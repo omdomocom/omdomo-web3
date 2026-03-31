@@ -6,17 +6,19 @@ Contexto completo del proyecto para sesiones de Claude Code.
 ## Visión del Proyecto
 
 "Spiritual Web3 Lifestyle Ecosystem" — Lululemon + Stepn + DAO espiritual + NFT art.
-- Website: omdomo.com (Shopify ya activo)
+- Website: omdomo.com (Shopify activo)
+- Web3 app: web3.omdomo.com (Vercel — Next.js)
 - Token: Ommy Coin en Avalanche Mainnet
 - **Lanzamiento oficial: Junio 2026**
-- Stack: Next.js 16 (App Router) + Thirdweb v5 + Claude API + Tailwind CSS
+- Stack: Next.js 15.3.9 (App Router) + Thirdweb v5 + Claude API + Tailwind CSS
 
 ## Wallets
 
 | Rol | Dirección |
 |-----|-----------|
 | Owner / Holder Ommy Coin | `0x15Eb18b12979AD8a85041423df4C92de6EF186f9` |
-| Deployer / Minter (Thirdweb managed) | `0x54E50e0eF3B690735161508374a4c5967AF49707` |
+| Deployer / Minter (server minter Fuji) | `0x648FD67c26E607324B860d95b2ee8834EE30b146` |
+| Deployer Thirdweb managed | `0x54E50e0eF3B690735161508374a4c5967AF49707` |
 
 ## Contratos On-Chain
 
@@ -40,14 +42,24 @@ NEXT_PUBLIC_OMMY_COIN_ADDRESS=        # 0x70EdA9Bb95eeE2551261c37720933905f94255
 NEXT_PUBLIC_OWNER_WALLET=             # 0x15Eb18b12979AD8a85041423df4C92de6EF186f9
 NEXT_PUBLIC_NFT_CONTRACT_FUJI=        # 0xd51de87FbC012b694922036C30E5C82e16594958
 NEXT_PUBLIC_NFT_CONTRACT_MAINNET=     # ⏳ Pendiente
-MINTER_PRIVATE_KEY=                   # Private key del deployer wallet
+MINTER_PRIVATE_KEY=                   # Private key del minter wallet (0x648FD67...)
 SHOPIFY_WEBHOOK_SECRET=               # HMAC secret del webhook Shopify
 RESEND_API_KEY=                       # Resend para emails transaccionales
 EMAIL_FROM=                           # "Om Domo <noreply@omdomo.com>"
+NEXT_PUBLIC_APP_URL=                  # https://web3.omdomo.com
 NEXT_PUBLIC_USE_MAINNET=false         # true = usa mainnet NFT
-KV_REST_API_URL=                      # ⏳ Upstash KV (claims persistentes)
-KV_REST_API_TOKEN=                    # ⏳ Upstash KV token
+REDIS_URL=                            # redis://... — Redis Cloud (claims persistentes)
 ```
+
+## Infraestructura Producción
+
+| Servicio | Estado | URL / Info |
+|---------|--------|------------|
+| Vercel | ✅ Live | web3.omdomo.com |
+| Redis Cloud | ✅ Conectado | redis-18598.c59.eu-west-1-2.ec2.cloud.redislabs.com |
+| Resend | ✅ Verificado | omdomo.com verificado, envía desde noreply@omdomo.com |
+| Shopify Webhook | ✅ Configurado | Pago de pedido → web3.omdomo.com/api/shopify/webhook |
+| GitHub | ✅ Conectado | github.com/omdomocom/omdomo-web3 (auto-deploy en push a main) |
 
 ## Estructura de Archivos
 
@@ -61,12 +73,12 @@ src/
 │   ├── drops/page.tsx                    # Página drops con countdown
 │   └── api/
 │       ├── agent/route.ts                # Multi-agent Claude API (coordinator + 5 agentes)
-│       ├── shopify/webhook/route.ts      # Webhook Shopify → crea claim record
+│       ├── shopify/webhook/route.ts      # Webhook Shopify → crea claim + envía email
 │       ├── nft/
 │       │   ├── approve-claim/route.ts    # Valida claim + linkea wallet
-│       │   ├── mint/route.ts             # Server-side mint (fallback dev)
+│       │   ├── mint/route.ts             # Server-side mint (minter wallet)
 │       │   ├── confirm-claimed/route.ts  # Registra txHash post-mint
-│       │   └── check-claim/route.ts     # GET claim por orderId o email
+│       │   └── check-claim/route.ts      # GET claim por orderId o email
 │       ├── share/route.ts                # Share-to-earn (+500 OMMY Twitter/IG)
 │       └── burn/stats/route.ts           # Estadísticas de burn dinámicas
 ├── components/
@@ -78,17 +90,28 @@ src/
 │   ├── RoadmapPanel.tsx                  # 5 fases del roadmap
 │   ├── TokenomicsPanel.tsx               # Stats live de tokenomics
 │   ├── ClaimPageClient.tsx               # Flow 4 pasos: lookup→connect→mint→share
+│   ├── LandingPage.tsx                   # Landing pública
 │   └── TestPurchasePanel.tsx             # Dev-only: simula compra Shopify
 ├── lib/
 │   ├── thirdweb.ts                       # Clientes Thirdweb + getOmmyContract()
 │   ├── nft.ts                            # getNFTContract() + rarity system
-│   ├── claims.ts                         # In-memory claims store (Map)
+│   ├── claims.ts                         # Redis (ioredis) + fallback in-memory
 │   ├── tokenomics.ts                     # Fuente única de verdad tokenomics
 │   ├── email.ts                          # Resend email (lazy init)
 │   └── agents/definitions.ts            # System prompts de todos los agentes
 └── types/
     └── agents.ts                         # AgentResponse, CoordinatorResult
 ```
+
+## Claims — Redis Schema
+
+```
+claim:{id}              → JSON del Claim completo
+order-index:{orderId}   → array de claim IDs por orden Shopify
+email-index:{email}     → array de claim IDs por email
+```
+
+Fallback: si `REDIS_URL` no está configurado → usa Map en memoria con warning en consola.
 
 ## Tokenomics Ommy Coin
 
@@ -169,8 +192,11 @@ Flow: `POST /api/agent` → selectAgents() → callAgent() en paralelo → coord
 
 ## Implementado ✅
 
-- Shopify webhook → crea claim record + envía email
-- Claim page `/claim` — flow 4 pasos: lookup → connect wallet → mint client-side → share
+- Redis Cloud (ioredis) — claims persistentes con fallback in-memory
+- Email automático via Resend al cliente tras cada compra (omdomo.com verificado)
+- Shopify webhook configurado: Pago de pedido → web3.omdomo.com/api/shopify/webhook
+- Bug fix: Order ID lookup por prefijo (claims formato `${orderId}-${productId}`)
+- Claim page `/claim` — flow 4 pasos: lookup → connect wallet → mint → share
 - Share-to-earn `/api/share` (+500 OMMY por Twitter/IG)
 - Burn stats `/api/burn/stats`
 - Drops page `/drops` con countdown a Junio 2026
@@ -178,19 +204,19 @@ Flow: `POST /api/agent` → selectAgents() → callAgent() en paralelo → coord
 - NFT rarity system (Genesis/Founder/Community/Standard) en metadata
 - `src/lib/tokenomics.ts` — fuente única de verdad tokenomics
 - TestPurchasePanel dev-only (NODE_ENV=development)
-- Agentes actualizados en español con contexto completo
+- Next.js 15.3.9 — parcheado CVE-2025-6647
+- GitHub conectado a Vercel (auto-deploy en push a main)
+- Secrets rotados: Anthropic API key + Resend API key
 
 ## Pendiente para Lanzamiento ⏳
 
-- `MINTER_PRIVATE_KEY` configurada y verificada en .env.local
 - Migrar NFT contract Fuji → Avalanche Mainnet
 - `NEXT_PUBLIC_NFT_CONTRACT_MAINNET` + `NEXT_PUBLIC_USE_MAINNET=true`
-- `SHOPIFY_WEBHOOK_SECRET` configurado en Shopify Partners
-- Deploy a producción (Vercel) para que Shopify alcance el webhook
 - Crear producto Drop #1 Genesis en Shopify (100 hoodies, €89)
+- Probar flujo completo end-to-end con compra real
 - Referral system on-chain (Fase 2)
 - Staking NFT 50 OMMY/día (Fase 2)
-- KV_REST_API_URL / KV_REST_API_TOKEN (Upstash) para claims persistentes
+- Rotar THIRDWEB_SECRET_KEY
 
 ## Convenciones de Código
 
@@ -199,7 +225,7 @@ Flow: `POST /api/agent` → selectAgents() → callAgent() en paralelo → coord
 - **SSR safety** — cualquier componente con Thirdweb: `"use client"` + `dynamic(..., {ssr: false})`
 - **Tailwind dark theme** — fondo `bg-background` (slate-950), glass con `backdrop-blur`
 - **Agentes en español** — todos los system prompts y respuestas en español
-- **Claims store** — actualmente in-memory (Map). Para producción: migrar a Upstash KV
+- **Claims async** — todas las funciones de claims son async (Redis)
 - Burn amounts siempre usar `BigInt()` no literales `1n` (compatibilidad ES target)
 - Resend: lazy init con `getResend()` — retorna null si no hay API key (no rompe build)
 

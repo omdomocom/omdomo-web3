@@ -14,14 +14,21 @@ ecosistema Ommy Coin en Avalanche. Cada compra física recompensa al cliente con
 Sistema de agentes AI (Claude API) para coordinar el desarrollo del ecosistema:
   Web3 Architect · Product Strategist · App Builder · Community Architect · Creative Director
 
+URLs
+----
+  Tienda:    https://omdomo.com       (Shopify)
+  Web3 app:  https://web3.omdomo.com  (Vercel — Next.js)
+  GitHub:    https://github.com/omdomocom/omdomo-web3
+
 
 REQUISITOS
 ----------
   - Node.js 18+
-  - npm / pnpm
+  - npm
   - Cuenta Thirdweb (thirdweb.com)
   - API key de Anthropic (Claude)
   - Cuenta Resend para emails (resend.com)
+  - Redis (Redis Cloud u otro proveedor)
 
 
 INSTALACION
@@ -31,7 +38,7 @@ INSTALACION
 
 CONFIGURACION (.env.local)
 --------------------------
-Crea el archivo .env.local en la raíz del proyecto:
+Crea el archivo .env.local en la raíz del proyecto (ver .env.example):
 
   ANTHROPIC_API_KEY=sk-ant-...
   NEXT_PUBLIC_THIRDWEB_CLIENT_ID=...
@@ -39,14 +46,14 @@ Crea el archivo .env.local en la raíz del proyecto:
   NEXT_PUBLIC_OMMY_COIN_ADDRESS=0x70EdA9Bb95eeE2551261c37720933905f9425596
   NEXT_PUBLIC_OWNER_WALLET=0x15Eb18b12979AD8a85041423df4C92de6EF186f9
   NEXT_PUBLIC_NFT_CONTRACT_FUJI=0xd51de87FbC012b694922036C30E5C82e16594958
-  NEXT_PUBLIC_NFT_CONTRACT_MAINNET=         (dejar vacío hasta migrar)
-  MINTER_PRIVATE_KEY=0x...                  (private key del deployer wallet)
-  SHOPIFY_WEBHOOK_SECRET=                   (de Shopify Partners > Webhooks)
+  NEXT_PUBLIC_NFT_CONTRACT_MAINNET=         (dejar vacío hasta migrar a mainnet)
+  MINTER_PRIVATE_KEY=0x...                  (private key del minter wallet)
+  SHOPIFY_WEBHOOK_SECRET=...                (de Shopify > Notificaciones > Webhooks)
   RESEND_API_KEY=re_...
   EMAIL_FROM=Om Domo <noreply@omdomo.com>
+  NEXT_PUBLIC_APP_URL=https://web3.omdomo.com
   NEXT_PUBLIC_USE_MAINNET=false             (false = Fuji testnet, true = mainnet)
-  KV_REST_API_URL=                          (Upstash — pendiente para producción)
-  KV_REST_API_TOKEN=                        (Upstash — pendiente para producción)
+  REDIS_URL=redis://...                     (Redis Cloud — claims persistentes)
 
 
 DESARROLLO LOCAL
@@ -55,9 +62,11 @@ DESARROLLO LOCAL
 
   Abre http://localhost:3000
 
-  En modo desarrollo (NODE_ENV=development) aparece el panel "Dev Tools" en el
-  dashboard con accesos directos y el TestPurchasePanel para simular compras
-  Shopify sin necesidad de webhook real.
+  Sin REDIS_URL configurado, los claims usan un Map en memoria (se pierde al
+  reiniciar el servidor — válido para desarrollo local).
+
+  En modo desarrollo (NODE_ENV=development) aparece el TestPurchasePanel
+  en el dashboard para simular compras Shopify sin webhook real.
 
 
 RUTAS DISPONIBLES
@@ -70,7 +79,7 @@ RUTAS DISPONIBLES
   POST /api/agent               Chat con el sistema de agentes AI
   POST /api/shopify/webhook     Webhook de Shopify (evento: orders/paid)
   POST /api/nft/approve-claim   Validar claim + linkear wallet
-  POST /api/nft/mint            Mint server-side (dev fallback)
+  POST /api/nft/mint            Mint server-side (minter wallet)
   POST /api/nft/confirm-claimed Confirmar txHash después de mint client-side
   GET  /api/nft/check-claim     Buscar claim por orderId o email
   POST /api/share               Registrar share social (+500 OMMY)
@@ -81,8 +90,8 @@ FLUJO COMPLETO: COMPRA → NFT
 -----------------------------
   1. Cliente compra en omdomo.com (Shopify)
   2. Shopify dispara webhook POST /api/shopify/webhook
-  3. El servidor crea un "claim record" y envía email al cliente
-  4. Cliente va a omdomo.com/claim
+  3. El servidor crea un claim en Redis y envía email al cliente
+  4. Cliente recibe email con link a web3.omdomo.com/claim
   5. Introduce su order ID o email para encontrar su claim
   6. Conecta MetaMask (red: Avalanche)
   7. Firma la transacción → mint del NFT en su wallet
@@ -98,6 +107,14 @@ CONTRATOS
   Om Domo NFT (ERC-1155 Edition Drop):
     Avalanche Fuji Testnet (43113): 0xd51de87FbC012b694922036C30E5C82e16594958
     Avalanche Mainnet (43114): [PENDIENTE — migrar antes de Junio 2026]
+
+
+INFRAESTRUCTURA
+---------------
+  Vercel:        web3.omdomo.com (auto-deploy desde GitHub main)
+  Redis Cloud:   redis-18598.c59.eu-west-1-2.ec2.cloud.redislabs.com
+  Resend:        noreply@omdomo.com (dominio verificado)
+  Shopify:       webhook configurado → Pago de pedido
 
 
 AGENTES AI
@@ -139,32 +156,20 @@ PENDIENTE ANTES DEL LANZAMIENTO
 --------------------------------
   [ ] Migrar NFT contract de Fuji → Avalanche Mainnet
   [ ] Configurar NEXT_PUBLIC_NFT_CONTRACT_MAINNET y NEXT_PUBLIC_USE_MAINNET=true
-  [ ] Configurar SHOPIFY_WEBHOOK_SECRET en Shopify Partners
-  [ ] Deploy a producción (Vercel) — URL pública para el webhook Shopify
   [ ] Crear producto Drop #1 Genesis en Shopify (100 hoodies, €89)
-  [ ] Upstash KV para claims persistentes (reemplazar in-memory Map)
-
-
-PRODUCCION (Vercel)
--------------------
-  1. Conecta el repo a Vercel
-  2. Configura todas las variables de entorno en Vercel Dashboard
-  3. Copia la URL de producción (ej: https://web3.omdomo.com)
-  4. En Shopify Partners > Webhooks > Crear webhook:
-       URL: https://tu-dominio.vercel.app/api/shopify/webhook
-       Evento: orders/paid
-       Versión API: 2024-01
-  5. Guarda el Signing Secret en SHOPIFY_WEBHOOK_SECRET
+  [ ] Probar flujo completo end-to-end con compra real
+  [ ] Rotar THIRDWEB_SECRET_KEY
 
 
 STACK TECNICO
 -------------
-  Next.js 16 (App Router, Turbopack)
+  Next.js 15.3.9 (App Router)
   TypeScript
   Thirdweb v5 SDK
   Anthropic Claude API
   Tailwind CSS
-  Resend (emails)
+  Resend (emails transaccionales)
+  ioredis + Redis Cloud (persistencia)
   Avalanche (blockchain)
 
 
