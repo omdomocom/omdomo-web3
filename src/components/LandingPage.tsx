@@ -570,6 +570,307 @@ function HeroLogo() {
   );
 }
 
+// ─── NFT Genesis Section ──────────────────────────────────────────────────────
+const RARITY_TIERS = [
+  { name: "Genesis", color: "#f59e0b", glow: "rgba(245,158,11,0.4)", desc: "Antes de Jun 2026 — rareza máxima", supply: "~200 NFTs" },
+  { name: "Founder", color: "#9333ea", glow: "rgba(147,51,234,0.4)", desc: "Primer mes post-lanzamiento", supply: "~500 NFTs" },
+  { name: "Community", color: "#0891b2", glow: "rgba(8,145,178,0.4)", desc: "Primeros 3 meses", supply: "~2.000 NFTs" },
+  { name: "Standard", color: "#64748b", glow: "rgba(100,116,139,0.3)", desc: "Resto de la colección", supply: "Ilimitado" },
+];
+
+const NFT_BENEFITS = [
+  { icon: "🔑", title: "Acceso DAO", desc: "Vota en las decisiones del proyecto" },
+  { icon: "💎", title: "OMMY rewards", desc: "10.000 OMMY en el Genesis Drop" },
+  { icon: "👕", title: "Certificado físico", desc: "Prueba de autenticidad on-chain" },
+  { icon: "🚀", title: "Acceso anticipado", desc: "Primero en futuros drops y colecciones" },
+  { icon: "🌙", title: "NFT dinámico", desc: "Evoluciona con tu actividad (Fase 2)" },
+  { icon: "🏛️", title: "Gobernanza", desc: "Tu NFT = tu voz en la comunidad" },
+];
+
+function HolographicCard() {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [rotate, setRotate] = useState({ x: 0, y: 0 });
+  const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
+  const [hovered, setHovered] = useState(false);
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    setRotate({ x: ((y - cy) / cy) * -12, y: ((x - cx) / cx) * 12 });
+    setGlowPos({ x: (x / rect.width) * 100, y: (y / rect.height) * 100 });
+  }
+
+  function handleMouseLeave() {
+    setRotate({ x: 0, y: 0 });
+    setGlowPos({ x: 50, y: 50 });
+    setHovered(false);
+  }
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      style={{ perspective: "900px", cursor: "pointer" }}
+      className="w-64 mx-auto select-none"
+    >
+      <motion.div
+        animate={{ rotateX: rotate.x, rotateY: rotate.y, scale: hovered ? 1.04 : 1 }}
+        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+        style={{ transformStyle: "preserve-3d", borderRadius: "20px", position: "relative" }}
+      >
+        {/* Card body */}
+        <div
+          style={{
+            borderRadius: "20px",
+            background: "linear-gradient(135deg, #1a0533 0%, #0c1a2e 50%, #0a0c1a 100%)",
+            border: "1px solid rgba(147,51,234,0.4)",
+            overflow: "hidden",
+            boxShadow: hovered
+              ? "0 30px 80px rgba(147,51,234,0.35), 0 0 40px rgba(245,158,11,0.15)"
+              : "0 10px 40px rgba(0,0,0,0.5)",
+            transition: "box-shadow 0.3s ease",
+          }}
+        >
+          {/* Holographic shimmer overlay */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage: `radial-gradient(ellipse at ${glowPos.x}% ${glowPos.y}%, rgba(255,255,255,0.12) 0%, transparent 60%),
+                linear-gradient(105deg, transparent 20%, rgba(245,158,11,0.08) 40%, rgba(147,51,234,0.1) 60%, transparent 80%)`,
+              transition: "background-image 0.05s",
+              pointerEvents: "none",
+              zIndex: 10,
+              borderRadius: "20px",
+            }}
+          />
+
+          {/* Header */}
+          <div style={{ padding: "16px 20px 12px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "10px", color: "#94a3b8", letterSpacing: "0.1em", textTransform: "uppercase" }}>Om Domo</span>
+              <span style={{
+                fontSize: "9px", fontWeight: 700, padding: "2px 8px", borderRadius: "20px",
+                background: "linear-gradient(90deg, #f59e0b, #d97706)",
+                color: "#000", letterSpacing: "0.08em",
+              }}>GENESIS</span>
+            </div>
+          </div>
+
+          {/* Art area */}
+          <div style={{ height: "180px", position: "relative", overflow: "hidden", background: "linear-gradient(135deg, #1a0533, #060308)" }}>
+            {/* Animated rings */}
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                style={{
+                  position: "absolute", top: "50%", left: "50%",
+                  width: `${80 + i * 50}px`, height: `${80 + i * 50}px`,
+                  borderRadius: "50%",
+                  border: `1px solid rgba(${i === 0 ? "245,158,11" : i === 1 ? "147,51,234" : "8,145,178"},${0.6 - i * 0.15})`,
+                  transform: "translate(-50%, -50%)",
+                }}
+                animate={{ rotate: i % 2 === 0 ? 360 : -360, scale: [1, 1.05, 1] }}
+                transition={{ rotate: { duration: 8 + i * 4, repeat: Infinity, ease: "linear" }, scale: { duration: 3, repeat: Infinity, ease: "easeInOut" } }}
+              />
+            ))}
+            {/* Center symbol */}
+            <div style={{
+              position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+              fontSize: "48px", filter: "drop-shadow(0 0 20px rgba(245,158,11,0.8))",
+            }}>
+              <motion.span
+                animate={{ scale: [1, 1.1, 1], filter: ["drop-shadow(0 0 12px rgba(245,158,11,0.6))", "drop-shadow(0 0 24px rgba(245,158,11,0.9))", "drop-shadow(0 0 12px rgba(245,158,11,0.6))"] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                style={{ display: "block" }}
+              >🕉️</motion.span>
+            </div>
+            {/* Particles */}
+            {[...Array(8)].map((_, i) => (
+              <motion.div
+                key={i}
+                style={{
+                  position: "absolute",
+                  width: "3px", height: "3px", borderRadius: "50%",
+                  background: i % 2 === 0 ? "#f59e0b" : "#9333ea",
+                  left: `${15 + (i * 10)}%`,
+                  top: `${20 + (i % 3) * 25}%`,
+                }}
+                animate={{ y: [-8, 8, -8], opacity: [0.3, 1, 0.3] }}
+                transition={{ duration: 2 + i * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+              />
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div style={{ padding: "14px 20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#f1f5f9" }}>Om Domo Genesis #001</div>
+                <div style={{ fontSize: "10px", color: "#64748b", marginTop: "2px" }}>Avalanche · ERC-1155</div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: "10px", color: "#94a3b8" }}>Reward</div>
+                <div style={{ fontSize: "13px", fontWeight: 700, background: "linear-gradient(90deg, #9333ea, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>+10K OMMY</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function NFTGenesisSection() {
+  return (
+    <section id="nft" className="section-dark py-24 px-6 relative overflow-hidden">
+      <Orb className="w-[600px] h-[600px] bg-purple-700 -top-40 left-1/2 -translate-x-1/2" />
+      <Orb className="w-[400px] h-[400px] bg-amber-600 bottom-0 right-0 opacity-10" />
+
+      <div className="max-w-6xl mx-auto relative z-10">
+
+        {/* Header */}
+        <FadeIn className="text-center mb-16">
+          <span className="text-xs text-amber-500 uppercase tracking-widest font-medium">Colección NFT</span>
+          <h2 className="font-serif text-4xl md:text-5xl font-bold mt-3 mb-4" style={{ color: "var(--dark-text)" }}>
+            Cada compra, un <span className="gradient-text-gold">NFT único</span>
+          </h2>
+          <p className="text-lg max-w-xl mx-auto" style={{ color: "var(--dark-muted)" }}>
+            Compra ropa Om Domo y recibe automáticamente tu NFT de autenticidad en Avalanche.
+            Cuanto antes entres, mayor rareza.
+          </p>
+        </FadeIn>
+
+        {/* Main content: card + benefits */}
+        <div className="grid md:grid-cols-2 gap-16 items-center mb-20">
+
+          {/* Holographic card */}
+          <FadeIn delay={0.1}>
+            <div className="relative">
+              <HolographicCard />
+              {/* Label below */}
+              <motion.p
+                className="text-center text-xs mt-6"
+                style={{ color: "var(--dark-muted)" }}
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                ✦ Mueve el cursor sobre la carta
+              </motion.p>
+            </div>
+          </FadeIn>
+
+          {/* Benefits grid */}
+          <FadeIn delay={0.2}>
+            <div className="grid grid-cols-2 gap-4">
+              {NFT_BENEFITS.map((b, i) => (
+                <motion.div
+                  key={b.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08 }}
+                  whileHover={{ scale: 1.03 }}
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    borderRadius: "16px",
+                    padding: "16px",
+                    cursor: "default",
+                  }}
+                >
+                  <div style={{ fontSize: "22px", marginBottom: "8px" }}>{b.icon}</div>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#f1f5f9", marginBottom: "4px" }}>{b.title}</div>
+                  <div style={{ fontSize: "11px", color: "#64748b", lineHeight: 1.4 }}>{b.desc}</div>
+                </motion.div>
+              ))}
+            </div>
+          </FadeIn>
+        </div>
+
+        {/* Rarity tiers */}
+        <FadeIn delay={0.3}>
+          <div className="mb-6 text-center">
+            <span className="text-xs uppercase tracking-widest font-medium" style={{ color: "var(--dark-muted)" }}>Sistema de rareza</span>
+            <p className="text-sm mt-1" style={{ color: "var(--dark-muted)" }}>Cuanto antes compres, mayor será la rareza de tu NFT</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {RARITY_TIERS.map((tier, i) => (
+              <motion.div
+                key={tier.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: `1px solid ${tier.color}40`,
+                  borderRadius: "16px",
+                  padding: "20px 16px",
+                  textAlign: "center",
+                  boxShadow: i === 0 ? `0 0 30px ${tier.glow}` : "none",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                {i === 0 && (
+                  <div style={{
+                    position: "absolute", top: "8px", right: "8px",
+                    fontSize: "8px", fontWeight: 700, padding: "2px 6px",
+                    borderRadius: "10px", background: tier.color, color: "#000",
+                  }}>AHORA</div>
+                )}
+                <div style={{
+                  width: "40px", height: "40px", borderRadius: "50%", margin: "0 auto 12px",
+                  background: `${tier.color}20`, border: `2px solid ${tier.color}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: `0 0 16px ${tier.glow}`,
+                }}>
+                  <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: tier.color }} />
+                </div>
+                <div style={{ fontSize: "14px", fontWeight: 700, color: tier.color, marginBottom: "4px" }}>{tier.name}</div>
+                <div style={{ fontSize: "10px", color: "#64748b", marginBottom: "6px", lineHeight: 1.3 }}>{tier.desc}</div>
+                <div style={{ fontSize: "11px", color: "#94a3b8", fontWeight: 600 }}>{tier.supply}</div>
+              </motion.div>
+            ))}
+          </div>
+        </FadeIn>
+
+        {/* CTA */}
+        <FadeIn delay={0.4} className="text-center mt-12">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href="/drops"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold text-sm"
+              style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "#000" }}
+            >
+              🔥 Ver Genesis Drop — €89
+            </a>
+            <a
+              href="/claim"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold text-sm"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#e2e8f0" }}
+            >
+              🎁 Ya compré — Reclamar NFT
+            </a>
+          </div>
+          <p className="text-xs mt-4" style={{ color: "var(--dark-muted)" }}>
+            NFT automático · Sin gas para el cliente · Red Avalanche
+          </p>
+        </FadeIn>
+
+      </div>
+    </section>
+  );
+}
+
 // ─── Pre-compra section ───────────────────────────────────────────────────────
 function PreCompraSection() {
   const SUPPLY_PRECOMPRA = "2,997,924,580";
@@ -1382,6 +1683,9 @@ export function LandingPage() {
       </section>
 
       {/* ── PRE-COMPRA ───────────────────────────────────────────────── */}
+      {/* ── NFT GENESIS ──────────────────────────────────────────────── */}
+      <NFTGenesisSection />
+
       <PreCompraSection />
 
       {/* ── ECOSISTEMA ───────────────────────────────────────────────── */}
