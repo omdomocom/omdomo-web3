@@ -5,14 +5,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#06060f",
-        surface: "#0d0d1f",
-        border: "#1a1a3a",
+        background: "#0c0906",
+        surface: "#140f0a",
+        border: "#2a1f14",
+        cream: {
+          DEFAULT: "#f5f0e8",
+          "2": "#ede8df",
+          text: "#1a1510",
+          muted: "#6b6057",
+        },
         accent: {
           purple: "#7c3aed",
-          cyan: "#06b6d4",
+          cyan: "#0891b2",
           pink: "#ec4899",
+          gold: "#c9973a",
         },
+      },
+      fontFamily: {
+        serif: ["var(--font-serif)", "Georgia", "serif"],
       },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
