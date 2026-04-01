@@ -1321,6 +1321,390 @@ function NFTTypesSection() {
   );
 }
 
+// ─── Guardians of Consciousness ───────────────────────────────────────────────
+
+const GUARDIANS = [
+  { id: 1, name: "El Silencio", archetype: "Meditación", emoji: "🌑", color: "#9B59B6" },
+  { id: 2, name: "La Llama", archetype: "Fuego interior", emoji: "🔥", color: "#E74C3C" },
+  { id: 3, name: "El Agua", archetype: "Fluidez", emoji: "💧", color: "#3498DB" },
+  { id: 4, name: "La Tierra", archetype: "Arraigo", emoji: "🌿", color: "#27AE60" },
+  { id: 5, name: "El Viento", archetype: "Libertad", emoji: "🌬️", color: "#F39C12" },
+  { id: 6, name: "La Luz", archetype: "Consciencia", emoji: "✨", color: "#F1C40F" },
+];
+
+function GuardianCard({ g, index }: { g: typeof GUARDIANS[0]; index: number }) {
+  const [hovered, setHovered] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={isInView ? { opacity: 1, scale: 1 } : {}}
+      transition={{ duration: 0.5, delay: index * 0.08 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: "relative",
+        borderRadius: 16,
+        overflow: "hidden",
+        aspectRatio: "3/4",
+        cursor: "pointer",
+        border: `1px solid ${hovered ? g.color + "88" : "rgba(255,255,255,0.07)"}`,
+        transition: "border-color 0.4s, box-shadow 0.4s",
+        boxShadow: hovered
+          ? `0 0 40px ${g.color}44, 0 8px 32px rgba(0,0,0,0.5)`
+          : "0 4px 16px rgba(0,0,0,0.4)",
+      }}
+    >
+      {/* Background — blurred gradient that "reveals" on hover */}
+      <motion.div
+        animate={{ opacity: hovered ? 1 : 0.15 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `radial-gradient(ellipse at 50% 30%, ${g.color}55 0%, ${g.color}11 50%, #0c0906 100%)`,
+        }}
+      />
+
+      {/* Noise texture overlay */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: 0.04,
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          backgroundSize: "200px 200px",
+        }}
+      />
+
+      {/* Locked overlay — hidden on hover */}
+      <motion.div
+        animate={{ opacity: hovered ? 0 : 1 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: 8,
+          background: "rgba(12,9,6,0.6)",
+          backdropFilter: "blur(12px)",
+        }}
+      >
+        <div style={{ fontSize: 28, opacity: 0.5 }}>🔒</div>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+          Jun 2026
+        </p>
+      </motion.div>
+
+      {/* Revealed content */}
+      <motion.div
+        animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 12 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 20,
+        }}
+      >
+        <motion.div
+          animate={{ scale: hovered ? 1 : 0.8, rotate: hovered ? 0 : -10 }}
+          transition={{ type: "spring", stiffness: 200 }}
+          style={{ fontSize: 52, marginBottom: 16 }}
+        >
+          {g.emoji}
+        </motion.div>
+        <h3
+          style={{
+            fontFamily: "var(--font-playfair)",
+            fontSize: 20,
+            fontWeight: 700,
+            color: "#f5f0e8",
+            textAlign: "center",
+            marginBottom: 6,
+          }}
+        >
+          {g.name}
+        </h3>
+        <p style={{ fontSize: 12, color: g.color, textAlign: "center", fontStyle: "italic" }}>
+          {g.archetype}
+        </p>
+      </motion.div>
+
+      {/* Always-visible index number */}
+      <div
+        style={{
+          position: "absolute",
+          top: 12,
+          left: 14,
+          fontSize: 11,
+          color: "rgba(255,255,255,0.2)",
+          fontWeight: 700,
+          letterSpacing: "0.05em",
+        }}
+      >
+        #{String(g.id).padStart(2, "0")}
+      </div>
+
+      {/* Color dot top right */}
+      <div
+        style={{
+          position: "absolute",
+          top: 12,
+          right: 14,
+          width: 8,
+          height: 8,
+          borderRadius: "50%",
+          background: g.color,
+          boxShadow: `0 0 8px ${g.color}`,
+          opacity: hovered ? 1 : 0.3,
+          transition: "opacity 0.3s",
+        }}
+      />
+    </motion.div>
+  );
+}
+
+function GuardiansCountdown() {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const target = new Date("2026-06-01T00:00:00Z").getTime();
+    function update() {
+      const now = Date.now();
+      const diff = Math.max(0, target - now);
+      setTimeLeft({
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor((diff % 86400000) / 3600000),
+        minutes: Math.floor((diff % 3600000) / 60000),
+        seconds: Math.floor((diff % 60000) / 1000),
+      });
+    }
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const units = [
+    { label: "días", value: timeLeft.days },
+    { label: "horas", value: timeLeft.hours },
+    { label: "min", value: timeLeft.minutes },
+    { label: "seg", value: timeLeft.seconds },
+  ];
+
+  return (
+    <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+      {units.map(({ label, value }) => (
+        <div
+          key={label}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 12,
+            padding: "14px 18px",
+            minWidth: 70,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 28,
+              fontWeight: 800,
+              color: "#f5f0e8",
+              fontVariantNumeric: "tabular-nums",
+              lineHeight: 1,
+            }}
+          >
+            {String(value).padStart(2, "0")}
+          </span>
+          <span style={{ fontSize: 11, color: "var(--dark-muted)", marginTop: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            {label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function GuardiansSection() {
+  return (
+    <section className="section-dark py-24 px-6 relative overflow-hidden">
+      {/* Star field */}
+      <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.4 }}>
+        {Array.from({ length: 40 }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              width: Math.random() > 0.8 ? 2 : 1,
+              height: Math.random() > 0.8 ? 2 : 1,
+              borderRadius: "50%",
+              background: "white",
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              opacity: Math.random() * 0.6 + 0.1,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 max-w-5xl mx-auto">
+        {/* Header */}
+        <FadeIn>
+          <div className="text-center mb-6">
+            <span
+              style={{
+                display: "inline-block",
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "var(--dark-muted)",
+                marginBottom: 12,
+              }}
+            >
+              Colección Artística · Junio 2026
+            </span>
+            <h2
+              className="gradient-text"
+              style={{
+                fontFamily: "var(--font-playfair)",
+                fontSize: "clamp(28px, 5vw, 44px)",
+                fontWeight: 700,
+                lineHeight: 1.2,
+                marginBottom: 16,
+              }}
+            >
+              Guardians of Consciousness
+            </h2>
+            <p
+              style={{
+                fontSize: 17,
+                color: "var(--dark-muted)",
+                maxWidth: 520,
+                margin: "0 auto 8px",
+                lineHeight: 1.65,
+              }}
+            >
+              6 arquetipos de consciencia, generados con AI y sagrados a mano.
+              Cada Guardian representa un estado del ser — edición de 111 unidades.
+            </p>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.25)", fontStyle: "italic" }}>
+              Pasa el cursor para un preview exclusivo
+            </p>
+          </div>
+        </FadeIn>
+
+        {/* Cards grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            gap: 16,
+            marginBottom: 48,
+          }}
+        >
+          {GUARDIANS.map((g, i) => (
+            <GuardianCard key={g.id} g={g} index={i} />
+          ))}
+        </div>
+
+        {/* Countdown + CTA */}
+        <FadeIn>
+          <div
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 20,
+              padding: "32px 24px",
+              textAlign: "center",
+            }}
+          >
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--dark-muted)",
+                marginBottom: 20,
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+              }}
+            >
+              Lanzamiento oficial en
+            </p>
+            <div style={{ marginBottom: 28 }}>
+              <GuardiansCountdown />
+            </div>
+
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <a
+                href="https://discord.gg/xXezFXnpaX"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "13px 28px",
+                  borderRadius: 12,
+                  background: "linear-gradient(135deg, #5865F2 0%, #4752C4 100%)",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: 15,
+                  textDecoration: "none",
+                  boxShadow: "0 4px 20px rgba(88,101,242,0.4)",
+                }}
+              >
+                💬 Únete a la lista de espera
+              </a>
+              <a
+                href="/drops"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "13px 28px",
+                  borderRadius: 12,
+                  background: "transparent",
+                  color: "#f5f0e8",
+                  fontWeight: 600,
+                  fontSize: 15,
+                  textDecoration: "none",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                }}
+              >
+                Ver todos los Drops →
+              </a>
+            </div>
+
+            <p
+              style={{
+                fontSize: 11,
+                color: "rgba(255,255,255,0.2)",
+                marginTop: 16,
+                fontStyle: "italic",
+              }}
+            >
+              111 unidades · Holders Genesis tienen acceso prioritario · Avalanche Mainnet
+            </p>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
 // ─── Pre-compra section ───────────────────────────────────────────────────────
 function PreCompraSection() {
   const SUPPLY_PRECOMPRA = "2,997,924,580";
@@ -2136,6 +2520,7 @@ export function LandingPage() {
       {/* ── NFT GENESIS ──────────────────────────────────────────────── */}
       <NFTGenesisSection />
       <NFTTypesSection />
+      <GuardiansSection />
 
       <PreCompraSection />
 
