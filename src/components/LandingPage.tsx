@@ -871,6 +871,456 @@ function NFTGenesisSection() {
   );
 }
 
+// ─── NFT Types Section ────────────────────────────────────────────────────────
+
+interface NFTType {
+  name: string;
+  subtitle: string;
+  rarity: string;
+  rarityColor: string;
+  glowColor: string;
+  trigger: string;
+  price: string;
+  rewards: string;
+  bonus: string;
+  symbol: string;
+  gradient: string;
+  borderColor: string;
+}
+
+const NFT_TYPES: NFTType[] = [
+  {
+    name: "Om Hoodie Genesis",
+    subtitle: "Edición Fundadora",
+    rarity: "Genesis",
+    rarityColor: "#FFD700",
+    glowColor: "rgba(255,215,0,0.25)",
+    trigger: "Compra hoodie €89+",
+    price: "€89",
+    rewards: "6.230 OMMY",
+    bonus: "+1.000 OMMY claim + NFT 1ª hora",
+    symbol: "🧘",
+    gradient: "linear-gradient(135deg, #1a1200 0%, #3d2b00 50%, #1a1200 100%)",
+    borderColor: "rgba(255,215,0,0.4)",
+  },
+  {
+    name: "Yogi Jogger Founder",
+    subtitle: "Edición Fundadora",
+    rarity: "Founder",
+    rarityColor: "#C0C0C0",
+    glowColor: "rgba(192,192,192,0.2)",
+    trigger: "Compra jogger €69+",
+    price: "€69",
+    rewards: "4.830 OMMY",
+    bonus: "+1.000 OMMY al reclamar",
+    symbol: "🌿",
+    gradient: "linear-gradient(135deg, #0d0d0d 0%, #1e1e1e 50%, #0d0d0d 100%)",
+    borderColor: "rgba(192,192,192,0.3)",
+  },
+  {
+    name: "Conscious Tee",
+    subtitle: "Edición Comunidad",
+    rarity: "Community",
+    rarityColor: "#4FC3F7",
+    glowColor: "rgba(79,195,247,0.2)",
+    trigger: "Compra tee €39+",
+    price: "€39",
+    rewards: "2.730 OMMY",
+    bonus: "+1.000 OMMY al reclamar",
+    symbol: "☀️",
+    gradient: "linear-gradient(135deg, #001a2e 0%, #002a45 50%, #001a2e 100%)",
+    borderColor: "rgba(79,195,247,0.3)",
+  },
+  {
+    name: "Ommie",
+    subtitle: "Acceso Estándar",
+    rarity: "Standard",
+    rarityColor: "#81C784",
+    glowColor: "rgba(129,199,132,0.2)",
+    trigger: "Cualquier compra",
+    price: "Desde €25",
+    rewards: "1.750 OMMY",
+    bonus: "+1.000 OMMY al reclamar",
+    symbol: "🕉️",
+    gradient: "linear-gradient(135deg, #001a00 0%, #002a00 50%, #001a00 100%)",
+    borderColor: "rgba(129,199,132,0.3)",
+  },
+];
+
+function NFTTypeCard({ nft, index }: { nft: NFTType; index: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 40 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay: index * 0.12 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: nft.gradient,
+        border: `1px solid ${hovered ? nft.rarityColor : nft.borderColor}`,
+        borderRadius: 16,
+        padding: "28px 24px",
+        position: "relative",
+        overflow: "hidden",
+        cursor: "default",
+        transition: "border-color 0.3s, box-shadow 0.3s",
+        boxShadow: hovered
+          ? `0 0 32px ${nft.glowColor}, 0 8px 32px rgba(0,0,0,0.4)`
+          : `0 4px 16px rgba(0,0,0,0.3)`,
+      }}
+    >
+      {/* Glow pulse on hover */}
+      <motion.div
+        animate={{ opacity: hovered ? 1 : 0 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `radial-gradient(circle at 50% 0%, ${nft.glowColor} 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Rarity badge */}
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          background: `${nft.rarityColor}22`,
+          border: `1px solid ${nft.rarityColor}66`,
+          borderRadius: 20,
+          padding: "3px 10px",
+          marginBottom: 16,
+        }}
+      >
+        <div
+          style={{
+            width: 7,
+            height: 7,
+            borderRadius: "50%",
+            background: nft.rarityColor,
+            boxShadow: `0 0 6px ${nft.rarityColor}`,
+          }}
+        />
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            color: nft.rarityColor,
+            textTransform: "uppercase",
+          }}
+        >
+          {nft.rarity}
+        </span>
+      </div>
+
+      {/* Symbol + name */}
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 8 }}>
+        <motion.div
+          animate={{ scale: hovered ? 1.15 : 1 }}
+          transition={{ type: "spring", stiffness: 300 }}
+          style={{ fontSize: 36, lineHeight: 1 }}
+        >
+          {nft.symbol}
+        </motion.div>
+        <div>
+          <h3
+            style={{
+              fontFamily: "var(--font-playfair)",
+              fontSize: 20,
+              fontWeight: 700,
+              color: "#f5f0e8",
+              marginBottom: 2,
+              lineHeight: 1.2,
+            }}
+          >
+            {nft.name}
+          </h3>
+          <p style={{ fontSize: 12, color: "var(--dark-muted)", fontStyle: "italic" }}>
+            {nft.subtitle}
+          </p>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div
+        style={{
+          height: 1,
+          background: `linear-gradient(90deg, ${nft.rarityColor}44, transparent)`,
+          margin: "16px 0",
+        }}
+      />
+
+      {/* Stats */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 12, color: "var(--dark-muted)" }}>Trigger</span>
+          <span style={{ fontSize: 13, color: "#f5f0e8", fontWeight: 500 }}>{nft.trigger}</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 12, color: "var(--dark-muted)" }}>OMMY rewards</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: nft.rarityColor }}>
+            {nft.rewards}
+          </span>
+        </div>
+        <div
+          style={{
+            fontSize: 11,
+            color: "var(--dark-muted)",
+            background: "rgba(255,255,255,0.04)",
+            borderRadius: 8,
+            padding: "6px 10px",
+            borderLeft: `2px solid ${nft.rarityColor}66`,
+          }}
+        >
+          {nft.bonus}
+        </div>
+      </div>
+
+      {/* Price tag */}
+      <div
+        style={{
+          position: "absolute",
+          top: 20,
+          right: 20,
+          fontSize: 13,
+          fontWeight: 800,
+          color: nft.rarityColor,
+          background: `${nft.rarityColor}18`,
+          border: `1px solid ${nft.rarityColor}44`,
+          borderRadius: 8,
+          padding: "4px 10px",
+        }}
+      >
+        {nft.price}
+      </div>
+    </motion.div>
+  );
+}
+
+function NFTTypesSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <section className="section-cream py-24 px-6 relative overflow-hidden">
+      {/* Subtle grid */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(180,160,120,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(180,160,120,0.06) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+
+      <div className="relative z-10 max-w-5xl mx-auto">
+        {/* Header */}
+        <FadeIn>
+          <div className="text-center mb-16">
+            <span
+              style={{
+                display: "inline-block",
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: "#8B7355",
+                marginBottom: 12,
+              }}
+            >
+              Colección NFT
+            </span>
+            <h2
+              className="gradient-text-gold"
+              style={{
+                fontFamily: "var(--font-playfair)",
+                fontSize: "clamp(28px, 5vw, 44px)",
+                fontWeight: 700,
+                lineHeight: 1.2,
+                marginBottom: 16,
+              }}
+            >
+              4 Tipos de NFT Om Domo
+            </h2>
+            <p
+              style={{
+                fontSize: 18,
+                color: "#5a4a3a",
+                maxWidth: 560,
+                margin: "0 auto",
+                lineHeight: 1.6,
+              }}
+            >
+              Cada prenda que compras en omdomo.com genera un NFT único en Avalanche.
+              La rareza depende de cuándo compras — los primeros siempre serán los más valiosos.
+            </p>
+          </div>
+        </FadeIn>
+
+        {/* 4 cards grid */}
+        <div
+          ref={ref}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: 20,
+            marginBottom: 48,
+          }}
+        >
+          {NFT_TYPES.map((nft, i) => (
+            <NFTTypeCard key={nft.rarity} nft={nft} index={i} />
+          ))}
+        </div>
+
+        {/* Rareza timeline */}
+        <FadeIn>
+          <div
+            style={{
+              background: "rgba(139,115,85,0.08)",
+              border: "1px solid rgba(139,115,85,0.2)",
+              borderRadius: 16,
+              padding: "28px 32px",
+              marginBottom: 40,
+            }}
+          >
+            <p
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "#8B7355",
+                marginBottom: 20,
+                textAlign: "center",
+              }}
+            >
+              Ventana de Rareza
+            </p>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                gap: 12,
+              }}
+            >
+              {[
+                { label: "Genesis", window: "Antes Jun 2026", color: "#FFD700" },
+                { label: "Founder", window: "Primer mes", color: "#C0C0C0" },
+                { label: "Community", window: "Primeros 3 meses", color: "#4FC3F7" },
+                { label: "Standard", window: "Siempre", color: "#81C784" },
+              ].map((tier) => (
+                <div
+                  key={tier.label}
+                  style={{ textAlign: "center", padding: "12px 8px" }}
+                >
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: "50%",
+                      background: `${tier.color}22`,
+                      border: `2px solid ${tier.color}`,
+                      margin: "0 auto 8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        background: tier.color,
+                        boxShadow: `0 0 8px ${tier.color}`,
+                      }}
+                    />
+                  </div>
+                  <p style={{ fontWeight: 700, fontSize: 14, color: tier.color, marginBottom: 4 }}>
+                    {tier.label}
+                  </p>
+                  <p style={{ fontSize: 12, color: "#8B7355" }}>{tier.window}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Progress bar */}
+            <div
+              style={{
+                marginTop: 20,
+                height: 6,
+                borderRadius: 3,
+                background:
+                  "linear-gradient(90deg, #FFD700 0%, #C0C0C0 33%, #4FC3F7 66%, #81C784 100%)",
+                boxShadow: "0 0 12px rgba(255,215,0,0.3)",
+              }}
+            />
+            <p
+              style={{
+                fontSize: 11,
+                color: "#8B7355",
+                textAlign: "center",
+                marginTop: 10,
+                fontStyle: "italic",
+              }}
+            >
+              ← Más raro · Más común →
+            </p>
+          </div>
+        </FadeIn>
+
+        {/* CTA */}
+        <FadeIn>
+          <div style={{ textAlign: "center" }}>
+            <a
+              href="https://omdomo.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "14px 32px",
+                borderRadius: 12,
+                background: "linear-gradient(135deg, #8B7355 0%, #6B5B45 100%)",
+                color: "#f5f0e8",
+                fontWeight: 700,
+                fontSize: 16,
+                textDecoration: "none",
+                boxShadow: "0 4px 20px rgba(139,115,85,0.3)",
+                transition: "transform 0.2s, box-shadow 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+                (e.currentTarget as HTMLElement).style.boxShadow =
+                  "0 8px 28px rgba(139,115,85,0.45)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                (e.currentTarget as HTMLElement).style.boxShadow =
+                  "0 4px 20px rgba(139,115,85,0.3)";
+              }}
+            >
+              🛍️ Compra y consigue tu NFT Genesis
+            </a>
+            <p style={{ fontSize: 12, color: "#8B7355", marginTop: 12, fontStyle: "italic" }}>
+              Disponible antes del lanzamiento oficial · Máxima rareza garantizada
+            </p>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
 // ─── Pre-compra section ───────────────────────────────────────────────────────
 function PreCompraSection() {
   const SUPPLY_PRECOMPRA = "2,997,924,580";
@@ -1685,6 +2135,7 @@ export function LandingPage() {
       {/* ── PRE-COMPRA ───────────────────────────────────────────────── */}
       {/* ── NFT GENESIS ──────────────────────────────────────────────── */}
       <NFTGenesisSection />
+      <NFTTypesSection />
 
       <PreCompraSection />
 
