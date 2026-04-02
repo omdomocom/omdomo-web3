@@ -101,8 +101,10 @@ REDIS_URL=redis://...                      # Redis Cloud
 
 ```
 /                   Landing pública + Hero animado
+/nft                Colección NFT completa — rareza, 4 tipos, Guardianes (carrusel)
 /claim              Claim NFT tras compra (buscar por Order ID o email)
 /drops              Drops limitados con countdown a Junio 2026
+/dashboard          Dashboard 3 columnas: Wallet + Chat AI + Roadmap
 
 POST /api/agent                  Chat multi-agente AI
 POST /api/shopify/webhook        Webhook orders/paid → crea claim + envía email
@@ -110,7 +112,7 @@ POST /api/nft/approve-claim      Valida claim + linkea wallet
 POST /api/nft/mint               Mint server-side (minter wallet)
 POST /api/nft/confirm-claimed    Registra txHash post-mint
 GET  /api/nft/check-claim        Busca claim por orderId o email
-POST /api/share                  Share-to-earn (+500 OMMY Twitter/IG)
+POST /api/share                  Share-to-earn (+500 OMMY por red social)
 GET  /api/burn/stats             Estadísticas de burn en tiempo real
 ```
 
@@ -190,6 +192,20 @@ Flujo: `POST /api/agent` → `selectAgents()` → llamadas en paralelo → `coor
 
 ---
 
+## Funcionalidades implementadas
+
+- Landing con 12 secciones (dark/cream dual theme, GSAP, Framer Motion)
+- **Página `/nft`** — rareza, 4 tipos de NFT y Guardianes de la Conciencia en carrusel (scroll-snap + arrows + dots)
+- **`EcosistemaSection`** — 6 nodos interactivos: Tienda, NFTs, Ommy Coin, DAO, dApp Bienestar, DEX
+- **Gamificación multi-plataforma** — Twitter/X, TikTok, Instagram, Threads (+500 OMMY c/u)
+- Reto combinado Meditación+Running con bonus
+- Guías Web3 integradas en sección "Cómo funciona" (accordion)
+- Shopify webhook → mint NFT → email automático
+- Share-to-earn `/api/share` (+500 OMMY por red social)
+- Redis Cloud — claims persistentes con fallback in-memory
+- Multi-agente AI (Claude claude-opus-4-6) con 6 especialistas
+- Drops page `/drops` con countdown a Junio 2026
+
 ## Pendiente antes del lanzamiento
 
 - [ ] Migrar NFT contract Fuji → Avalanche Mainnet
@@ -197,6 +213,7 @@ Flujo: `POST /api/agent` → `selectAgents()` → llamadas en paralelo → `coor
 - [ ] Crear Drop #1 Genesis en Shopify (100 hoodies Genesis Hoodie, €89)
 - [ ] Probar flujo completo end-to-end con compra real
 - [ ] Rotar `THIRDWEB_SECRET_KEY`
+- [ ] Pre-compra: mecanismo de pago real (actualmente informacional)
 
 ---
 

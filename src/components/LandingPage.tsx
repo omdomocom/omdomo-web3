@@ -1942,66 +1942,38 @@ const GUIAS = [
   },
 ];
 
-function GuiasWeb3() {
+function GuiasWeb3Accordion() {
   const [open, setOpen] = useState<number | null>(null);
   return (
-    <section id="guias" className="section-cream-2 py-24 px-6">
-      <div className="max-w-3xl mx-auto">
-        <FadeIn className="text-center mb-14">
-          <span className="text-xs text-purple-600 uppercase tracking-widest font-medium">Aprende Web3</span>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mt-3 mb-4 text-cream-text">
-            Guías para <span className="gradient-text">empezar</span>
-          </h2>
-          <p className="text-cream-muted max-w-xl mx-auto text-sm">
-            ¿Nuevo en crypto? No pasa nada. Aquí tienes todo lo que necesitas para entrar al ecosistema Om Domo desde cero.
-          </p>
-        </FadeIn>
-
-        <div className="space-y-3">
-          {GUIAS.map((g, i) => (
-            <FadeIn key={g.title} delay={i * 0.07}>
-              <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
-                <button
-                  onClick={() => setOpen(open === i ? null : i)}
-                  className="w-full flex items-center justify-between p-5 text-left hover:bg-stone-50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{g.icon}</span>
-                    <span className="font-semibold text-cream-text text-sm">{g.title}</span>
-                  </div>
-                  <motion.span
-                    animate={{ rotate: open === i ? 180 : 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="text-stone-400 flex-shrink-0"
-                  >
-                    ▾
-                  </motion.span>
-                </button>
-                <AnimatePresence initial={false}>
-                  {open === i && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-5 pb-5 border-t border-stone-100">
-                        <ul className="mt-4 space-y-2.5">
-                          {g.content.map((line, j) => (
-                            <li key={j} className="text-sm text-cream-muted leading-relaxed">{line}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </FadeIn>
-          ))}
+    <>
+      {GUIAS.map((g, i) => (
+        <div key={g.title} className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
+          <button
+            onClick={() => setOpen(open === i ? null : i)}
+            className="w-full flex items-center justify-between p-5 text-left hover:bg-stone-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">{g.icon}</span>
+              <span className="font-semibold text-cream-text text-sm">{g.title}</span>
+            </div>
+            <motion.span animate={{ rotate: open === i ? 180 : 0 }} transition={{ duration: 0.25 }} className="text-stone-400 flex-shrink-0">▾</motion.span>
+          </button>
+          <AnimatePresence initial={false}>
+            {open === i && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }} className="overflow-hidden">
+                <div className="px-5 pb-5 border-t border-stone-100">
+                  <ul className="mt-4 space-y-2.5">
+                    {g.content.map((line, j) => (
+                      <li key={j} className="text-sm text-cream-muted leading-relaxed">{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
-    </section>
+      ))}
+    </>
   );
 }
 
@@ -2665,7 +2637,7 @@ export function LandingPage() {
             </p>
           </FadeIn>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-6 mb-16">
             {[
               {
                 step: "01",
@@ -2707,6 +2679,20 @@ export function LandingPage() {
               </FadeIn>
             ))}
           </div>
+
+          {/* ── Guías para empezar — accordion integrado ── */}
+          <FadeIn delay={0.2}>
+            <div className="divider-cream mb-12" />
+            <div className="text-center mb-8">
+              <span className="text-xs text-purple-600 uppercase tracking-widest font-medium">¿Nuevo en Web3?</span>
+              <h3 className="font-serif text-2xl md:text-3xl font-bold mt-2 text-cream-text">
+                Guías para <span className="gradient-text">empezar</span>
+              </h3>
+            </div>
+            <div className="max-w-2xl mx-auto space-y-3">
+              <GuiasWeb3Accordion />
+            </div>
+          </FadeIn>
         </div>
       </section>
 
@@ -2903,9 +2889,6 @@ export function LandingPage() {
 
       {/* ── PROYECTOS SUSTENTABLES ───────────────────────────────────── */}
       <ProyectosSustentables />
-
-      {/* ── GUÍAS WEB3 ───────────────────────────────────────────────── */}
-      <GuiasWeb3 />
 
       {/* ── TESTNET FUJI ─────────────────────────────────────────────── */}
       <FadeIn>

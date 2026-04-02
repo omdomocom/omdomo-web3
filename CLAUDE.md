@@ -116,17 +116,38 @@ src/
     └── agents.ts                     # AgentResponse, CoordinatorResult
 ```
 
+## Páginas (rutas)
+
+| Ruta | Descripción |
+|------|-------------|
+| `/` | Landing pública + Hero animado |
+| `/nft` | Colección NFT completa — rareza, 4 tipos (carrusel), Guardianes (carrusel), countdown |
+| `/claim` | Claim NFT tras compra — lookup por Order ID o email |
+| `/drops` | Drops limitados con countdown a Junio 2026 |
+| `/dashboard` | Dashboard 3 columnas: Wallet + Chat AI + Roadmap |
+
 ## Componentes internos de LandingPage.tsx
 
 ```
-HeroLogo           # Logo Om Domo 164px + anillos ripple + glow pulsante + badge "Web3 Ecosystem"
-OmDomoLogo         # Logo pequeño reutilizable (nav, footer) con prop showStars (Disney stars)
-DonutChart         # SVG puro — distribución supply tokenomics
-SocialsCarousel    # Carrusel infinito Framer Motion con logos oficiales RRSS
-PreCompraSection   # Sección pre-compra OMMY (10% supply, lock 30d)
+HeroLogo             # Logo Om Domo 164px + anillos ripple + glow pulsante + badge "Web3 Ecosystem"
+OmDomoLogo           # Logo pequeño reutilizable (nav, footer) con prop showStars
+DonutChart           # SVG puro — distribución supply tokenomics
+SocialsCarousel      # Carrusel infinito Framer Motion con logos oficiales RRSS
+EcosistemaSection    # 6 nodos interactivos (Tienda, NFTs, OMMY, DAO, dApp, DEX)
+PreCompraSection     # Sección pre-compra OMMY (10% supply, lock 30d)
 ProyectosSustentables  # 6 cards: moda sostenible, ropa reciclada, CO2, etc.
-GuiasWeb3          # Accordion: cómo crear wallet, glosario, cómo usar dashboard
-ComunidadDev       # GitHub + Discord + feedback form
+GuiasWeb3Accordion   # Accordion integrado en "Cómo funciona": wallet, glosario, dashboard
+ComunidadDev         # GitHub + Discord + feedback form
+```
+
+## Componentes de /nft (src/app/nft/page.tsx)
+
+```
+HolographicCard      # Carta NFT 3D interactiva (mouse tilt + glow)
+NFTTypeCard          # Card de tipo NFT (Genesis/Founder/Community/Standard)
+GuardianCard         # Card Guardián de la Conciencia (hover reveal)
+ScrollCarousel       # Carrusel con scroll-snap + botones prev/next + dots activos
+Countdown            # Countdown live hasta Jun 2026
 ```
 
 ## Secciones Landing (web3.omdomo.com) — Estado
@@ -134,22 +155,30 @@ ComunidadDev       # GitHub + Discord + feedback form
 ```
 ✅ Hero             — SpaceBackground canvas + HeroLogo + "Om Domo" shimmer+float + badge testnet
 ✅ Stats bar        — contadores animados
-✅ Cómo funciona    — 3 pasos (cream)
-✅ Rewards          — gamificación (cream)
-✅ Tokenomics       — DonutChart SVG + distribución
+✅ Cómo funciona    — 3 pasos (cream) + Guías Web3 accordion integrado al final
+✅ Rewards          — gamificación multi-plataforma (Twitter, TikTok, Instagram, Threads)
+✅ Tokenomics       — DonutChart SVG + mecánicas de burn
+✅ NFT teaser       — pills rareza + preview 3 Guardianes + CTA → /nft
 ✅ Pre-compra OMMY  — 10% supply, lock 30d, explicación del mecanismo
-✅ Ecosistema       — 6 nodos (dark)
+✅ Ecosistema       — 6 nodos interactivos (dark): Tienda, NFTs, OMMY, DAO, dApp, DEX
 ✅ Proyectos Sustentables — 6 cards (cream)
-✅ Guías Web3       — accordion (cream)
 ✅ Testnet Fuji     — dark
 ✅ Comunidad + RRSS — carrusel logos oficiales + ComunidadDev (cream)
 ✅ Waitlist         — form email (cream)
 ✅ Footer           — dark, logo real, redes sociales
 
+## Página /nft (web3.omdomo.com/nft) — Estado
+
+✅ Hero             — HolographicCard 3D + 6 beneficios NFT
+✅ Sistema rareza   — 4 tiers con barras progress + gradient visual
+✅ 4 tipos NFT      — ScrollCarousel draggable (Genesis/Founder/Community/Standard)
+✅ Guardianes       — ScrollCarousel draggable (6 arquetipos, hover reveal, countdown)
+✅ Footer           — links a Inicio, Drops, Reclamar, Tienda
+```
+
 ⏳ Pre-compra:      Mecanismo de pago real (actualmente informacional)
 ⏳ Referral system  on-chain (Fase 2)
 ⏳ Staking NFT      50 OMMY/día (Fase 2)
-```
 
 ## Design System
 
@@ -258,21 +287,27 @@ Flow: `POST /api/agent` → selectAgents() → callAgent() en paralelo → coord
 
 ## Implementado ✅
 
-- Landing completa con 13 secciones (dark/cream dual theme, GSAP, Framer Motion)
-- Logo real Om Domo integrado — `public/logo-negro.png` + `public/logo-blanco.png`
+- Landing pública con 12 secciones (dark/cream dual theme, GSAP, Framer Motion)
+- Página `/nft` completa — rareza, 4 tipos NFT + Guardianes en carrusel (ScrollCarousel)
+- `ScrollCarousel`: scroll-snap nativo + prev/next arrows + dots activos animados
+- `EcosistemaSection`: 6 nodos interactivos con sub-contenido específico por nodo
+  - DAO: progress tracker visual 5 fases + links GitHub/Discord
+  - dApp: grid 8 actividades (Running, Yoga, Ciclismo, Natación, Patines, Meditación, Arte→NFT, Música)
+  - DEX: Trader Joe / Pangolin / Uniswap con incentivos
+- Gamificación multi-plataforma: Twitter/X, TikTok, Instagram, Threads (+500 OMMY c/u)
+- Reto combinado Meditación+Running con bonus OMMY
+- Guías Web3 integradas en sección "Cómo funciona" (accordion compacto)
+- Logo real Om Domo — `public/logo-negro.png` + `public/logo-blanco.png`
 - `HeroLogo`: anillos ripple + glow pulsante + badge "Web3 Ecosystem"
-- `OmDomoLogo`: logo reutilizable en nav/footer con prop `showStars`
 - `SpaceBackground`: canvas interactivo con gravedad cursor + estrellas fugaces
 - `DonutChart`: SVG puro para distribución supply
 - `SocialsCarousel`: carrusel infinito Framer Motion (6 redes sociales)
-- Secciones nuevas: Pre-compra OMMY, Proyectos Sustentables, Guías Web3, Comunidad Dev
-- `.shimmer-omdomo` CSS animation: sweep de luz sobre título "Om Domo"
-- "Om Domo" en hero con float animation (y: 0→-7→0, 5s) + shimmer sweep
+- `.shimmer-omdomo` + float animation sobre "Om Domo" en hero
 - Redis Cloud (ioredis) — claims persistentes con fallback in-memory
 - Email automático via Resend al cliente tras cada compra
 - Shopify webhook: Pago de pedido → mint NFT → email
 - Claim page `/claim` — flow 4 pasos: lookup → connect wallet → mint → share
-- Share-to-earn `/api/share` (+500 OMMY por Twitter/IG)
+- Share-to-earn `/api/share` (+500 OMMY por red social)
 - Drops page `/drops` con countdown a Junio 2026
 - NFT rarity system (Genesis/Founder/Community/Standard)
 - `src/lib/tokenomics.ts` — fuente única de verdad tokenomics
@@ -291,7 +326,6 @@ Flow: `POST /api/agent` → selectAgents() → callAgent() en paralelo → coord
 - Pre-compra: implementar mecanismo de pago real (actualmente informacional)
 - Referral system on-chain (Fase 2)
 - Staking NFT 50 OMMY/día (Fase 2)
-- Discord URL pública en ComunidadDev section
 
 ## Convenciones de Código
 
