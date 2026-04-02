@@ -2825,10 +2825,76 @@ export function LandingPage() {
       </section>
 
       {/* ── PRE-COMPRA ───────────────────────────────────────────────── */}
-      {/* ── NFT GENESIS ──────────────────────────────────────────────── */}
-      <NFTGenesisSection />
-      <NFTTypesSection />
-      <GuardiansSection />
+      {/* ── NFT TEASER ───────────────────────────────────────────────── */}
+      <section id="nft" className="section-dark py-20 px-6 relative overflow-hidden">
+        <Orb className="w-[500px] h-[500px] bg-purple-800 top-0 left-1/2 -translate-x-1/2" />
+        <div className="max-w-5xl mx-auto relative z-10">
+          <FadeIn className="text-center mb-12">
+            <span className="text-xs text-amber-500 uppercase tracking-widest font-medium">Colección NFT</span>
+            <h2 className="font-serif text-4xl md:text-5xl font-bold mt-3 mb-4">
+              Cada compra, un <span className="gradient-text-gold">NFT único</span>
+            </h2>
+            <p className="text-slate-400 max-w-xl mx-auto leading-relaxed">
+              4 tipos de NFT según cuando compres. Genesis Hoodies, Guardianes de la Conciencia y arte on-chain.
+            </p>
+          </FadeIn>
+
+          {/* 4 rarity pills */}
+          <FadeIn delay={0.1} className="flex flex-wrap justify-center gap-3 mb-10">
+            {[
+              { name: "Genesis",   color: "#FFD700", supply: "~200",    tag: "🔥 Ahora" },
+              { name: "Founder",   color: "#C0C0C0", supply: "~500",    tag: "Jul 2026" },
+              { name: "Community", color: "#4FC3F7", supply: "~2.000",  tag: "Ago–Sep" },
+              { name: "Standard",  color: "#81C784", supply: "∞",       tag: "Siempre" },
+            ].map((t) => (
+              <div key={t.name} className="flex items-center gap-2 px-4 py-2 rounded-full"
+                style={{ background: `${t.color}12`, border: `1px solid ${t.color}44` }}>
+                <div className="w-2.5 h-2.5 rounded-full" style={{ background: t.color, boxShadow: `0 0 6px ${t.color}` }} />
+                <span className="text-sm font-bold" style={{ color: t.color }}>{t.name}</span>
+                <span className="text-xs text-slate-500">{t.supply} NFTs</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${t.color}20`, color: t.color }}>{t.tag}</span>
+              </div>
+            ))}
+          </FadeIn>
+
+          {/* 3 preview cards — Guardianes teaser */}
+          <FadeIn delay={0.15} className="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-10">
+            {[
+              { emoji: "🌑", name: "El Silencio", color: "#9B59B6" },
+              { emoji: "🔥", name: "La Llama",    color: "#E74C3C" },
+              { emoji: "💧", name: "El Agua",     color: "#3498DB" },
+            ].map((g) => (
+              <motion.div key={g.name} whileHover={{ y: -4, scale: 1.04 }}
+                className="rounded-2xl flex flex-col items-center justify-center py-6 gap-2 cursor-pointer"
+                style={{ background: `${g.color}10`, border: `1px solid ${g.color}33`, aspectRatio: "3/4" }}>
+                <span className="text-3xl">{g.emoji}</span>
+                <span className="text-[10px] font-medium text-center px-1 leading-tight" style={{ color: g.color }}>{g.name}</span>
+                <div className="text-[9px] text-slate-600 flex items-center gap-1"><Lock size={8} /> Jun 2026</div>
+              </motion.div>
+            ))}
+          </FadeIn>
+
+          {/* CTA */}
+          <FadeIn delay={0.2} className="text-center">
+            <a href="/nft"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base mb-3 hover:opacity-90 transition-opacity"
+              style={{ background: "linear-gradient(135deg,#9333ea,#06b6d4)", color: "#fff" }}>
+              Ver colección completa →
+            </a>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mt-2">
+              <a href="https://omdomo.com" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm"
+                style={{ background: "linear-gradient(135deg,#f59e0b,#d97706)", color: "#000" }}>
+                <ShoppingBag size={15} /> Comprar y recibir NFT Genesis
+              </a>
+              <a href="/claim"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm border border-white/10 text-slate-300 hover:bg-white/5 transition-all">
+                <Gift size={15} /> Ya compré — Reclamar NFT
+              </a>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
 
       <PreCompraSection />
 
