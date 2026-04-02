@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { motion, useInView } from "framer-motion";
-import { Flame, ExternalLink, Gift, ShoppingBag } from "lucide-react";
+import { Flame, ExternalLink, Gift, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
 
 // ─── Shared primitives ────────────────────────────────────────────────────────
 
@@ -25,9 +25,115 @@ function FadeIn({ children, delay = 0, className = "" }: { children: React.React
 
 function Orb({ className }: { className: string }) {
   return (
-    <div
-      className={`absolute rounded-full pointer-events-none blur-3xl opacity-[0.07] ${className}`}
-    />
+    <div className={`absolute rounded-full pointer-events-none blur-3xl opacity-[0.07] ${className}`} />
+  );
+}
+
+// ─── Scroll Carousel ──────────────────────────────────────────────────────────
+
+function ScrollCarousel({
+  children,
+  cardMinWidth = 280,
+  dotColor = "#9333ea",
+  darkTheme = true,
+}: {
+  children: React.ReactNode[];
+  cardMinWidth?: number;
+  dotColor?: string;
+  darkTheme?: boolean;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const total = children.length;
+
+  const scroll = useCallback((dir: 1 | -1) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const card = el.querySelector("[data-card]") as HTMLElement;
+    const step = card ? card.offsetWidth + 20 : el.clientWidth * 0.85;
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
+  }, []);
+
+  const scrollTo = useCallback((i: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const cards = el.querySelectorAll("[data-card]");
+    const target = cards[i] as HTMLElement;
+    if (target) el.scrollTo({ left: target.offsetLeft - 24, behavior: "smooth" });
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const cards = Array.from(el.querySelectorAll("[data-card]")) as HTMLElement[];
+      const center = el.scrollLeft + el.clientWidth / 2;
+      let closest = 0;
+      let minDist = Infinity;
+      cards.forEach((c, i) => {
+        const dist = Math.abs(c.offsetLeft + c.offsetWidth / 2 - center);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      });
+      setActiveIdx(closest);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const btnBase = `absolute top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center transition-all
+    ${darkTheme ? "bg-slate-800/80 border border-slate-700/60 text-slate-300 hover:bg-slate-700 hover:text-white" : "bg-white/80 border border-stone-200 text-stone-600 hover:bg-white hover:text-stone-900"}
+    backdrop-blur-sm shadow-lg`;
+
+  return (
+    <div className="relative">
+      {/* Prev */}
+      <button onClick={() => scroll(-1)} className={`${btnBase} -left-4 md:-left-6`} aria-label="Anterior">
+        <ChevronLeft size={20} />
+      </button>
+      {/* Next */}
+      <button onClick={() => scroll(1)} className={`${btnBase} -right-4 md:-right-6`} aria-label="Siguiente">
+        <ChevronRight size={20} />
+      </button>
+
+      {/* Track */}
+      <div
+        ref={scrollRef}
+        className="flex gap-5 overflow-x-auto pb-4 px-1"
+        style={{ scrollSnapType: "x mandatory", scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        <style>{`div::-webkit-scrollbar{display:none}`}</style>
+        {children.map((child, i) => (
+          <div
+            key={i}
+            data-card
+            style={{ minWidth: `min(${cardMinWidth}px, 82vw)`, scrollSnapAlign: "center", flexShrink: 0 }}
+          >
+            {child}
+          </div>
+        ))}
+      </div>
+
+      {/* Dots */}
+      <div className="flex justify-center gap-2 mt-4">
+        {Array.from({ length: total }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => scrollTo(i)}
+            aria-label={`Ir a ${i + 1}`}
+            style={{
+              width: i === activeIdx ? 22 : 7,
+              height: 7,
+              borderRadius: 4,
+              background: i === activeIdx ? dotColor : darkTheme ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)",
+              transition: "width 0.3s, background 0.3s",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+            }}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -389,8 +495,10 @@ export default function NFTPage() {
               Cada prenda que compras en omdomo.com genera un NFT único en Avalanche. La rareza depende de cuándo compras.
             </p>
           </FadeIn>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 20, marginBottom: 40 }}>
-            {NFT_TYPES.map((nft, i) => <NFTTypeCard key={nft.rarity} nft={nft} index={i} />)}
+          <div className="mb-10">
+            <ScrollCarousel cardMinWidth={280} dotColor="#c9973a" darkTheme={false}>
+              {NFT_TYPES.map((nft, i) => <NFTTypeCard key={nft.rarity} nft={nft} index={i} />)}
+            </ScrollCarousel>
           </div>
           <FadeIn className="text-center">
             <a href="https://omdomo.com" target="_blank" rel="noopener noreferrer"
@@ -422,8 +530,14 @@ export default function NFTPage() {
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.25)", fontStyle: "italic" }}>Pasa el cursor para un preview exclusivo</p>
           </FadeIn>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 16, marginBottom: 48 }}>
-            {GUARDIANS.map((g, i) => <GuardianCard key={g.id} g={g} index={i} />)}
+          <div className="mb-12">
+            <ScrollCarousel cardMinWidth={200} dotColor="#9333ea" darkTheme={true}>
+              {GUARDIANS.map((g, i) => (
+                <div key={g.id} style={{ aspectRatio: "3/4", minHeight: 280 }}>
+                  <GuardianCard g={g} index={i} />
+                </div>
+              ))}
+            </ScrollCarousel>
           </div>
 
           <FadeIn>
