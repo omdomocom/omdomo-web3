@@ -28,6 +28,12 @@ import {
   Lock,
   Unlock,
   Star,
+  Activity,
+  Music,
+  Palette,
+  ArrowLeftRight,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 
 // ─── Social links ─────────────────────────────────────────────────────────────
@@ -2125,6 +2131,302 @@ function ComunidadDev() {
   );
 }
 
+// ─── Ecosistema Section ────────────────────────────────────────────────────────
+function EcosistemaSection() {
+  const [activeNodo, setActiveNodo] = useState<string | null>(null);
+
+  const nodos = [
+    {
+      id: "tienda",
+      emoji: "🛍️",
+      color: "#10b981",
+      glow: "rgba(16,185,129,0.18)",
+      border: "rgba(16,185,129,0.28)",
+      tag: "Live · Shopify",
+      title: "Tienda de Productos Físicos",
+      desc: "Ropa consciente, hoodies Genesis y accesorios Om Domo. Cada compra te recompensa con OMMY y un NFT de autenticidad on-chain.",
+      features: [
+        "70 OMMY por USD gastado",
+        "NFT de autenticidad incluido",
+        "Drops limitados exclusivos",
+        "Envío con certificado blockchain",
+      ],
+      cta: { label: "Ir a omdomo.com", href: "https://omdomo.com", external: true },
+    },
+    {
+      id: "nfts",
+      emoji: "🖼️",
+      color: "#9333ea",
+      glow: "rgba(147,51,234,0.18)",
+      border: "rgba(147,51,234,0.32)",
+      tag: "Fase 1 · Activo",
+      title: "NFTs",
+      desc: "Genesis Hoodies, Guardianes de la Conciencia y arte espiritual on-chain. Cada NFT es tu pasaporte a todo el ecosistema.",
+      features: [
+        "Genesis Hoodie — 100 unidades",
+        "Guardianes de la Conciencia",
+        "Staking 50 OMMY/día",
+        "Acceso DAO + drops anticipados",
+      ],
+      cta: { label: "Ver colecciones", href: "#nft", external: false },
+    },
+    {
+      id: "ommy",
+      emoji: "🪙",
+      color: "#f59e0b",
+      glow: "rgba(245,158,11,0.15)",
+      border: "rgba(245,158,11,0.28)",
+      tag: "Mainnet · Avalanche",
+      title: "Ommy Coin",
+      desc: "El token deflacionario del ecosistema. Cada compra quema OMMY y recompensa a la comunidad. 90% quemado en 7-8 años.",
+      features: [
+        "70 OMMY por cada USD gastado",
+        "Deflación 90% programada",
+        "Pre-compra con lock 30 días",
+        "Liquidez DEX Avalanche",
+      ],
+      cta: { label: "Conectar wallet", href: "/dashboard", external: false },
+    },
+    {
+      id: "dao",
+      emoji: "🏛",
+      color: "#6366f1",
+      glow: "rgba(99,102,241,0.15)",
+      border: "rgba(99,102,241,0.28)",
+      tag: "Fase 4 · Jun 2027",
+      title: "DAO",
+      desc: "La comunidad vota el rumbo del ecosistema. Los holders de NFT tienen poder de gobernanza real sobre el treasury y las propuestas.",
+      features: ["+200 OMMY por cada voto", "Propuestas en GitHub", "Discord governance", "Treasury descentralizado"],
+      progress: [
+        { label: "Fase 1: Motor de Ventas", pct: 80 },
+        { label: "Fase 2: Economía OMMY", pct: 5 },
+        { label: "Fase 3: App Bienestar", pct: 0 },
+        { label: "Fase 4: DAO", pct: 0 },
+        { label: "Fase 5: Ommy Lab", pct: 0 },
+      ],
+      links: [
+        { label: "GitHub", href: "https://github.com/omdomocom/omdomo-web3" },
+        { label: "Discord", href: "https://discord.gg/xXezFXnpaX" },
+      ],
+      cta: { label: "Conectar wallet", href: "/dashboard", external: false },
+    },
+    {
+      id: "dapp",
+      emoji: "⚡",
+      color: "#0891b2",
+      glow: "rgba(8,145,178,0.15)",
+      border: "rgba(8,145,178,0.28)",
+      tag: "Fase 3 · Ene 2027",
+      title: "dApp Bienestar",
+      desc: "Proof of Conscious Activity — gana OMMY por meditación, deporte, arte y música. La primera dApp de bienestar consciente en blockchain.",
+      activities: [
+        { icon: "🏃", label: "Running", reward: "+250/5km" },
+        { icon: "🧘", label: "Yoga", reward: "por posición" },
+        { icon: "🚴", label: "Ciclismo", reward: "+OMMY/km" },
+        { icon: "🏊", label: "Natación", reward: "+OMMY/largo" },
+        { icon: "🛼", label: "Patines", reward: "+OMMY/ruta" },
+        { icon: "🧠", label: "Meditación", reward: "+50/20min" },
+        { icon: "🎨", label: "Arte → NFT", reward: "mintear" },
+        { icon: "🎵", label: "Música", reward: "compartir" },
+      ],
+      features: [
+        "Reto Meditación + Running combinado con bonus",
+        "Arte consciente → mint NFT directo",
+        "Música: sube y gana OMMY",
+      ],
+      cta: { label: "Ver roadmap", href: "#roadmap", external: false },
+    },
+    {
+      id: "dex",
+      emoji: "💱",
+      color: "#ec4899",
+      glow: "rgba(236,72,153,0.15)",
+      border: "rgba(236,72,153,0.28)",
+      tag: "Fase 2 · Sep 2026",
+      title: "DEX",
+      desc: "Intercambia OMMY sin intermediarios en los mejores DEXes de Avalanche. Conecta tu wallet y accede al ecosistema DeFi.",
+      dexes: [
+        { name: "Trader Joe", desc: "DEX líder Avalanche", tag: "★ Recomendado" },
+        { name: "Pangolin", desc: "AMM nativo Avalanche", tag: "Avalanche" },
+        { name: "Uniswap v3", desc: "Máxima liquidez", tag: "Multi-chain" },
+      ],
+      features: [
+        "Bonus OMMY al comprar por primera vez",
+        "Slippage optimizado para OMMY",
+        "Historial de transacciones on-chain",
+      ],
+      cta: { label: "Conectar wallet", href: "/dashboard", external: false },
+    },
+  ] as const;
+
+  return (
+    <section id="ecosistema" className="section-dark py-24 px-6 relative overflow-hidden">
+      <Orb className="w-[600px] h-[600px] bg-purple-900 -top-60 left-1/2 -translate-x-1/2" />
+      <Orb className="w-[400px] h-[400px] bg-cyan-900 bottom-0 right-0 opacity-40" />
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        <FadeIn className="text-center mb-16">
+          <span className="text-xs text-purple-400 uppercase tracking-widest font-medium">Ecosistema</span>
+          <h2 className="font-serif text-4xl md:text-5xl font-bold mt-3 mb-4">
+            Un ecosistema <span className="gradient-text">completo</span>
+          </h2>
+          <p className="text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Seis pilares que conectan el mundo físico con el Web3. Desde la tienda hasta el DAO, cada pieza te recompensa con OMMY.
+          </p>
+        </FadeIn>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {nodos.map((nodo, i) => {
+            const isActive = activeNodo === nodo.id;
+            return (
+              <FadeIn key={nodo.id} delay={i * 0.07}>
+                <motion.div
+                  layout
+                  className="rounded-2xl p-6 flex flex-col gap-4 h-full cursor-pointer"
+                  style={{
+                    background: "rgba(14,10,20,0.7)",
+                    border: `1px solid ${isActive ? nodo.border : "rgba(255,255,255,0.06)"}`,
+                    boxShadow: isActive ? `0 0 32px ${nodo.glow}` : "none",
+                    transition: "border-color 0.3s, box-shadow 0.3s",
+                  }}
+                  onClick={() => setActiveNodo(isActive ? null : nodo.id)}
+                  whileHover={{ y: -3 }}
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                      style={{ background: `${nodo.color}18`, border: `1px solid ${nodo.color}33` }}
+                    >
+                      {nodo.emoji}
+                    </div>
+                    <span
+                      className="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 mt-0.5"
+                      style={{ background: `${nodo.color}18`, color: nodo.color, border: `1px solid ${nodo.color}44` }}
+                    >
+                      {nodo.tag}
+                    </span>
+                  </div>
+
+                  {/* Title + desc */}
+                  <div>
+                    <h3 className="font-bold text-base mb-1.5" style={{ color: "var(--dark-text)" }}>{nodo.title}</h3>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--dark-muted)" }}>{nodo.desc}</p>
+                  </div>
+
+                  {/* Special content per nodo */}
+                  {"progress" in nodo && (
+                    <div className="flex flex-col gap-2 mt-1">
+                      {(nodo as typeof nodos[3]).progress.map((p) => (
+                        <div key={p.label}>
+                          <div className="flex justify-between text-[10px] mb-1">
+                            <span style={{ color: "var(--dark-muted)" }}>{p.label}</span>
+                            <span style={{ color: nodo.color }}>{p.pct}%</span>
+                          </div>
+                          <div className="h-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                            <motion.div
+                              className="h-full rounded-full"
+                              style={{ background: nodo.color }}
+                              initial={{ width: 0 }}
+                              whileInView={{ width: `${p.pct}%` }}
+                              viewport={{ once: true }}
+                              transition={{ duration: 1.2, ease: "easeOut" }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      <div className="flex gap-2 mt-2">
+                        {(nodo as typeof nodos[3]).links.map((l) => (
+                          <a
+                            key={l.label}
+                            href={l.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[10px] px-2.5 py-1 rounded-full border flex items-center gap-1 hover:opacity-80 transition-opacity"
+                            style={{ borderColor: `${nodo.color}44`, color: nodo.color }}
+                          >
+                            <ExternalLink size={9} /> {l.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {"activities" in nodo && (
+                    <div className="grid grid-cols-4 gap-1.5 mt-1">
+                      {(nodo as typeof nodos[4]).activities.map((a) => (
+                        <div
+                          key={a.label}
+                          className="rounded-xl p-2 flex flex-col items-center gap-0.5 text-center"
+                          style={{ background: "rgba(8,145,178,0.08)", border: "1px solid rgba(8,145,178,0.14)" }}
+                        >
+                          <span className="text-base leading-none">{a.icon}</span>
+                          <span className="text-[9px] font-medium text-slate-300 leading-tight">{a.label}</span>
+                          <span className="text-[8px]" style={{ color: nodo.color }}>{a.reward}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {"dexes" in nodo && (
+                    <div className="flex flex-col gap-2 mt-1">
+                      {(nodo as typeof nodos[5]).dexes.map((d) => (
+                        <div
+                          key={d.name}
+                          className="flex items-center justify-between px-3 py-2 rounded-xl"
+                          style={{ background: "rgba(236,72,153,0.06)", border: "1px solid rgba(236,72,153,0.14)" }}
+                        >
+                          <div>
+                            <p className="text-xs font-bold text-slate-200">{d.name}</p>
+                            <p className="text-[10px]" style={{ color: "var(--dark-muted)" }}>{d.desc}</p>
+                          </div>
+                          <span
+                            className="text-[9px] px-2 py-0.5 rounded-full font-medium"
+                            style={{ background: `${nodo.color}18`, color: nodo.color }}
+                          >
+                            {d.tag}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Features */}
+                  <ul className="flex flex-col gap-1.5 flex-1">
+                    {nodo.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-xs" style={{ color: "var(--dark-muted)" }}>
+                        <span className="mt-0.5 flex-shrink-0" style={{ color: nodo.color }}>✓</span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA */}
+                  <a
+                    href={nodo.cta.href}
+                    target={nodo.cta.external ? "_blank" : undefined}
+                    rel={nodo.cta.external ? "noopener noreferrer" : undefined}
+                    onClick={(e) => e.stopPropagation()}
+                    className="mt-auto flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all hover:opacity-90"
+                    style={{
+                      background: `linear-gradient(135deg, ${nodo.color}cc, ${nodo.color}88)`,
+                      color: "#fff",
+                    }}
+                  >
+                    {nodo.cta.label}
+                    {nodo.cta.external ? <ExternalLink size={11} /> : <ArrowLeftRight size={11} />}
+                  </a>
+                </motion.div>
+              </FadeIn>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
 export function LandingPage() {
   const countdown = useCountdown();
@@ -2418,15 +2720,21 @@ export function LandingPage() {
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {[
-                { action: "Compra física",       reward: "5,000+ OMMY",  icon: <ShoppingBag size={14} />, hot: true },
-                { action: "Compartir en Twitter", reward: "+500 OMMY",   icon: <Globe size={14} /> },
-                { action: "Referir un amigo",     reward: "+2,000 OMMY", icon: <Users size={14} /> },
-                { action: "Drop limitado (1ª h)", reward: "+10,000 OMMY",icon: <Flame size={14} />, hot: true },
-                { action: "Staking de NFT/día",   reward: "+50 OMMY",    icon: <Zap size={14} /> },
-                { action: "Meditación 20 min",    reward: "+50 OMMY",    icon: <Heart size={14} /> },
-                { action: "Running 5km",          reward: "+250 OMMY",   icon: <Zap size={14} /> },
-                { action: "Votación DAO",         reward: "+200 OMMY",   icon: <Star size={14} /> },
-                { action: "Evento Om Domo",       reward: "+3,000 OMMY", icon: <Globe size={14} />, hot: true },
+                { action: "Compra física",           reward: "5,000+ OMMY",  icon: <ShoppingBag size={14} />, hot: true },
+                { action: "Share Twitter / X",       reward: "+500 OMMY",   icon: <Globe size={14} /> },
+                { action: "Share TikTok",             reward: "+500 OMMY",   icon: <Activity size={14} /> },
+                { action: "Share Instagram",          reward: "+500 OMMY",   icon: <Heart size={14} /> },
+                { action: "Share Threads",            reward: "+500 OMMY",   icon: <Globe size={14} /> },
+                { action: "Referir un amigo",         reward: "+2,000 OMMY", icon: <Users size={14} /> },
+                { action: "Drop limitado (1ª h)",     reward: "+10,000 OMMY",icon: <Flame size={14} />, hot: true },
+                { action: "Staking de NFT/día",       reward: "+50 OMMY",    icon: <Zap size={14} /> },
+                { action: "Meditación 20 min",        reward: "+50 OMMY",    icon: <Music size={14} /> },
+                { action: "Running 5km",              reward: "+250 OMMY",   icon: <Zap size={14} /> },
+                { action: "Reto Medita + Running",    reward: "+500 OMMY",   icon: <Activity size={14} />, hot: true },
+                { action: "Arte consciente → NFT",    reward: "+OMMY",       icon: <Palette size={14} /> },
+                { action: "Música: sube contenido",   reward: "+OMMY",       icon: <Music size={14} /> },
+                { action: "Votación DAO",             reward: "+200 OMMY",   icon: <Star size={14} /> },
+                { action: "Evento Om Domo",           reward: "+3,000 OMMY", icon: <Globe size={14} />, hot: true },
               ].map((r) => (
                 <motion.div
                   key={r.action}
@@ -2525,114 +2833,7 @@ export function LandingPage() {
       <PreCompraSection />
 
       {/* ── ECOSISTEMA ───────────────────────────────────────────────── */}
-      <section id="ecosistema" className="section-cream py-24 px-6 relative overflow-hidden">
-        <Orb className="w-[500px] h-[500px] bg-purple-700 top-0 left-1/2 -translate-x-1/2 opacity-10" />
-        <div className="max-w-5xl mx-auto relative z-10">
-          <FadeIn className="text-center mb-16">
-            <span className="text-xs text-purple-600 uppercase tracking-widest font-medium">Arquitectura</span>
-            <h2 className="font-serif text-4xl md:text-5xl font-bold mt-3 mb-4 text-cream-text">
-              Un ecosistema <span className="gradient-text">completo</span>
-            </h2>
-            <p className="text-cream-muted max-w-xl mx-auto text-sm">
-              Cada pieza está conectada. Comprar, crear, moverse y votar generan valor real en la blockchain.
-            </p>
-          </FadeIn>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {[
-              {
-                icon: "🛍",
-                title: "Tienda física",
-                desc: "Compra ropa consciente en omdomo.com y activa recompensas Web3 automáticamente.",
-                badge: "Shopify + Avalanche",
-                color: "border-purple-500/30 hover:border-purple-500/60",
-                badgeColor: "bg-purple-900/30 text-purple-300",
-                size: "md:col-span-1",
-              },
-              {
-                icon: "🎨",
-                title: "NFTs por compra",
-                desc: "Cada prenda genera un NFT único del diseño. Arte digital que es tuyo.",
-                badge: "ERC-1155 · Genesis NFT",
-                color: "border-cyan-500/30 hover:border-cyan-500/60",
-                badgeColor: "bg-cyan-900/30 text-cyan-300",
-                size: "md:col-span-1",
-              },
-              {
-                icon: "🪙",
-                title: "OMMY Coin",
-                desc: "Token deflacionario. Cada compra quema supply. Gana OMMY con cada acción.",
-                badge: "ERC-20 · Avalanche",
-                color: "border-orange-500/30 hover:border-orange-500/60",
-                badgeColor: "bg-orange-900/30 text-orange-300",
-                size: "md:col-span-1",
-              },
-              {
-                icon: "🏛",
-                title: "DAO — Vota diseños",
-                desc: "Los holders NFT votan las próximas colecciones, precios y decisiones del proyecto.",
-                badge: "Gobernanza on-chain",
-                color: "border-green-500/30 hover:border-green-500/60",
-                badgeColor: "bg-green-900/30 text-green-300",
-                size: "md:col-span-1",
-              },
-              {
-                icon: "📱",
-                title: "App Conscious",
-                desc: "Medita, corre, practica yoga. Cada actividad verificada genera OMMY y NFT achievements.",
-                badge: "Proof of Activity · Fase 3",
-                color: "border-pink-500/30 hover:border-pink-500/60",
-                badgeColor: "bg-pink-900/30 text-pink-300",
-                size: "md:col-span-1",
-              },
-              {
-                icon: "⚡",
-                title: "Intercambia OMMY",
-                desc: "Liquidez en DEX de Avalanche. Compra, vende o haz staking de tus tokens.",
-                badge: "DEX · 15% liquidez",
-                color: "border-amber-500/30 hover:border-amber-500/60",
-                badgeColor: "bg-amber-900/30 text-amber-300",
-                size: "md:col-span-1",
-              },
-            ].map((item, i) => (
-              <FadeIn key={item.title} delay={i * 0.08}>
-                <motion.div
-                  whileHover={{ y: -4, scale: 1.01 }}
-                  className={`glass rounded-2xl p-5 border ${item.color} transition-all h-full flex flex-col gap-3`}
-                >
-                  <div className="flex items-start justify-between">
-                    <span className="text-3xl">{item.icon}</span>
-                    <span className={`text-[10px] px-2 py-1 rounded-full font-medium ${item.badgeColor}`}>
-                      {item.badge}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-100 mb-1">{item.title}</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
-                  </div>
-                </motion.div>
-              </FadeIn>
-            ))}
-          </div>
-
-          {/* Connecting line visual */}
-          <FadeIn delay={0.5}>
-            <div className="mt-10 flex items-center justify-center gap-2 flex-wrap">
-              {["Compra", "→", "NFT", "→", "OMMY", "→", "DAO", "→", "App", "→", "DEX"].map((item, i) => (
-                <span
-                  key={i}
-                  className={item === "→"
-                    ? "text-stone-400 font-bold text-sm"
-                    : "text-xs px-3 py-1.5 rounded-full bg-white text-stone-900 font-semibold border border-stone-200 shadow-sm"
-                  }
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-          </FadeIn>
-        </div>
-      </section>
+      <EcosistemaSection />
 
       {/* ── PROYECTOS SUSTENTABLES ───────────────────────────────────── */}
       <ProyectosSustentables />
