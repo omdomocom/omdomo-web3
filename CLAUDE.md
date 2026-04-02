@@ -158,17 +158,18 @@ Countdown            # Countdown live hasta Jun 2026
 ✅ Cómo funciona    — 3 pasos (cream) + Guías Web3 accordion integrado al final
 ✅ Rewards          — gamificación multi-plataforma (Twitter, TikTok, Instagram, Threads)
 ✅ Tokenomics       — DonutChart SVG + mecánicas de burn
-✅ NFT teaser       — pills rareza + preview 3 Guardianes + CTA → /nft
 ✅ Pre-compra OMMY  — 10% supply, lock 30d, explicación del mecanismo
-✅ Ecosistema       — 6 nodos interactivos (dark): Tienda, NFTs, OMMY, DAO, dApp, DEX
+✅ Ecosistema       — 6 nodos interactivos (dark): Tienda, NFTs→/nft, OMMY, DAO, dApp, DEX
 ✅ Proyectos Sustentables — 6 cards (cream)
 ✅ Testnet Fuji     — dark
 ✅ Comunidad + RRSS — carrusel logos oficiales + ComunidadDev (cream)
 ✅ Waitlist         — form email (cream)
 ✅ Footer           — dark, logo real, redes sociales
+```
 
 ## Página /nft (web3.omdomo.com/nft) — Estado
 
+```
 ✅ Hero             — HolographicCard 3D + 6 beneficios NFT
 ✅ Sistema rareza   — 4 tiers con barras progress + gradient visual
 ✅ 4 tipos NFT      — ScrollCarousel draggable (Genesis/Founder/Community/Standard)

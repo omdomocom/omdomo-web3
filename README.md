@@ -194,16 +194,17 @@ Flujo: `POST /api/agent` → `selectAgents()` → llamadas en paralelo → `coor
 
 ## Funcionalidades implementadas
 
-- Landing con 12 secciones (dark/cream dual theme, GSAP, Framer Motion)
-- **Página `/nft`** — rareza, 4 tipos de NFT y Guardianes de la Conciencia en carrusel (scroll-snap + arrows + dots)
-- **`EcosistemaSection`** — 6 nodos interactivos: Tienda, NFTs, Ommy Coin, DAO, dApp Bienestar, DEX
+- Landing con 11 secciones (dark/cream dual theme, GSAP, Framer Motion)
+- **Página `/nft`** — rareza, 4 tipos NFT y Guardianes de la Conciencia en carrusel (scroll-snap + arrows + dots)
+- **`EcosistemaSection`** — 6 nodos interactivos: Tienda→omdomo.com, NFTs→/nft, OMMY, DAO, dApp, DEX
+- Nodo NFTs del Ecosistema enlaza a `/nft` (página dedicada)
 - **Gamificación multi-plataforma** — Twitter/X, TikTok, Instagram, Threads (+500 OMMY c/u)
 - Reto combinado Meditación+Running con bonus
-- Guías Web3 integradas en sección "Cómo funciona" (accordion)
+- Guías Web3 integradas en "Cómo funciona" (accordion, sin sección propia)
 - Shopify webhook → mint NFT → email automático
 - Share-to-earn `/api/share` (+500 OMMY por red social)
 - Redis Cloud — claims persistentes con fallback in-memory
-- Multi-agente AI (Claude claude-opus-4-6) con 6 especialistas
+- Multi-agente AI (claude-opus-4-6) con 6 especialistas
 - Drops page `/drops` con countdown a Junio 2026
 
 ## Pendiente antes del lanzamiento
