@@ -114,6 +114,10 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("[NFT Mint]", error);
-    return NextResponse.json({ error: "Mint failed", details: String(error) }, { status: 500 });
+    const isDev = process.env.NODE_ENV === "development";
+    return NextResponse.json(
+      { error: "Mint failed", ...(isDev && { details: String(error) }) },
+      { status: 500 }
+    );
   }
 }

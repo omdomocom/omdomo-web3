@@ -1,5 +1,22 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+
+// ── Rate limiter en memoria (10 req/min por IP) ───────────────────────────
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 10;
+const RATE_WINDOW_MS = 60_000;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
 import {
   AGENTS,
   COORDINATOR_SYSTEM_PROMPT,
@@ -112,10 +129,27 @@ NEXT ACTIONS:
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting por IP
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        { error: "Demasiadas solicitudes. Espera 1 minuto." },
+        { status: 429 }
+      );
+    }
+
     const { message } = await req.json();
 
     if (!message?.trim()) {
       return NextResponse.json({ error: "Message required" }, { status: 400 });
+    }
+
+    // Límite de longitud para prevenir abusos de coste
+    if (message.length > 2000) {
+      return NextResponse.json(
+        { error: "Mensaje demasiado largo (máx. 2000 caracteres)" },
+        { status: 400 }
+      );
     }
 
     // Step 1: Coordinator selects relevant agents

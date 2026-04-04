@@ -7,7 +7,7 @@
 //   Format: JSON
 //   Secret: copy SHOPIFY_WEBHOOK_SECRET from .env.local
 
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createClaim } from "@/lib/claims";
 import { calculateOmmyReward, calculateOmmyBurn } from "@/lib/nft";
@@ -21,7 +21,11 @@ function verifyShopifyWebhook(
   const hash = createHmac("sha256", secret)
     .update(rawBody, "utf8")
     .digest("base64");
-  return hash === hmacHeader;
+  const a = Buffer.from(hash);
+  const b = Buffer.from(hmacHeader);
+  // Longitud diferente → rechazar (timingSafeEqual requiere mismo tamaño)
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
 }
 
 export async function POST(req: NextRequest) {

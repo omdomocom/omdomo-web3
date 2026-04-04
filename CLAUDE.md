@@ -10,7 +10,7 @@ Contexto completo del proyecto para sesiones de Claude Code.
 - Web3 app: web3.omdomo.com (Vercel — Next.js)
 - Token: Ommy Coin en Avalanche Mainnet
 - **Lanzamiento oficial: Junio 2026**
-- Stack: Next.js 15.3.9 (App Router) + Thirdweb v5 + Claude API + Tailwind CSS
+- Stack: Next.js 15.3.9 (App Router) + Thirdweb v5 + Claude API + Tailwind CSS + shadcn/ui
 
 ## Wallets
 
@@ -43,7 +43,7 @@ NEXT_PUBLIC_OWNER_WALLET=             # 0x15Eb18b12979AD8a85041423df4C92de6EF186
 NEXT_PUBLIC_NFT_CONTRACT_FUJI=        # 0xd51de87FbC012b694922036C30E5C82e16594958
 NEXT_PUBLIC_NFT_CONTRACT_MAINNET=     # ⏳ Pendiente
 MINTER_PRIVATE_KEY=                   # Private key del minter wallet (0x648FD67...)
-SHOPIFY_WEBHOOK_SECRET=               # HMAC secret del webhook Shopify
+SHOPIFY_WEBHOOK_SECRET=               # HMAC secret del webhook Shopify (OBLIGATORIO en prod)
 RESEND_API_KEY=                       # Resend para emails transaccionales
 EMAIL_FROM=                           # "Om Domo <noreply@omdomo.com>"
 NEXT_PUBLIC_APP_URL=                  # https://web3.omdomo.com
@@ -72,39 +72,54 @@ REDIS_URL=                            # redis://... — Redis Cloud (claims pers
 ## Estructura de Archivos
 
 ```
+next.config.ts                        # Security headers HTTP + remotePatterns next/image
 public/
 ├── logo-negro.png                    # Logo Om Domo original (negro sobre blanco)
 └── logo-blanco.png                   # Logo invertido para uso sobre fondos oscuros
 
 src/
 ├── app/
-│   ├── page.tsx                      # Root: LandingPage pública + Dashboard dinámico
-│   ├── layout.tsx                    # ThirdwebProvider + Playfair Display font + metadata
-│   ├── globals.css                   # Tailwind + sistema dual dark/cream + shimmer-omdomo
+│   ├── page.tsx                      # Root: LandingPage pública
+│   ├── layout.tsx                    # ThirdwebProvider + TooltipProvider + Playfair Display
+│   ├── globals.css                   # Tailwind + shadcn tokens (purple/space) + dual dark/cream
 │   ├── claim/page.tsx                # Página claim NFT (dynamic import)
 │   ├── drops/page.tsx                # Página drops con countdown
+│   ├── dashboard/page.tsx            # Dashboard Web3 completo
+│   ├── nft/page.tsx                  # Colección NFT + rareza + Guardianes
 │   └── api/
-│       ├── agent/route.ts            # Multi-agent Claude API (coordinator + 5 agentes)
-│       ├── shopify/webhook/route.ts  # Webhook Shopify → crea claim + envía email
+│       ├── agent/route.ts            # Multi-agent Claude API — rate limit 10 req/min/IP
+│       ├── shopify/webhook/route.ts  # Webhook Shopify → claim + email (HMAC timingSafeEqual)
 │       ├── nft/
 │       │   ├── approve-claim/route.ts
-│       │   ├── mint/route.ts
+│       │   ├── mint/route.ts         # Error details solo en dev (no leak en prod)
 │       │   ├── confirm-claimed/route.ts
 │       │   └── check-claim/route.ts
 │       ├── share/route.ts            # Share-to-earn (+500 OMMY Twitter/IG)
+│       ├── prices/route.ts           # Precios live CoinGecko (cache 60s + fallback mock)
 │       └── burn/stats/route.ts       # Estadísticas de burn dinámicas
 ├── components/
-│   ├── LandingPage.tsx               # Landing pública completa (ver secciones abajo)
-│   ├── Dashboard.tsx                 # Layout 3 columnas (Wallet|Chat|Roadmap)
+│   ├── LandingPage.tsx               # Landing pública completa (12 secciones)
+│   ├── Dashboard.tsx                 # Layout tabs: Overview|NFT|dApp|Finanzas|DAO|Social|Perfil|AI
+│   ├── ProfilePanel.tsx              # Perfil usuario: avatar, bio, 12 temas de fondo
+│   ├── CommunityPanel.tsx            # Feed público + mensajes privados 1:1
 │   ├── ChatInterface.tsx             # Chat con Coordinator AI
 │   ├── AgentsPanel.tsx               # Lista de 5 agentes especializados
 │   ├── AgentCard.tsx                 # Card individual de agente
-│   ├── WalletPanel.tsx               # Connect wallet + balance OMMY
+│   ├── WalletPanel.tsx               # Connect wallet + balance OMMY + AVAX
 │   ├── RoadmapPanel.tsx              # 5 fases del roadmap
-│   ├── TokenomicsPanel.tsx           # Stats live de tokenomics
+│   ├── TokenomicsPanel.tsx           # Stats live tokenomics + proyección precio
+│   ├── CryptoPanel.tsx               # Precios BTC/ETH/AVAX/XRP/OMMY + sparklines SVG
+│   ├── NFTCollectionPanel.tsx        # Colección NFT con flip cards + rareza
+│   ├── GamificationPanel.tsx         # Niveles XP + badges + misiones diarias
+│   ├── PurchasesPanel.tsx            # Compras + funnel conversión
+│   ├── DAOPanel.tsx                  # Propuestas + votación (+200 OMMY)
+│   ├── InviteFriendPanel.tsx         # Referral link + tiers de recompensa
+│   ├── SocialCarousel.tsx            # Carrusel infinito RRSS (Framer Motion)
 │   ├── ClaimPageClient.tsx           # Flow 4 pasos: lookup→connect→mint→share
 │   ├── SpaceBackground.tsx           # Canvas: estrellas interactivas + gravedad cursor
 │   └── TestPurchasePanel.tsx         # Dev-only: simula compra Shopify
+│   └── ui/                           # shadcn/ui: badge, button, card, progress,
+│                                     #   scroll-area, separator, tabs, tooltip
 ├── lib/
 │   ├── thirdweb.ts                   # Clientes Thirdweb + getOmmyContract()
 │   ├── nft.ts                        # getNFTContract() + rarity system
@@ -124,70 +139,64 @@ src/
 | `/nft` | Colección NFT completa — rareza, 4 tipos (carrusel), Guardianes (carrusel), countdown |
 | `/claim` | Claim NFT tras compra — lookup por Order ID o email |
 | `/drops` | Drops limitados con countdown a Junio 2026 |
-| `/dashboard` | Dashboard 3 columnas: Wallet + Chat AI + Roadmap |
+| `/dashboard` | Dashboard completo: Wallet + 8 tabs + Chat AI + Comunidad + Perfil |
 
-## Componentes internos de LandingPage.tsx
+## Dashboard — Tabs
 
-```
-HeroLogo             # Logo Om Domo 164px + anillos ripple + glow pulsante + badge "Web3 Ecosystem"
-OmDomoLogo           # Logo pequeño reutilizable (nav, footer) con prop showStars
-DonutChart           # SVG puro — distribución supply tokenomics
-SocialsCarousel      # Carrusel infinito Framer Motion con logos oficiales RRSS
-EcosistemaSection    # 6 nodos interactivos (Tienda, NFTs, OMMY, DAO, dApp, DEX)
-PreCompraSection     # Sección pre-compra OMMY (10% supply, lock 30d)
-ProyectosSustentables  # 6 cards: moda sostenible, ropa reciclada, CO2, etc.
-GuiasWeb3Accordion   # Accordion integrado en "Cómo funciona": wallet, glosario, dashboard
-ComunidadDev         # GitHub + Discord + feedback form
-```
+| Tab | Contenido |
+|-----|-----------|
+| Overview | Stats globales + compras recientes + gamificación |
+| Mi Colección | NFTs con flip cards + rareza + slots bloqueados |
+| dApp | Herramientas: Claim, Drops, Staking, Tienda, Links rápidos |
+| Finanzas | Precios live crypto + tokenomics OMMY |
+| DAO | Propuestas activas + votación + +200 OMMY |
+| Comunidad | Feed público + mensajes privados 1:1 |
+| Mi Perfil | Avatar, bio, 12 temas de fondo |
+| AI Coordinator | Chat multi-agente Claude |
 
-## Componentes de /nft (src/app/nft/page.tsx)
-
-```
-HolographicCard      # Carta NFT 3D interactiva (mouse tilt + glow)
-NFTTypeCard          # Card de tipo NFT (Genesis/Founder/Community/Standard)
-GuardianCard         # Card Guardián de la Conciencia (hover reveal)
-ScrollCarousel       # Carrusel con scroll-snap + botones prev/next + dots activos
-Countdown            # Countdown live hasta Jun 2026
-```
-
-## Secciones Landing (web3.omdomo.com) — Estado
+## Temas de Fondo Dashboard (12)
 
 ```
-✅ Hero             — SpaceBackground canvas + HeroLogo + "Om Domo" shimmer+float + badge testnet
-✅ Stats bar        — contadores animados
-✅ Cómo funciona    — 3 pasos (cream) + Guías Web3 accordion integrado al final
-✅ Rewards          — gamificación multi-plataforma (Twitter, TikTok, Instagram, Threads)
-✅ Tokenomics       — DonutChart SVG + mecánicas de burn
-✅ Pre-compra OMMY  — 10% supply, lock 30d, explicación del mecanismo
-✅ Ecosistema       — 6 nodos interactivos (dark): Tienda, NFTs→/nft, OMMY, DAO, dApp, DEX
-✅ Proyectos Sustentables — 6 cards (cream)
-✅ Testnet Fuji     — dark
-✅ Comunidad + RRSS — carrusel logos oficiales + ComunidadDev (cream)
-✅ Waitlist         — form email (cream)
-✅ Footer           — dark, logo real, redes sociales
+Oscuros:   Espacio 🌌 | Nebula 🔮 | Océano 🌊 | Aurora ✨ | Cosmos 💫 | Midnight 🌑
+Claros:    Solar ☀️  | Nubes ☁️  | Montañas 🏔️ | Bosque 🌲 | Amanecer 🌅 | Desierto 🏜️
 ```
-
-## Página /nft (web3.omdomo.com/nft) — Estado
-
-```
-✅ Hero             — HolographicCard 3D + 6 beneficios NFT
-✅ Sistema rareza   — 4 tiers con barras progress + gradient visual
-✅ 4 tipos NFT      — ScrollCarousel draggable (Genesis/Founder/Community/Standard)
-✅ Guardianes       — ScrollCarousel draggable (6 arquetipos, hover reveal, countdown)
-✅ Footer           — links a Inicio, Drops, Reclamar, Tienda
-```
-
-⏳ Pre-compra:      Mecanismo de pago real (actualmente informacional)
-⏳ Referral system  on-chain (Fase 2)
-⏳ Staking NFT      50 OMMY/día (Fase 2)
+- Guardados en `localStorage` junto al perfil del usuario
+- Los temas claros aplican glow de color a 18% opacidad sobre fondo oscuro (legibilidad preservada)
 
 ## Design System
 
 - **Tema dual**: secciones dark (`--dark-bg: #0c0906`) + cream (`--cream-bg: #f5f0e8`)
+- **shadcn/ui**: tokens CSS mapeados a purple/space (`--primary: #7c3aed`, `--accent: #0891b2`)
 - **Tipografía**: Playfair Display (serif) via `next/font` + system sans-serif
 - **Clases clave**: `.section-dark`, `.section-cream`, `.glass`, `.glass-light`, `.gradient-text`, `.gradient-text-gold`, `.card-cream-hover`
 - **Animación shimmer**: `.shimmer-omdomo` — sweep de luz sobre "Om Domo" en hero
 - **SpaceBackground**: canvas con gravedad en cursor, drift orgánico, estrellas fugaces
+- **tailwind.config.ts**: colores shadcn como CSS vars + `darkMode: "class"`
+
+## Seguridad
+
+### Medidas implementadas ✅
+- **Shopify webhook**: HMAC-SHA256 verificado con `timingSafeEqual` (previene timing attacks)
+- **Rate limiting** en `/api/agent`: 10 req/min por IP (in-memory Map)
+- **Límite mensaje AI**: máx. 2000 caracteres (previene ataques de coste)
+- **Wallet validation**: regex `^0x[a-fA-F0-9]{40}$` en todos los endpoints
+- **Error leak**: `details` de error solo en `NODE_ENV=development`, nunca en producción
+- **Security headers HTTP** via `next.config.ts`:
+  - `X-Frame-Options: SAMEORIGIN` (anti-clickjacking)
+  - `X-Content-Type-Options: nosniff`
+  - `Strict-Transport-Security` (HSTS 1 año + preload)
+  - `Content-Security-Policy` (permite Thirdweb, Avalanche RPCs, CoinGecko)
+  - `Permissions-Policy` (bloquea cámara, micrófono, geolocalización)
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+- **Dependencias**: 0 vulnerabilidades (npm audit fix aplicado 2026-04-04)
+- **Double-claim prevention**: Redis key `share:{wallet}:{orderId}:{platform}` previene re-claim
+
+### Pendiente reforzar ⚠️
+- `SHOPIFY_WEBHOOK_SECRET` debe estar configurado en Vercel (sin él el webhook acepta sin verificar)
+- `/api/agent` no requiere auth — considerar API key en Fase 2 para proteger coste Anthropic
+- `/api/share` sin verificación de que el post existe realmente (honesty system por ahora)
+- Rotar `THIRDWEB_SECRET_KEY` antes del lanzamiento mainnet
+- `MINTER_PRIVATE_KEY` — asegurar que solo tiene AVAX suficiente para gas (wallet mínima)
 
 ## Claims — Redis Schema
 
@@ -195,6 +204,8 @@ Countdown            # Countdown live hasta Jun 2026
 claim:{id}              → JSON del Claim completo
 order-index:{orderId}   → array de claim IDs por orden Shopify
 email-index:{email}     → array de claim IDs por email
+share:{wallet}:{orderId}:{platform} → ShareRecord (anti-double-claim)
+shares:wallet:{wallet}  → array de share keys por wallet
 ```
 
 Fallback: si `REDIS_URL` no está configurado → usa Map en memoria con warning en consola.
@@ -256,6 +267,7 @@ $0.003 (2026) → $0.01 (2027) → $0.035 (2028) → $0.10 (2029) → $0.25 (203
 ## Equipo de Agentes AI
 
 API: Claude (claude-opus-4-6) — `src/lib/agents/definitions.ts`
+Rate limit: 10 req/min/IP — mensaje máx. 2000 chars
 
 | Agente | Especialidad |
 |--------|-------------|
@@ -266,7 +278,7 @@ API: Claude (claude-opus-4-6) — `src/lib/agents/definitions.ts`
 | Community Architect | DAO, Discord/Telegram, ambassadors |
 | Creative Director | NFT art, fashion, drops |
 
-Flow: `POST /api/agent` → selectAgents() → callAgent() en paralelo → coordinatorSynthesize()
+Flow: `POST /api/agent` → rate limit check → selectAgents() → callAgent() paralelo → coordinatorSynthesize()
 
 ## Roadmap 5 Fases
 
@@ -288,34 +300,31 @@ Flow: `POST /api/agent` → selectAgents() → callAgent() en paralelo → coord
 
 ## Implementado ✅
 
-- Landing pública con 12 secciones (dark/cream dual theme, GSAP, Framer Motion)
-- Página `/nft` completa — rareza, 4 tipos NFT + Guardianes en carrusel (ScrollCarousel)
-- `ScrollCarousel`: scroll-snap nativo + prev/next arrows + dots activos animados
-- `EcosistemaSection`: 6 nodos interactivos con sub-contenido específico por nodo
-  - DAO: progress tracker visual 5 fases + links GitHub/Discord
-  - dApp: grid 8 actividades (Running, Yoga, Ciclismo, Natación, Patines, Meditación, Arte→NFT, Música)
-  - DEX: Trader Joe / Pangolin / Uniswap con incentivos
-- Gamificación multi-plataforma: Twitter/X, TikTok, Instagram, Threads (+500 OMMY c/u)
-- Reto combinado Meditación+Running con bonus OMMY
-- Guías Web3 integradas en sección "Cómo funciona" (accordion compacto)
-- Logo real Om Domo — `public/logo-negro.png` + `public/logo-blanco.png`
-- `HeroLogo`: anillos ripple + glow pulsante + badge "Web3 Ecosystem"
-- `SpaceBackground`: canvas interactivo con gravedad cursor + estrellas fugaces
-- `DonutChart`: SVG puro para distribución supply
-- `SocialsCarousel`: carrusel infinito Framer Motion (6 redes sociales)
-- `.shimmer-omdomo` + float animation sobre "Om Domo" en hero
+- Landing pública con 12 secciones (dark/cream dual theme, Framer Motion)
+- Página `/nft` completa — rareza, 4 tipos NFT + Guardianes en ScrollCarousel
+- Dashboard `/dashboard` con 8 tabs, sidebar doble, SpaceBackground
+- `ProfilePanel`: avatar emoji/foto, username, bio, 12 temas de fondo (guardado localStorage)
+- `CommunityPanel`: feed público con likes + mensajes privados 1:1 con chat
+- `CryptoPanel`: BTC/ETH/AVAX/XRP/OMMY con sparklines SVG, refresh 60s
+- `GamificationPanel`: 6 niveles XP, 8 badges, 5 misiones diarias
+- `NFTCollectionPanel`: grid con flip cards 3D, rarity badges, locked slots
+- `DAOPanel`: 4 propuestas, votación, +200 OMMY reward
+- `InviteFriendPanel`: referral link, tiers, compartir en Twitter/WhatsApp
+- `SocialCarousel`: carrusel infinito 8 redes sociales (Framer Motion)
+- shadcn/ui instalado: badge, button, card, progress, scroll-area, separator, tabs, tooltip
+- Tailwind config con tokens shadcn mapeados al tema purple/space
+- `next.config.ts` con security headers completos (CSP, HSTS, X-Frame-Options, etc.)
+- Shopify webhook HMAC con `timingSafeEqual` (anti timing-attack)
+- Rate limiting `/api/agent`: 10 req/min/IP
+- 0 vulnerabilidades npm (audit fix 2026-04-04)
 - Redis Cloud (ioredis) — claims persistentes con fallback in-memory
 - Email automático via Resend al cliente tras cada compra
-- Shopify webhook: Pago de pedido → mint NFT → email
-- Claim page `/claim` — flow 4 pasos: lookup → connect wallet → mint → share
-- Share-to-earn `/api/share` (+500 OMMY por red social)
-- Drops page `/drops` con countdown a Junio 2026
+- Share-to-earn `/api/share` (+500 OMMY, anti double-claim)
 - NFT rarity system (Genesis/Founder/Community/Standard)
 - `src/lib/tokenomics.ts` — fuente única de verdad tokenomics
 - TestPurchasePanel dev-only (NODE_ENV=development)
-- Next.js 15.3.9 — parcheado CVE-2025-6647
 - GitHub → Vercel auto-deploy en push a main
-- Discord URL: https://discord.gg/xXezFXnpaX
+- Discord: https://discord.gg/xXezFXnpaX
 
 ## Pendiente para Lanzamiento ⏳
 
@@ -323,10 +332,12 @@ Flow: `POST /api/agent` → selectAgents() → callAgent() en paralelo → coord
 - `NEXT_PUBLIC_NFT_CONTRACT_MAINNET` + `NEXT_PUBLIC_USE_MAINNET=true`
 - Crear producto Drop #1 Genesis en Shopify (100 hoodies, €89)
 - Probar flujo completo end-to-end con compra real
-- Rotar THIRDWEB_SECRET_KEY
+- Configurar `SHOPIFY_WEBHOOK_SECRET` en Vercel (actualmente sin verificar en prod)
+- Rotar `THIRDWEB_SECRET_KEY` antes de mainnet
 - Pre-compra: implementar mecanismo de pago real (actualmente informacional)
 - Referral system on-chain (Fase 2)
 - Staking NFT 50 OMMY/día (Fase 2)
+- Rate limiting `/api/agent` mejorado con Redis (persistente entre instancias)
 
 ## Convenciones de Código
 
@@ -334,11 +345,14 @@ Flow: `POST /api/agent` → selectAgents() → callAgent() en paralelo → coord
 - **Thirdweb v5** — siempre usar `prepareContractCall`, `sendTransaction`, `useReadContract`
 - **SSR safety** — cualquier componente con Thirdweb: `"use client"` + `dynamic(..., {ssr: false})`
 - **Tailwind dual theme** — usar variables CSS (`var(--dark-bg)`, `var(--cream-bg)`) + clases `.section-dark` / `.section-cream`
+- **shadcn tokens** — `bg-background`, `text-foreground`, `bg-primary`, etc. apuntan al tema purple/space
 - **Agentes en español** — todos los system prompts y respuestas en español
 - **Claims async** — todas las funciones de claims son async (Redis)
 - Burn amounts siempre usar `BigInt()` no literales `1n` (compatibilidad ES target)
 - Resend: lazy init con `getResend()` — retorna null si no hay API key (no rompe build)
 - Imágenes locales desde `/public/` usando `next/image` con `priority` en hero
+- Error details en API routes: solo exponer en `NODE_ENV === "development"`
+- Security headers: cualquier nueva ruta API hereda los headers de `next.config.ts`
 
 ## Mercado Objetivo
 
