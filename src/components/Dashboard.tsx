@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Image, Zap, TrendingUp, Vote,
   Bot, Users, ShoppingBag, Flame, Coins,
-  ChevronRight, ExternalLink, Menu, X,
+  ChevronRight, ExternalLink, Menu, X, UserCircle, MessagesSquare,
 } from "lucide-react";
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { client } from "@/lib/thirdweb";
@@ -23,16 +23,20 @@ import { SocialCarousel }       from "@/components/SocialCarousel";
 import { RoadmapPanel }         from "@/components/RoadmapPanel";
 import { TokenomicsPanel }      from "@/components/TokenomicsPanel";
 import { WalletPanel }          from "@/components/WalletPanel";
+import { ProfilePanel, BG_THEMES, loadProfile, UserAvatar } from "@/components/ProfilePanel";
+import { CommunityPanel }       from "@/components/CommunityPanel";
 
-type TabId = "overview" | "nft" | "dapp" | "finanzas" | "dao" | "ai";
+type TabId = "overview" | "nft" | "dapp" | "finanzas" | "dao" | "ai" | "perfil" | "social";
 
 const TABS: { id: TabId; label: string; icon: React.ReactNode; badge?: string }[] = [
-  { id: "overview",  label: "Overview",   icon: <LayoutDashboard size={15} /> },
-  { id: "nft",       label: "Mi Colección",icon: <Image size={15} /> },
-  { id: "dapp",      label: "dApp",        icon: <Zap size={15} /> },
-  { id: "finanzas",  label: "Finanzas",    icon: <TrendingUp size={15} /> },
-  { id: "dao",       label: "DAO",         icon: <Vote size={15} />, badge: "1" },
-  { id: "ai",        label: "AI Coordinator", icon: <Bot size={15} /> },
+  { id: "overview",  label: "Overview",      icon: <LayoutDashboard size={15} /> },
+  { id: "nft",       label: "Mi Colección",  icon: <Image size={15} /> },
+  { id: "dapp",      label: "dApp",          icon: <Zap size={15} /> },
+  { id: "finanzas",  label: "Finanzas",      icon: <TrendingUp size={15} /> },
+  { id: "dao",       label: "DAO",           icon: <Vote size={15} />, badge: "1" },
+  { id: "social",    label: "Comunidad",     icon: <MessagesSquare size={15} /> },
+  { id: "perfil",    label: "Mi Perfil",     icon: <UserCircle size={15} /> },
+  { id: "ai",        label: "AI Coordinator",icon: <Bot size={15} /> },
 ];
 
 // ─── DApp Panel (inline) ──────────────────────────────────────────────────
@@ -148,13 +152,33 @@ function OverviewPanel({ address }: { address?: string }) {
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [bgTheme, setBgTheme] = useState("space");
+  const [myProfile, setMyProfile] = useState(loadProfile());
   const account = useActiveAccount();
   const address = account?.address;
+
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const p = loadProfile();
+    setMyProfile(p);
+    setBgTheme(p.bgTheme || "space");
+    const handler = (e: Event) => {
+      const updated = (e as CustomEvent).detail;
+      setMyProfile(updated);
+      setBgTheme(updated.bgTheme || "space");
+    };
+    window.addEventListener("omdomo-profile-update", handler);
+    return () => window.removeEventListener("omdomo-profile-update", handler);
+  }, []);
+
+  const theme = BG_THEMES[bgTheme] ?? BG_THEMES.space;
 
   const tabContent: Record<TabId, React.ReactNode> = {
     overview:  <OverviewPanel address={address} />,
     nft:       <NFTCollectionPanel walletAddress={address} />,
     dapp:      <DAppPanel />,
+    perfil:    <ProfilePanel walletAddress={address} onThemeChange={setBgTheme} />,
+    social:    <CommunityPanel />,
     finanzas:  (
       <div className="grid lg:grid-cols-2 gap-6">
         <div>
@@ -190,10 +214,17 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07091a] text-slate-100 flex flex-col overflow-hidden relative">
-      {/* Space background — fixed, fills screen */}
-      <div className="fixed inset-0 z-0">
-        <SpaceBackground />
+    <div className={`min-h-screen text-slate-100 flex flex-col overflow-hidden relative ${theme.bg}`}>
+      {/* Fixed background layers */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        {/* Canvas star field */}
+        {theme.showCanvas && <SpaceBackground />}
+        {/* Colored glow for light-inspired themes (radial, low opacity) */}
+        {theme.glow && (
+          <div
+            className={`absolute inset-0 bg-gradient-to-br ${theme.glow} opacity-[0.18]`}
+          />
+        )}
       </div>
 
       {/* Content — above background */}
@@ -233,6 +264,13 @@ export function Dashboard() {
 
             {/* Right: status + wallet + mobile menu */}
             <div className="flex items-center gap-3 ml-auto">
+              {/* Avatar mini — click → perfil tab */}
+              <button
+                onClick={() => setActiveTab("perfil")}
+                className={`flex-shrink-0 p-0.5 rounded-xl border-2 transition-all ${activeTab === "perfil" ? "border-purple-500" : "border-slate-700/40 hover:border-purple-500/50"}`}
+              >
+                <UserAvatar profile={myProfile} size="sm" />
+              </button>
               <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                 Fuji live
@@ -286,6 +324,19 @@ export function Dashboard() {
 
           {/* Left sidebar */}
           <aside className="hidden xl:flex flex-col w-56 flex-shrink-0 border-r border-slate-800/40 bg-slate-950/30 backdrop-blur-sm overflow-y-auto p-3 gap-3">
+            {/* Mini profile card */}
+            <button
+              onClick={() => setActiveTab("perfil")}
+              className="glass rounded-xl p-3 border border-slate-700/30 hover:border-purple-500/30 transition-all flex items-center gap-2.5 text-left"
+            >
+              <UserAvatar profile={myProfile} size="sm" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-slate-200 truncate">
+                  {myProfile.username || (address ? `${address.slice(0, 6)}…` : "Mi Perfil")}
+                </p>
+                <p className="text-xs text-slate-600">Editar perfil →</p>
+              </div>
+            </button>
             <WalletPanel />
 
             {/* Quick nav links */}

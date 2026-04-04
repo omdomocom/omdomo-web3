@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Playfair_Display, Geist } from "next/font/google";
 import "./globals.css";
 import { ThirdwebProvider } from "thirdweb/react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -13,19 +14,19 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Om Domo | Ommy Coin Dashboard",
-  description: "AI-powered coordinator for the Ommy Coin ecosystem on Avalanche",
+  title: "Om Domo | Spiritual Web3 Lifestyle",
+  description: "Compra. Gana NFTs y OMMY Coin. Forma parte de la comunidad Web3 más consciente.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
+    <html lang="es" className={cn("dark font-sans", geist.variable, playfair.variable)}>
       <body>
-        <ThirdwebProvider>{children}</ThirdwebProvider>
+        <ThirdwebProvider>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        </ThirdwebProvider>
       </body>
     </html>
   );
