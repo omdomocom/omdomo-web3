@@ -24,7 +24,10 @@ import { RoadmapPanel }         from "@/components/RoadmapPanel";
 import { TokenomicsPanel }      from "@/components/TokenomicsPanel";
 import { WalletPanel }          from "@/components/WalletPanel";
 import { ProfilePanel, BG_THEMES, loadProfile, UserAvatar } from "@/components/ProfilePanel";
-import { CommunityPanel }       from "@/components/CommunityPanel";
+import { CommunityPanel }           from "@/components/CommunityPanel";
+import { NotificationsDropdown }    from "@/components/NotificationsDropdown";
+import { OnboardingChecklist }      from "@/components/OnboardingChecklist";
+import { ActivityTimeline }         from "@/components/ActivityTimeline";
 
 type TabId = "overview" | "nft" | "dapp" | "finanzas" | "dao" | "ai" | "perfil" | "social";
 
@@ -106,45 +109,164 @@ function DAppPanel() {
   );
 }
 
-// ─── Overview Panel (inline) ─────────────────────────────────────────────
+// ─── Animated stat counter ───────────────────────────────────────────────
+function AnimatedNumber({ value, prefix = "", suffix = "" }: { value: string; prefix?: string; suffix?: string }) {
+  return (
+    <motion.span
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {prefix}{value}{suffix}
+    </motion.span>
+  );
+}
+
+// ─── Drop countdown (persistente) ─────────────────────────────────────────
+function DropCountdown() {
+  const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 });
+  useEffect(() => {
+    const DROP_DATE = new Date("2026-06-15T10:00:00Z").getTime();
+    function update() {
+      const diff = DROP_DATE - Date.now();
+      if (diff <= 0) { setTime({ d: 0, h: 0, m: 0, s: 0 }); return; }
+      setTime({
+        d: Math.floor(diff / 86400000),
+        h: Math.floor((diff % 86400000) / 3600000),
+        m: Math.floor((diff % 3600000) / 60000),
+        s: Math.floor((diff % 60000) / 1000),
+      });
+    }
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="flex items-center gap-1.5">
+      {[
+        { v: time.d, u: "d" }, { v: time.h, u: "h" },
+        { v: time.m, u: "m" }, { v: time.s, u: "s" },
+      ].map(({ v, u }) => (
+        <div key={u} className="flex items-baseline gap-0.5">
+          <span className="text-sm font-black text-slate-100 tabular-nums w-7 text-center">
+            {String(v).padStart(2, "0")}
+          </span>
+          <span className="text-xs text-slate-600">{u}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Overview Panel ───────────────────────────────────────────────────────
 function OverviewPanel({ address }: { address?: string }) {
   return (
-    <div className="space-y-5">
-      {/* Hero stats */}
+    <div className="space-y-6">
+
+      {/* ── Hero stats ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "OMMY Price",   value: "$0.001",  sub: "Jun 2026",        icon: <Coins size={16} />,       color: "from-purple-500 to-pink-500"  },
-          { label: "NFTs",         value: address ? "1" : "—",  sub: "Colección",  icon: <Image size={16} />,        color: "from-cyan-500 to-blue-500"    },
-          { label: "Supply Burn",  value: "0%",      sub: "de 90% objetivo", icon: <Flame size={16} />,       color: "from-orange-500 to-red-500"   },
-          { label: "Comunidad",    value: "2,000",   sub: "target 2026",     icon: <Users size={16} />,       color: "from-green-500 to-emerald-500"},
-        ].map((s) => (
+          { label: "OMMY Price",    value: "$0.001", sub: "Lanzamiento Jun 2026",  icon: <Coins size={15} />,  color: "from-purple-500 to-pink-500",   glow: "shadow-purple-500/20" },
+          { label: "Mis NFTs",      value: address ? "1" : "—", sub: address ? "Genesis" : "Conecta wallet", icon: <Image size={15} />, color: "from-cyan-500 to-blue-500", glow: "shadow-cyan-500/20" },
+          { label: "OMMY Acumulados",value: address ? "5,320" : "—", sub: address ? "≈ $5.32" : "Conecta wallet", icon: <Coins size={15} />, color: "from-yellow-400 to-amber-500", glow: "shadow-yellow-500/20" },
+          { label: "Supply Quemado",value: "0.001%", sub: "objetivo 90%",          icon: <Flame size={15} />,  color: "from-orange-500 to-red-500",    glow: "shadow-orange-500/20" },
+        ].map((s, i) => (
           <motion.div
             key={s.label}
-            whileHover={{ y: -2 }}
-            className="glass rounded-2xl p-4 border border-slate-700/30"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.06, duration: 0.35 }}
+            whileHover={{ y: -3, scale: 1.02 }}
+            className={`glass rounded-2xl p-4 border border-slate-700/30 hover:border-slate-600/50 transition-all shadow-lg ${s.glow} cursor-default`}
           >
-            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-3`}>
-              {s.icon}
+            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-3 shadow-sm`}>
+              <span className="text-white">{s.icon}</span>
             </div>
-            <p className="text-xl font-black text-slate-100">{s.value}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{s.label}</p>
+            <p className="text-xl font-black text-slate-100">
+              <AnimatedNumber value={s.value} />
+            </p>
+            <p className="text-xs text-slate-400 font-medium mt-0.5">{s.label}</p>
             <p className="text-xs text-slate-700 mt-0.5">{s.sub}</p>
           </motion.div>
         ))}
       </div>
 
-      {/* 2 cols */}
+      {/* ── Drop countdown banner ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+        className="glass rounded-2xl p-4 border border-orange-500/25 bg-gradient-to-r from-orange-900/10 to-red-900/10 flex flex-wrap items-center gap-4"
+      >
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-lg flex-shrink-0">
+            🔥
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-slate-100">Drop #1 Genesis Hoodie</p>
+            <p className="text-xs text-slate-500">100 unidades · €89 · 10,000 OMMY Bonus · 5M OMMY quemados</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 flex-shrink-0">
+          <DropCountdown />
+          <a
+            href="/drops"
+            className="px-3 py-1.5 rounded-xl bg-orange-500/20 border border-orange-500/30 text-xs font-bold text-orange-300 hover:bg-orange-500/30 transition-colors whitespace-nowrap"
+          >
+            Ver drop →
+          </a>
+        </div>
+      </motion.div>
+
+      {/* ── Onboarding checklist ── */}
+      <OnboardingChecklist walletConnected={!!address} />
+
+      {/* ── 2 cols: Actividad + Gamificación ── */}
       <div className="grid lg:grid-cols-2 gap-5">
         <div className="space-y-3">
-          <p className="text-xs text-slate-500 uppercase tracking-wider">Compras recientes</p>
-          <PurchasesPanel />
+          <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">Actividad reciente</p>
+          <div className="glass rounded-2xl p-4 border border-slate-700/30">
+            <ActivityTimeline />
+          </div>
         </div>
         <div className="space-y-3">
-          <p className="text-xs text-slate-500 uppercase tracking-wider">Gamificación</p>
+          <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">Gamificación</p>
           <GamificationPanel ommyBalance={address ? 5320 : 0} />
         </div>
       </div>
+
+      {/* ── Compras recientes (colapsado) ── */}
+      <div className="space-y-3">
+        <p className="text-xs text-slate-500 uppercase tracking-wider font-medium">Compras en omdomo.com</p>
+        <PurchasesPanel />
+      </div>
     </div>
+  );
+}
+
+// ─── Nav drop countdown pill ──────────────────────────────────────────────
+function NavDropPill() {
+  const [t, setT] = useState({ d: 0, h: 0, m: 0 });
+  useEffect(() => {
+    const DROP = new Date("2026-06-15T10:00:00Z").getTime();
+    function update() {
+      const diff = DROP - Date.now();
+      if (diff <= 0) return;
+      setT({
+        d: Math.floor(diff / 86400000),
+        h: Math.floor((diff % 86400000) / 3600000),
+        m: Math.floor((diff % 3600000) / 60000),
+      });
+    }
+    update();
+    const id = setInterval(update, 60000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <a
+      href="/drops"
+      className="hidden lg:flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-xl bg-orange-900/30 border border-orange-500/30 text-orange-300 hover:bg-orange-900/50 transition-colors whitespace-nowrap"
+    >
+      🔥 Drop #1 — {t.d}d {t.h}h {t.m}m
+    </a>
   );
 }
 
@@ -263,7 +385,7 @@ export function Dashboard() {
             </div>
 
             {/* Right: status + wallet + mobile menu */}
-            <div className="flex items-center gap-3 ml-auto">
+            <div className="flex items-center gap-2 ml-auto">
               {/* Avatar mini — click → perfil tab */}
               <button
                 onClick={() => setActiveTab("perfil")}
@@ -271,10 +393,14 @@ export function Dashboard() {
               >
                 <UserAvatar profile={myProfile} size="sm" />
               </button>
+              {/* Notifications bell */}
+              <NotificationsDropdown />
               <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                 Fuji live
               </div>
+              {/* Drop #1 countdown pill */}
+              <NavDropPill />
               <a href="/drops" className="hidden md:flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500/20 transition-colors">
                 <Flame size={11} /> Drops
               </a>
