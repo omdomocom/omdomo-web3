@@ -5,29 +5,28 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Check, Edit3, Wallet, Palette } from "lucide-react";
 
 export interface BgTheme {
-  label:      string;
-  emoji:      string;
-  preview:    string;   // gradient for preview thumbnail
-  bg:         string;   // base bg class on root div
-  glow?:      string;   // optional warm/light glow overlay (fixed, low opacity)
-  showCanvas: boolean;
+  label:       string;
+  emoji:       string;
+  preview:     string;   // gradient for preview thumbnail
+  bg:          string;   // base bg class on root div (fallback colour)
+  animatedBg:  "space" | "clouds" | "ocean" | "lava" | "forest" | "solid";
+  solidColor?: string;   // only used when animatedBg === "solid"
 }
 
 export const BG_THEMES: Record<string, BgTheme> = {
-  // ── Dark space themes ────────────────────────────────────────────────────
-  space:    { label: "Espacio",    emoji: "🌌", preview: "from-[#07091a] to-[#0f1128]",              bg: "bg-[#07091a]",                                                      showCanvas: true  },
-  nebula:   { label: "Nebula",     emoji: "🔮", preview: "from-[#1a0533] via-[#0d0f2e] to-[#05151a]", bg: "bg-gradient-to-br from-[#1a0533] via-[#0d0f2e] to-[#05151a]",    showCanvas: false },
-  ocean:    { label: "Océano",     emoji: "🌊", preview: "from-[#021b3d] via-[#052e4a] to-[#010e1a]", bg: "bg-gradient-to-br from-[#021b3d] via-[#052e4a] to-[#010e1a]",    showCanvas: false },
-  aurora:   { label: "Aurora",     emoji: "✨", preview: "from-[#051a0a] via-[#07091a] to-[#1a0533]", bg: "bg-gradient-to-br from-[#051a0a] via-[#07091a] to-[#1a0533]",    showCanvas: true  },
-  cosmos:   { label: "Cosmos",     emoji: "💫", preview: "from-[#090214] via-[#07091a] to-[#02101a]", bg: "bg-gradient-to-br from-[#090214] via-[#07091a] to-[#02101a]",    showCanvas: true  },
-  midnight: { label: "Midnight",   emoji: "🌑", preview: "from-[#08080f] to-[#111118]",              bg: "bg-gradient-to-br from-[#08080f] to-[#111118]",                   showCanvas: true  },
-  // ── Light-inspired themes (warm dark + colored glow) ────────────────────
-  solar:    { label: "Solar",      emoji: "☀️", preview: "from-[#ffcc40] via-[#ff8c00] to-[#c45000]", bg: "bg-gradient-to-br from-[#1e1000] via-[#120a00] to-[#070400]",    glow: "from-[#ffb400] via-[#ff8c00] to-[#c45000]", showCanvas: false },
-  nubes:    { label: "Nubes",      emoji: "☁️", preview: "from-[#d0e8f8] via-[#90c0e8] to-[#5090c0]", bg: "bg-gradient-to-br from-[#0b1520] via-[#0d1a28] to-[#060d18]",    glow: "from-[#80b8e0] via-[#60a0d0] to-[#3070a0]", showCanvas: false },
-  montanas: { label: "Montañas",   emoji: "🏔️", preview: "from-[#c0d4e8] via-[#7090a8] to-[#405868]", bg: "bg-gradient-to-br from-[#0c1620] via-[#0a1218] to-[#060c12]",   glow: "from-[#708090] via-[#506070] to-[#304050]", showCanvas: true  },
-  bosque:   { label: "Bosque",     emoji: "🌲", preview: "from-[#a8e0b0] via-[#50a860] to-[#206030]", bg: "bg-gradient-to-br from-[#041008] via-[#030c06] to-[#020804]",    glow: "from-[#40a050] via-[#308040] to-[#206030]", showCanvas: false },
-  amanecer: { label: "Amanecer",   emoji: "🌅", preview: "from-[#ffe080] via-[#ff8040] to-[#d04060]", bg: "bg-gradient-to-br from-[#200810] via-[#180608] to-[#0c0404]",    glow: "from-[#ffb040] via-[#ff6040] to-[#c03050]", showCanvas: false },
-  desierto: { label: "Desierto",   emoji: "🏜️", preview: "from-[#f0d890] via-[#d4a040] to-[#a06820]", bg: "bg-gradient-to-br from-[#1c1006] via-[#140c04] to-[#0c0803]",   glow: "from-[#e0a030] via-[#c08020] to-[#805010]", showCanvas: false },
+  // ── Animated themes ──────────────────────────────────────────────────────
+  space:      { label: "Espacio",    emoji: "🌌", preview: "from-[#07091a] to-[#0f1128]",   bg: "bg-[#07091a]",   animatedBg: "space"  },
+  clouds:     { label: "Nubes",      emoji: "☁️",  preview: "from-[#0a1628] to-[#1a3a5c]",  bg: "bg-[#0a1628]",   animatedBg: "clouds" },
+  ocean:      { label: "Océano",     emoji: "🌊",  preview: "from-[#020b18] to-[#031e38]",  bg: "bg-[#020b18]",   animatedBg: "ocean"  },
+  lava:       { label: "Lava",       emoji: "🌋",  preview: "from-[#0e0300] to-[#1a0500]",  bg: "bg-[#0e0300]",   animatedBg: "lava"   },
+  forest:     { label: "Bosque",     emoji: "🌲",  preview: "from-[#010a02] to-[#020e04]",  bg: "bg-[#010a02]",   animatedBg: "forest" },
+  // ── Solid colours ────────────────────────────────────────────────────────
+  midnight:   { label: "Midnight",   emoji: "⬛",  preview: "from-[#09090f] to-[#111118]",  bg: "bg-[#09090f]",   animatedBg: "solid", solidColor: "#09090f" },
+  purpura:    { label: "Púrpura",    emoji: "🟣",  preview: "from-[#180522] to-[#0d0318]",  bg: "bg-[#180522]",   animatedBg: "solid", solidColor: "#180522" },
+  esmeralda:  { label: "Esmeralda",  emoji: "💚",  preview: "from-[#011e0f] to-[#010e08]",  bg: "bg-[#011e0f]",   animatedBg: "solid", solidColor: "#011e0f" },
+  cobre:      { label: "Cobre",      emoji: "🟤",  preview: "from-[#1e0e04] to-[#0f0702]",  bg: "bg-[#1e0e04]",   animatedBg: "solid", solidColor: "#1e0e04" },
+  // ── Light mode ───────────────────────────────────────────────────────────
+  luz:        { label: "Luz",        emoji: "☀️",  preview: "from-[#f5f0e8] to-[#ede5d8]",  bg: "bg-[#f5f0e8]",   animatedBg: "solid", solidColor: "#f5f0e8" },
 };
 
 const EMOJI_AVATARS = ["🧘", "🦁", "🌟", "🔮", "🌊", "🦋", "⚡", "🌺", "🏔️", "🐉", "🎯", "💎"];
@@ -281,18 +280,18 @@ export function ProfilePanel({
                 <Palette size={11} /> Fondo del dashboard
               </p>
 
-              {/* Dark themes group */}
-              <p className="text-xs text-slate-600 px-0.5">Oscuros</p>
+              {/* Animated themes */}
+              <p className="text-xs text-slate-600 px-0.5">Animados</p>
               <div className="grid grid-cols-3 gap-2">
-                {Object.entries(BG_THEMES).filter(([,t]) => !t.glow).map(([key, theme]) => (
+                {Object.entries(BG_THEMES).filter(([,t]) => t.animatedBg !== "solid").map(([key, theme]) => (
                   <ThemeButton key={key} themeKey={key} theme={theme} active={draft.bgTheme === key} onSelect={applyTheme} />
                 ))}
               </div>
 
-              {/* Light-inspired themes group */}
-              <p className="text-xs text-slate-600 px-0.5 pt-1">Claros / Naturales</p>
-              <div className="grid grid-cols-3 gap-2">
-                {Object.entries(BG_THEMES).filter(([,t]) => !!t.glow).map(([key, theme]) => (
+              {/* Solid colours */}
+              <p className="text-xs text-slate-600 px-0.5 pt-1">Colores lisos</p>
+              <div className="grid grid-cols-4 gap-2">
+                {Object.entries(BG_THEMES).filter(([,t]) => t.animatedBg === "solid").map(([key, theme]) => (
                   <ThemeButton key={key} themeKey={key} theme={theme} active={draft.bgTheme === key} onSelect={applyTheme} />
                 ))}
               </div>

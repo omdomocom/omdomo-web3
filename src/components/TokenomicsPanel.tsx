@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Flame, TrendingUp, Users, Coins } from "lucide-react";
+import { Flame, Users, Coins } from "lucide-react";
 import {
   SUPPLY,
   PRICE,
-  PRICE_PROJECTION,
   WALLET_DISTRIBUTION,
   BURN_SCHEDULE,
 } from "@/lib/tokenomics";
@@ -24,7 +23,7 @@ const CURRENT_YEAR = 2026;
 
 export function TokenomicsPanel() {
   const [burnStats, setBurnStats] = useState<BurnStats | null>(null);
-  const [expanded, setExpanded] = useState<"wallets" | "schedule" | null>(null);
+  const [expanded, setExpanded] = useState<"wallets" | null>(null);
 
   useEffect(() => {
     fetch("/api/burn/stats")
@@ -36,7 +35,7 @@ export function TokenomicsPanel() {
   const burnPercent = burnStats?.burnPercent ?? 0;
   const currentSupply = burnStats?.currentSupply ?? SUPPLY.initial;
   const totalOrders = burnStats?.breakdown.totalOrders ?? 0;
-  const currentPrice = PRICE_PROJECTION[CURRENT_YEAR] ?? PRICE.launch;
+  const currentPrice = PRICE.launch;
 
   // Usuarios estimados este año
   const thisYearSchedule = BURN_SCHEDULE.find((b) => b.year === CURRENT_YEAR);
@@ -155,40 +154,6 @@ export function TokenomicsPanel() {
         )}
       </div>
 
-      {/* Proyección precio — expandible */}
-      <div className="glass rounded-xl overflow-hidden">
-        <button
-          onClick={() => setExpanded(expanded === "schedule" ? null : "schedule")}
-          className="w-full flex items-center justify-between p-3 text-xs text-slate-400 hover:text-slate-200 transition-colors"
-        >
-          <span className="flex items-center gap-1.5">
-            <TrendingUp size={12} className="text-green-400" />
-            Proyección precio & usuarios
-          </span>
-          <span className="text-slate-600">{expanded === "schedule" ? "▲" : "▼"}</span>
-        </button>
-        {expanded === "schedule" && (
-          <div className="px-3 pb-3 space-y-1.5 animate-fade-in">
-            {BURN_SCHEDULE.map((s) => (
-              <div key={s.year} className={`flex items-center gap-2 text-xs py-1.5 px-2 rounded-lg ${s.year === CURRENT_YEAR ? "bg-purple-900/20 border border-purple-500/20" : ""}`}>
-                <span className={`font-mono w-9 flex-shrink-0 ${s.year === CURRENT_YEAR ? "text-purple-300 font-bold" : "text-slate-500"}`}>
-                  {s.year}
-                </span>
-                <span className="text-green-400 w-14 flex-shrink-0">
-                  ${(PRICE_PROJECTION[s.year] ?? PRICE.launch).toFixed(4)}
-                </span>
-                <span className="text-slate-500 flex items-center gap-1">
-                  <Users size={9} />
-                  {s.users.toLocaleString()}
-                </span>
-                <span className="text-orange-400 ml-auto">
-                  -{(s.burned / 1e9).toFixed(1)}B
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
