@@ -14,11 +14,28 @@ Contexto completo del proyecto para sesiones de Claude Code.
 
 ## Wallets
 
+### Operativas
 | Rol | Dirección |
 |-----|-----------|
 | Owner / Holder Ommy Coin | `0x15Eb18b12979AD8a85041423df4C92de6EF186f9` |
 | Deployer / Minter (server minter Fuji) | `0x648FD67c26E607324B860d95b2ee8834EE30b146` |
 | Deployer Thirdweb managed | `0x54E50e0eF3B690735161508374a4c5967AF49707` |
+| NFTs / Personal MetaMask | `0xF7B9Ca5A0Da3fB83CB3a980Db215f47D456317cE` |
+
+### Distribución Tokenomics (MetaMask — misma dirección Mainnet + Fuji)
+| Cajón | % | OMMY | Dirección |
+|-------|---|------|-----------|
+| 🔥 Burn permanente | 25% | 7,494,811,450 | `0x000000000000000000000000000000000000dEaD` |
+| 🌱 Ecosistema & Rewards | 25% | 7,494,811,450 | `0xF49FBE7764932c5Ca95f0Da80F54C3C65C6ec294` |
+| 💧 Liquidez DEX | 15% | 4,496,886,870 | `0x9EE85AE6D167bb5737aB85407088E766237Ed38a` |
+| 🔒 Pre-compra (lock 30d) | 10% | 2,997,924,580 | `0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2` |
+| 👥 Equipo (4yr vesting) | 10% | 2,997,924,580 | `0xF8099E1cFc08FE7845188e5d77d70fedCd40802c` ✅ Safe 2/2 |
+| 📣 Marketing | 7% | 2,098,547,206 | `0x1f1a22351F1CD24f5aaF70AA72F130Ec52Fa7c06` ✅ Safe 2/2 |
+| 🏛️ DAO Treasury | 5% | 1,498,962,290 | `0x6d7d88dBC7266Cfd9F5BF6B2324372eA9Cb70867` ✅ Safe 2/2 |
+| 🎁 Reserva Drops | 3% | 899,377,374 | `0x15137EF263D78353458B57Bcb60b210AF4c827Bc` |
+| 🔥 Burn controlado (drops/eventos) | — | — | `0x109706Ff57E7f83a51A691C5BA8Beb4C190C6aac` |
+
+> Safe multisig configurados en app.safe.global (Avalanche). Owners: 0x15Eb... (tú) + 0x490F... (padre). Threshold 2/2.
 
 ## Contratos On-Chain
 
@@ -105,9 +122,11 @@ src/
 │   ├── ChatInterface.tsx             # Chat con Coordinator AI
 │   ├── AgentsPanel.tsx               # Lista de 5 agentes especializados
 │   ├── AgentCard.tsx                 # Card individual de agente
-│   ├── WalletPanel.tsx               # Connect wallet + balance OMMY + AVAX
-│   ├── RoadmapPanel.tsx              # 5 fases del roadmap
-│   ├── TokenomicsPanel.tsx           # Stats live tokenomics + proyección precio
+│   ├── WalletPanel.tsx               # Connect wallet + balance OMMY/AVAX + toggle Test/Real
+│   ├── RoadmapPanel.tsx              # 5 fases — colapsable con puntos de progreso
+│   ├── TokenomicsPanel.tsx           # Stats live tokenomics (sin proyección de precio)
+│   ├── AnimatedBackground.tsx        # Fondos animados: Clouds/Ocean/Lava/Forest/Solid
+│   ├── Web3AcademyPanel.tsx          # Academy: artículos Web3 + recompensa OMMY por lectura
 │   ├── CryptoPanel.tsx               # Precios BTC/ETH/AVAX/XRP/OMMY + sparklines SVG
 │   ├── NFTCollectionPanel.tsx        # Colección NFT con flip cards + rareza
 │   ├── GamificationPanel.tsx         # Niveles XP + badges + misiones diarias
@@ -154,14 +173,17 @@ src/
 | Mi Perfil | Avatar, bio, 12 temas de fondo |
 | AI Coordinator | Chat multi-agente Claude |
 
-## Temas de Fondo Dashboard (12)
+## Temas de Fondo Dashboard (10)
 
 ```
-Oscuros:   Espacio 🌌 | Nebula 🔮 | Océano 🌊 | Aurora ✨ | Cosmos 💫 | Midnight 🌑
-Claros:    Solar ☀️  | Nubes ☁️  | Montañas 🏔️ | Bosque 🌲 | Amanecer 🌅 | Desierto 🏜️
+Animados:  Espacio 🌌 | Nubes ☁️ | Océano 🌊 | Lava 🌋 | Bosque 🌲
+Sólidos:   Midnight 🌑 | Púrpura 🔮 | Esmeralda 💚 | Cobre 🟤
+Claro:     Luz ☀️
 ```
 - Guardados en `localStorage` junto al perfil del usuario
-- Los temas claros aplican glow de color a 18% opacidad sobre fondo oscuro (legibilidad preservada)
+- Animados: CSS keyframes GPU-accelerated (cloud-drift, bubble-rise, lava-move, tree-sway)
+- Modo claro (Luz) activa `data-mode="light"` en el root → overrides CSS en globals.css
+- Toggle Luna/Sol en la barra superior del dashboard
 
 ## Design System
 
@@ -302,17 +324,27 @@ Flow: `POST /api/agent` → rate limit check → selectAgents() → callAgent() 
 
 - Landing pública con 12 secciones (dark/cream dual theme, Framer Motion)
 - Página `/nft` completa — rareza, 4 tipos NFT + Guardianes en ScrollCarousel
-- Dashboard `/dashboard` con 8 tabs, sidebar doble, SpaceBackground
-- `ProfilePanel`: avatar emoji/foto, username, bio, 12 temas de fondo (guardado localStorage)
+- Dashboard `/dashboard` con 8 tabs + sidebar colapsable (vue-element-admin style)
+- **Sidebar colapsable**: 220px ↔ 64px, transición 0.28s, wallet arriba + nav abajo
+- **10 temas de fondo**: 5 animados (CSS keyframes: nubes, océano, lava, bosque, espacio) + 4 sólidos + luz
+- **Modo claro/oscuro** (Luna/Sol toggle): `data-mode="light|dark"` + overrides CSS `[data-mode="light"]`
+- `AnimatedBackground.tsx`: `CloudsBackground`, `OceanBackground`, `LavaBackground`, `ForestBackground`, `SolidBackground`
+- `ProfilePanel`: avatar emoji/foto, username, bio, 10 temas de fondo (guardado localStorage)
+- `WalletPanel`: toggle Test(Fuji)/Real(Mainnet), logo OMMY (OM), logo AVAX oficial rojo, balance OMMY 8 dígitos + `...`
+- `NotificationsDropdown`: `createPortal` a `document.body` — z-index correcto sobre todo el contenido
+- `RoadmapPanel`: colapsable compacto con puntos de progreso y fechas
+- `Web3AcademyPanel`: artículos Web3 con recompensa OMMY por lectura
 - `CommunityPanel`: feed público con likes + mensajes privados 1:1 con chat
 - `CryptoPanel`: BTC/ETH/AVAX/XRP/OMMY con sparklines SVG, refresh 60s
 - `GamificationPanel`: 6 niveles XP, 8 badges, 5 misiones diarias
 - `NFTCollectionPanel`: grid con flip cards 3D, rarity badges, locked slots
 - `DAOPanel`: 4 propuestas, votación, +200 OMMY reward
-- `InviteFriendPanel`: referral link, tiers, compartir en Twitter/WhatsApp
+- `InviteFriendPanel`: referral link, límite 3 invitados, barra progreso, compartir Twitter/WhatsApp
 - `SocialCarousel`: carrusel infinito 8 redes sociales (Framer Motion)
+- DAppPanel: sección "Disponible ahora" + "Próximamente" con badges (yoga, actividad, meditación, arte)
+- SobreNosotrosPanel: misión, visión, valores, roadmap resumen, links sociales
+- TokenomicsPanel: eliminada proyección de precio (solo datos reales)
 - shadcn/ui instalado: badge, button, card, progress, scroll-area, separator, tabs, tooltip
-- Tailwind config con tokens shadcn mapeados al tema purple/space
 - `next.config.ts` con security headers completos (CSP, HSTS, X-Frame-Options, etc.)
 - Shopify webhook HMAC con `timingSafeEqual` (anti timing-attack)
 - Rate limiting `/api/agent`: 10 req/min/IP
@@ -325,6 +357,12 @@ Flow: `POST /api/agent` → rate limit check → selectAgents() → callAgent() 
 - TestPurchasePanel dev-only (NODE_ENV=development)
 - GitHub → Vercel auto-deploy en push a main
 - Discord: https://discord.gg/xXezFXnpaX
+
+## Nuevas variables de entorno requeridas
+
+```
+STRIPE_SECRET_KEY=sk_live_...     # Stripe para pago pre-compra con tarjeta
+```
 
 ## Pendiente para Lanzamiento ⏳
 

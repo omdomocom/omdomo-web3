@@ -29,6 +29,7 @@ El dashboard incluye un **sistema multi-agente AI** (Claude API) con 5 especiali
 | Tienda | [omdomo.com](https://omdomo.com) (Shopify) |
 | Web3 App | [web3.omdomo.com](https://web3.omdomo.com) (Vercel) |
 | GitHub | [github.com/omdomocom/omdomo-web3](https://github.com/omdomocom/omdomo-web3) |
+| Discord | [discord.gg/xXezFXnpaX](https://discord.gg/xXezFXnpaX) |
 
 ---
 
@@ -41,7 +42,7 @@ El dashboard incluye un **sistema multi-agente AI** (Claude API) con 5 especiali
 | Blockchain | Avalanche (Mainnet 43114 / Fuji 43113) |
 | Web3 SDK | Thirdweb v5 |
 | AI | Anthropic Claude API (claude-opus-4-6) |
-| Estilos | Tailwind CSS + Framer Motion + GSAP |
+| Estilos | Tailwind CSS + shadcn/ui + Framer Motion |
 | Emails | Resend (noreply@omdomo.com) |
 | Persistencia | Redis Cloud (ioredis) |
 | Deploy | Vercel (auto-deploy desde GitHub main) |
@@ -100,19 +101,20 @@ REDIS_URL=redis://...                      # Redis Cloud
 ## Rutas
 
 ```
-/                   Landing pública + Hero animado
+/                   Landing pública + Hero animado (12 secciones)
 /nft                Colección NFT completa — rareza, 4 tipos, Guardianes (carrusel)
 /claim              Claim NFT tras compra (buscar por Order ID o email)
 /drops              Drops limitados con countdown a Junio 2026
-/dashboard          Dashboard 3 columnas: Wallet + Chat AI + Roadmap
+/dashboard          Dashboard Web3 completo (8 tabs + sidebar colapsable)
 
-POST /api/agent                  Chat multi-agente AI
+POST /api/agent                  Chat multi-agente AI (rate limit 10 req/min/IP)
 POST /api/shopify/webhook        Webhook orders/paid → crea claim + envía email
 POST /api/nft/approve-claim      Valida claim + linkea wallet
 POST /api/nft/mint               Mint server-side (minter wallet)
 POST /api/nft/confirm-claimed    Registra txHash post-mint
 GET  /api/nft/check-claim        Busca claim por orderId o email
 POST /api/share                  Share-to-earn (+500 OMMY por red social)
+GET  /api/prices                 Precios live CoinGecko (cache 60s + fallback)
 GET  /api/burn/stats             Estadísticas de burn en tiempo real
 ```
 
@@ -157,9 +159,41 @@ GET  /api/burn/stats             Estadísticas de burn en tiempo real
 | FDV | ~$30M |
 | Rewards rate | 70 OMMY por USD gastado |
 
-**Distribución:** 35% Ecosistema & Rewards · 25% Quema programada · 15% Liquidez DEX · 10% Equipo (4yr vesting) · 7% Marketing · 5% DAO Treasury · 3% Drops
+**Distribución:** 25% Ecosistema & Rewards · 25% Quema programada · 15% Liquidez DEX · 10% Equipo (4yr vesting) · 7% Marketing · 5% DAO Treasury · 3% Drops
 
 **Mecánica de Burn:** 500 OMMY por compra + 2% rewards · 5M OMMY por drop · 50 OMMY por share
+
+---
+
+## Dashboard — 8 Tabs
+
+| Tab | Contenido |
+|-----|-----------|
+| Overview | Stats globales + compras recientes + gamificación |
+| Mi Colección | NFTs con flip cards 3D + rarity badges |
+| dApp | Herramientas live + sección "Próximamente" |
+| Finanzas | Precios live crypto + tokenomics OMMY |
+| DAO | Propuestas + votación + +200 OMMY |
+| Comunidad | Feed público + mensajes privados 1:1 |
+| Mi Perfil | Avatar, bio, 10 temas de fondo (5 animados + 4 sólidos + luz) |
+| Academy | Artículos Web3 con recompensa OMMY por lectura |
+
+### Temas de fondo (10)
+
+| Tipo | Temas |
+|------|-------|
+| Animados | Espacio, Nubes, Océano, Lava, Bosque |
+| Sólidos | Midnight, Púrpura, Esmeralda, Cobre |
+| Claro | Luz |
+
+---
+
+## Sidebar colapsable
+
+- **Expandido** (220px): wallet arriba, menú de navegación abajo
+- **Colapsado** (64px): solo iconos + avatar
+- Toggle con animación 0.28s · estado guardado en `localStorage`
+- Modo oscuro/claro (Luna/Sol) en la barra superior
 
 ---
 
@@ -176,7 +210,7 @@ Sistema multi-agente en `src/lib/agents/definitions.ts`, modelo `claude-opus-4-6
 | Community Architect | DAO, Discord, ambassadors |
 | Creative Director | NFT art, fashion, colecciones |
 
-Flujo: `POST /api/agent` → `selectAgents()` → llamadas en paralelo → `coordinatorSynthesize()`
+Flujo: `POST /api/agent` → rate limit → `selectAgents()` → llamadas en paralelo → `coordinatorSynthesize()`
 
 ---
 
@@ -192,34 +226,48 @@ Flujo: `POST /api/agent` → `selectAgents()` → llamadas en paralelo → `coor
 
 ---
 
-## Funcionalidades implementadas
+## Funcionalidades implementadas ✅
 
-- Landing con 11 secciones (dark/cream dual theme, GSAP, Framer Motion)
-- **Página `/nft`** — rareza, 4 tipos NFT y Guardianes de la Conciencia en carrusel (scroll-snap + arrows + dots)
-- **`EcosistemaSection`** — 6 nodos interactivos: Tienda→omdomo.com, NFTs→/nft, OMMY, DAO, dApp, DEX
-- Nodo NFTs del Ecosistema enlaza a `/nft` (página dedicada)
-- **Gamificación multi-plataforma** — Twitter/X, TikTok, Instagram, Threads (+500 OMMY c/u)
-- Reto combinado Meditación+Running con bonus
-- Guías Web3 integradas en "Cómo funciona" (accordion, sin sección propia)
-- Shopify webhook → mint NFT → email automático
-- Share-to-earn `/api/share` (+500 OMMY por red social)
+- Landing con 12 secciones (dark/cream dual theme, Framer Motion)
+- Página `/nft` — rareza, 4 tipos NFT y Guardianes en carrusel
+- Dashboard con **sidebar colapsable** (vue-element-admin style, 220px↔64px)
+- **10 temas de fondo** — 5 animados (CSS keyframes GPU): nubes, océano, lava, bosque, espacio
+- **Modo claro/oscuro** (Luna/Sol) con overrides `[data-mode="light"]` en CSS
+- WalletPanel: logo OMMY + logo AVAX oficial · toggle Test(Fuji)/Real(Mainnet)
+- OMMY balance: muestra primeros 8 dígitos + `...`
+- Notificaciones con `createPortal` (z-index correcto sobre todo el contenido)
+- RoadmapPanel colapsable con puntos de progreso
+- Web3 Academy con recompensas OMMY por lectura
+- GamificationPanel: 6 niveles XP, 8 badges, 5 misiones diarias
+- DAOPanel: propuestas + votación + +200 OMMY
+- InviteFriendPanel: referral link + límite 3 invitados + barra de progreso
+- CommunityPanel: feed público + mensajes privados 1:1
+- ProfilePanel: avatar emoji/foto + 10 temas de fondo
+- CryptoPanel: BTC/ETH/AVAX/XRP/OMMY con sparklines SVG (refresh 60s)
+- Shopify webhook → mint NFT → email automático (HMAC timingSafeEqual)
+- Share-to-earn (+500 OMMY, anti double-claim con Redis)
 - Redis Cloud — claims persistentes con fallback in-memory
-- Multi-agente AI (claude-opus-4-6) con 6 especialistas
-- Drops page `/drops` con countdown a Junio 2026
+- Multi-agente AI (claude-opus-4-6) con rate limit 10 req/min
+- Security headers HTTP completos (CSP, HSTS, X-Frame-Options...)
+- 0 vulnerabilidades npm · TypeScript strict sin errores
 
-## Pendiente antes del lanzamiento
+---
+
+## Pendiente antes del lanzamiento ⏳
 
 - [ ] Migrar NFT contract Fuji → Avalanche Mainnet
-- [ ] Configurar `NEXT_PUBLIC_NFT_CONTRACT_MAINNET` + `NEXT_PUBLIC_USE_MAINNET=true`
-- [ ] Crear Drop #1 Genesis en Shopify (100 hoodies Genesis Hoodie, €89)
+- [ ] `NEXT_PUBLIC_NFT_CONTRACT_MAINNET` + `NEXT_PUBLIC_USE_MAINNET=true`
+- [ ] Crear Drop #1 Genesis en Shopify (100 hoodies, €89)
 - [ ] Probar flujo completo end-to-end con compra real
-- [ ] Rotar `THIRDWEB_SECRET_KEY`
-- [ ] Pre-compra: mecanismo de pago real (actualmente informacional)
+- [ ] Configurar `SHOPIFY_WEBHOOK_SECRET` en Vercel
+- [ ] Rotar `THIRDWEB_SECRET_KEY` antes de mainnet
+- [ ] Pre-compra: mecanismo de pago real con Stripe
 
 ---
 
 ## Comunidad
 
+- Discord: [discord.gg/xXezFXnpaX](https://discord.gg/xXezFXnpaX)
 - Instagram: [@om.domo](https://instagram.com/om.domo)
 - TikTok: [@omdomo.com](https://tiktok.com/@omdomo.com)
 - Twitter: [@omdomocom](https://twitter.com/omdomocom)
