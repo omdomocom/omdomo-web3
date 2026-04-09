@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   motion,
@@ -12,6 +13,8 @@ import {
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SpaceBackground } from "./SpaceBackground";
+import { ConnectButton, useActiveAccount } from "thirdweb/react";
+import { client, avalanche } from "@/lib/thirdweb";
 import {
   Flame,
   Coins,
@@ -100,6 +103,30 @@ const SOCIALS_SECONDARY = [
 
 // Keep for footer
 const SOCIALS = [...SOCIALS_PRIMARY, ...SOCIALS_SECONDARY];
+
+// ─── SmartJoinCTA ─────────────────────────────────────────────────────────────
+function SmartJoinCTA({ className }: { className?: string }) {
+  const account = useActiveAccount();
+  const router = useRouter();
+  if (account) {
+    return (
+      <button
+        onClick={() => router.push("/dashboard")}
+        className={className ?? "flex-shrink-0 text-xs px-4 py-2 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 font-semibold hover:bg-purple-100 transition-colors whitespace-nowrap"}
+      >
+        Ir al Dashboard →
+      </button>
+    );
+  }
+  return (
+    <a
+      href="#waitlist"
+      className={className ?? "flex-shrink-0 text-xs px-4 py-2 rounded-xl bg-green-50 border border-green-200 text-green-700 font-semibold hover:bg-green-100 transition-colors whitespace-nowrap"}
+    >
+      Unirme →
+    </a>
+  );
+}
 
 // ─── Countdown hook ───────────────────────────────────────────────────────────
 const LAUNCH_DATE = new Date("2026-06-15T18:00:00Z");
@@ -1287,7 +1314,7 @@ function NFTTypesSection() {
         <FadeIn>
           <div style={{ textAlign: "center" }}>
             <a
-              href="https://omdomo.com"
+              href="https://www.omdomo.com"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -1713,76 +1740,187 @@ function GuardiansSection() {
 
 // ─── Pre-compra section ───────────────────────────────────────────────────────
 function PreCompraSection() {
-  const SUPPLY_PRECOMPRA = "2,997,924,580";
+  const account = useActiveAccount();
+  const [ommyAmount, setOmmyAmount] = useState(10000);
+  const [payMethod, setPayMethod] = useState<"avax" | "card">("avax");
+  const [step, setStep] = useState<"idle" | "confirm" | "done">("idle");
+  const AVAX_PRICE = 25; // USD aproximado — se actualizará con feed en Fase 2
+  const OMMY_PRICE = 0.001;
+  const usdTotal = ommyAmount * OMMY_PRICE;
+  const avaxTotal = (usdTotal / AVAX_PRICE).toFixed(4);
+  const PRECOMPRA_WALLET = "0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2";
+
+  async function handleAvaxPay() {
+    if (!account) return;
+    setStep("confirm");
+    try {
+      const { sendTransaction, prepareTransaction } = await import("thirdweb");
+      const tx = prepareTransaction({
+        to: PRECOMPRA_WALLET as `0x${string}`,
+        value: BigInt(Math.round(parseFloat(avaxTotal) * 1e18)),
+        chain: avalanche,
+        client,
+      });
+      await sendTransaction({ transaction: tx, account });
+      setStep("done");
+    } catch {
+      setStep("idle");
+    }
+  }
+
+  async function handleCardPay() {
+    const res = await fetch("/api/precompra/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ommyAmount, wallet: account?.address }),
+    });
+    const { url } = await res.json();
+    if (url) window.location.href = url;
+  }
+
   return (
-    <section id="precompra" className="section-dark-2 py-24 px-6 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none opacity-[0.015]"
-        style={{ backgroundImage: "radial-gradient(circle, #f59e0b 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+    <section id="precompra" className="section-cream py-24 px-6 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
+        style={{ backgroundImage: "radial-gradient(circle, #9333ea 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
       <div className="max-w-5xl mx-auto relative z-10">
         <FadeIn className="text-center mb-14">
-          <span className="text-xs text-amber-400 uppercase tracking-widest font-medium">Acceso anticipado</span>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mt-3 mb-4" style={{ color: "var(--dark-text)" }}>
+          <span className="text-xs text-amber-600 uppercase tracking-widest font-medium">Acceso anticipado · Exclusivo</span>
+          <h2 className="font-serif text-4xl md:text-5xl font-bold mt-3 mb-4 text-cream-text">
             Pre-compra <span className="gradient-text-gold">OMMY</span>
           </h2>
-          <p className="text-sm max-w-xl mx-auto" style={{ color: "var(--dark-muted)" }}>
-            El 10% del supply está reservado para early adopters antes del lanzamiento oficial en Junio 2026.
-            Los tokens se bloquean 30 días para mantener la estabilidad del token al lanzamiento.
+          <p className="text-sm max-w-xl mx-auto text-cream-muted">
+            El 10% del supply está reservado exclusivamente para early adopters al precio de lanzamiento.
+            Entra ahora y asegura tu posición antes de Junio 2026.
           </p>
         </FadeIn>
 
         <div className="grid md:grid-cols-3 gap-4 mb-10">
           {[
-            { label: "Supply disponible", value: `${SUPPLY_PRECOMPRA}`, sub: "OMMY — 10% del total", icon: "🪙", color: "border-amber-500/30" },
-            { label: "Precio pre-compra", value: "$0.001", sub: "Precio de lanzamiento", icon: "💰", color: "border-green-500/30" },
-            { label: "Lock post-lanzamiento", value: "30 días", sub: "Liberación Julio 2026", icon: "🔒", color: "border-purple-500/30" },
+            { label: "Supply disponible", value: "2,997,924,580", sub: "OMMY — 10% del total", icon: "🪙", color: "border-amber-300 bg-amber-50" },
+            { label: "Precio pre-compra",  value: "$0.001",        sub: "Precio de lanzamiento", icon: "💰", color: "border-green-300 bg-green-50" },
+            { label: "Lock post-lanzamiento", value: "30 días",   sub: "Liberación Julio 2026",  icon: "🔒", color: "border-purple-300 bg-purple-50" },
           ].map((item) => (
             <FadeIn key={item.label}>
-              <div className={`glass rounded-2xl p-6 border ${item.color} text-center`}>
+              <div className={`rounded-2xl p-6 border ${item.color} text-center shadow-sm`}>
                 <div className="text-3xl mb-3">{item.icon}</div>
-                <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "var(--dark-muted)" }}>{item.label}</p>
+                <p className="text-xs uppercase tracking-widest mb-1 text-stone-500">{item.label}</p>
                 <p className="text-2xl font-black font-mono gradient-text-gold">{item.value}</p>
-                <p className="text-xs mt-1" style={{ color: "var(--dark-muted)" }}>{item.sub}</p>
+                <p className="text-xs mt-1 text-stone-400">{item.sub}</p>
               </div>
             </FadeIn>
           ))}
         </div>
 
+        {/* Payment widget */}
         <FadeIn>
-          <div className="glass rounded-2xl p-6 border border-amber-500/20 mb-6">
-            <p className="text-xs uppercase tracking-widest mb-4" style={{ color: "var(--dark-muted)" }}>¿Por qué el lock de 30 días?</p>
-            <div className="grid sm:grid-cols-3 gap-4 text-sm">
-              {[
-                { icon: "📊", text: "Evita venta masiva inmediata que desestabiliza el precio al lanzar" },
-                { icon: "🤝", text: "Premia a los early adopters que creen en el proyecto a largo plazo" },
-                { icon: "💎", text: "Señal de confianza: el 60% del supply está en comunidad y quema" },
-              ].map((item, i) => (
-                <div key={i} className="flex gap-3 items-start">
-                  <span className="text-xl flex-shrink-0">{item.icon}</span>
-                  <p style={{ color: "var(--dark-muted)" }} className="text-xs leading-relaxed">{item.text}</p>
+          <div className="glass rounded-3xl border border-amber-500/20 p-8 max-w-lg mx-auto">
+            {step === "done" ? (
+              <div className="text-center py-6">
+                <div className="text-5xl mb-4">✅</div>
+                <h3 className="text-xl font-bold text-white mb-2">¡Pre-compra registrada!</h3>
+                <p className="text-sm" style={{ color: "var(--dark-muted)" }}>
+                  Recibirás {ommyAmount.toLocaleString()} OMMY en tu wallet el día del lanzamiento (Junio 2026) con un lock de 30 días.
+                </p>
+              </div>
+            ) : !account ? (
+              <div className="text-center">
+                <p className="text-sm mb-5 font-medium" style={{ color: "var(--dark-muted)" }}>
+                  Conecta tu wallet para participar en la pre-compra
+                </p>
+                <ConnectButton
+                  client={client}
+                  chain={avalanche}
+                  connectButton={{
+                    label: "Conectar wallet para pre-comprar",
+                    className: "!w-full !bg-gradient-to-r !from-amber-500 !to-orange-500 !text-white !rounded-2xl !py-4 !text-sm !font-bold hover:!opacity-90 !transition-opacity",
+                  }}
+                />
+                <p className="text-xs mt-4" style={{ color: "var(--dark-muted)" }}>
+                  Compatible con MetaMask, Coinbase Wallet y más
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <div className="flex items-center gap-2 text-xs text-green-400 bg-green-900/20 rounded-xl px-3 py-2">
+                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  {account.address.slice(0, 6)}...{account.address.slice(-4)} conectada
                 </div>
-              ))}
-            </div>
+
+                {/* Amount */}
+                <div>
+                  <label className="text-xs uppercase tracking-widest mb-2 block" style={{ color: "var(--dark-muted)" }}>
+                    Cantidad de OMMY (mínimo 10,000)
+                  </label>
+                  <input
+                    type="number"
+                    min={10000}
+                    step={1000}
+                    value={ommyAmount}
+                    onChange={(e) => setOmmyAmount(Math.max(10000, Number(e.target.value)))}
+                    className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-amber-500/60"
+                  />
+                  <div className="flex justify-between mt-1.5 text-xs" style={{ color: "var(--dark-muted)" }}>
+                    <span>= ${usdTotal.toFixed(2)} USD</span>
+                    <span>= {avaxTotal} AVAX</span>
+                  </div>
+                </div>
+
+                {/* Pay method */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setPayMethod("avax")}
+                    className={`rounded-xl py-3 text-sm font-semibold border transition-all ${payMethod === "avax" ? "border-amber-500 bg-amber-900/20 text-amber-300" : "border-slate-700 text-slate-400 hover:border-slate-500"}`}
+                  >
+                    Pagar con AVAX
+                  </button>
+                  <button
+                    onClick={() => setPayMethod("card")}
+                    className={`rounded-xl py-3 text-sm font-semibold border transition-all ${payMethod === "card" ? "border-amber-500 bg-amber-900/20 text-amber-300" : "border-slate-700 text-slate-400 hover:border-slate-500"}`}
+                  >
+                    Pagar con tarjeta
+                  </button>
+                </div>
+
+                {payMethod === "avax" ? (
+                  <button
+                    onClick={handleAvaxPay}
+                    disabled={step === "confirm"}
+                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-60"
+                  >
+                    {step === "confirm" ? "Confirmando..." : `Pagar ${avaxTotal} AVAX`}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleCardPay}
+                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold text-sm hover:opacity-90 transition-opacity"
+                  >
+                    Pagar ${usdTotal.toFixed(2)} con tarjeta →
+                  </button>
+                )}
+
+                <p className="text-xs text-center" style={{ color: "var(--dark-muted)" }}>
+                  🔒 Lock 30 días · Liberación Julio 2026 · Token en Avalanche
+                </p>
+              </div>
+            )}
           </div>
         </FadeIn>
 
-        <FadeIn className="text-center">
-          <p className="text-xs mb-4" style={{ color: "var(--dark-muted)" }}>
-            La pre-compra se activa al conectar tu wallet. El mecanismo de pago estará disponible próximamente.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href="/dashboard"
-              className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-amber-900/30"
-            >
-              <Unlock size={16} /> Conectar wallet
-            </a>
-            <a
-              href="#waitlist"
-              className="flex items-center gap-2 px-8 py-4 rounded-2xl border text-sm font-semibold hover:opacity-80 transition-opacity"
-              style={{ borderColor: "var(--dark-border)", color: "var(--dark-muted)" }}
-            >
-              Registrar interés →
-            </a>
+        <FadeIn>
+          <div className="rounded-2xl p-6 border border-stone-200 bg-white shadow-sm mt-6">
+            <p className="text-xs uppercase tracking-widest mb-4 text-stone-400">¿Por qué el lock de 30 días?</p>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {[
+                { icon: "📊", text: "Evita venta masiva que desestabiliza el precio al lanzar" },
+                { icon: "🤝", text: "Premia a early adopters que creen en el proyecto a largo plazo" },
+                { icon: "💎", text: "60% del supply dedicado a comunidad y quema — token sólido" },
+              ].map((item, i) => (
+                <div key={i} className="flex gap-3 items-start">
+                  <span className="text-xl flex-shrink-0">{item.icon}</span>
+                  <p className="text-xs leading-relaxed text-stone-500">{item.text}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </FadeIn>
       </div>
@@ -1879,12 +2017,7 @@ function ProyectosSustentables() {
                   Fase 4 activa desde Jun 2027.
                 </p>
               </div>
-              <a
-                href="#waitlist"
-                className="flex-shrink-0 text-xs px-4 py-2 rounded-xl bg-green-50 border border-green-200 text-green-700 font-semibold hover:bg-green-100 transition-colors whitespace-nowrap"
-              >
-                Unirme →
-              </a>
+              <SmartJoinCTA />
             </div>
           </div>
         </FadeIn>
@@ -2399,6 +2532,193 @@ function EcosistemaSection() {
   );
 }
 
+// ─── Join / Perfil section ───────────────────────────────────────────────────
+
+// Signos zodiacales para preview client-side
+const ZODIAC_PREVIEW_DATA: Array<{ name: string; emoji: string; dates: string; mStart: number; dStart: number; mEnd: number; dEnd: number }> = [
+  { name: "Capricornio", emoji: "♑", dates: "22 Dic – 19 Ene", mStart: 12, dStart: 22, mEnd: 1,  dEnd: 19 },
+  { name: "Acuario",     emoji: "♒", dates: "20 Ene – 18 Feb", mStart: 1,  dStart: 20, mEnd: 2,  dEnd: 18 },
+  { name: "Piscis",      emoji: "♓", dates: "19 Feb – 20 Mar", mStart: 2,  dStart: 19, mEnd: 3,  dEnd: 20 },
+  { name: "Aries",       emoji: "♈", dates: "21 Mar – 19 Abr", mStart: 3,  dStart: 21, mEnd: 4,  dEnd: 19 },
+  { name: "Tauro",       emoji: "♉", dates: "20 Abr – 20 May", mStart: 4,  dStart: 20, mEnd: 5,  dEnd: 20 },
+  { name: "Géminis",     emoji: "♊", dates: "21 May – 20 Jun", mStart: 5,  dStart: 21, mEnd: 6,  dEnd: 20 },
+  { name: "Cáncer",      emoji: "♋", dates: "21 Jun – 22 Jul", mStart: 6,  dStart: 21, mEnd: 7,  dEnd: 22 },
+  { name: "Leo",         emoji: "♌", dates: "23 Jul – 22 Ago", mStart: 7,  dStart: 23, mEnd: 8,  dEnd: 22 },
+  { name: "Virgo",       emoji: "♍", dates: "23 Ago – 22 Sep", mStart: 8,  dStart: 23, mEnd: 9,  dEnd: 22 },
+  { name: "Libra",       emoji: "♎", dates: "23 Sep – 22 Oct", mStart: 9,  dStart: 23, mEnd: 10, dEnd: 22 },
+  { name: "Escorpio",    emoji: "♏", dates: "23 Oct – 21 Nov", mStart: 10, dStart: 23, mEnd: 11, dEnd: 21 },
+  { name: "Sagitario",   emoji: "♐", dates: "22 Nov – 21 Dic", mStart: 11, dStart: 22, mEnd: 12, dEnd: 21 },
+];
+
+function getZodiacPreview(birthday: string): { name: string; emoji: string; dates: string } | null {
+  if (!birthday) return null;
+  const d = new Date(birthday);
+  if (isNaN(d.getTime())) return null;
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  for (const z of ZODIAC_PREVIEW_DATA) {
+    if (z.mStart === z.mEnd) continue; // Capricornio tiene meses separados
+    if (m === z.mStart && day >= z.dStart) return z;
+    if (m === z.mEnd && day <= z.dEnd) return z;
+  }
+  // Capricornio (dic 22+ o ene 1-19)
+  if ((m === 12 && day >= 22) || (m === 1 && day <= 19)) {
+    return ZODIAC_PREVIEW_DATA[0];
+  }
+  return null;
+}
+
+function JoinSection() {
+  const account = useActiveAccount();
+  const router = useRouter();
+  const [profileDone, setProfileDone] = useState(false);
+  const [email, setEmail] = useState("");
+  const [birthday, setBirthday] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const zodiacPreview = getZodiacPreview(birthday);
+
+  async function saveProfile(e: React.FormEvent) {
+    e.preventDefault();
+    if (!account || !email || !birthday) return;
+    setSaving(true);
+    try {
+      await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: account.address, email, birthday }),
+      });
+      setProfileDone(true);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (profileDone) {
+    return (
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="py-4">
+        <div className="text-5xl mb-4">🎉</div>
+        <p className="text-green-600 font-bold text-lg mb-2">¡Perfil guardado!</p>
+        <p className="text-stone-500 text-sm">
+          Revisa tu email para verificar tu cuenta y reclamar tu NFT del zodíaco.
+        </p>
+      </motion.div>
+    );
+  }
+
+  if (!account) {
+    return (
+      <>
+        <div className="text-4xl mb-4">✨</div>
+        <h2 className="font-serif text-3xl font-bold mb-3 text-stone-900">
+          Empieza tu <span className="gradient-text">viaje</span>
+        </h2>
+        <p className="text-stone-500 text-sm mb-6 leading-relaxed">
+          Conecta tu wallet para acceder al ecosistema Om Domo, reclamar tu NFT del zodíaco gratis
+          y participar en la pre-compra de OMMY al precio de lanzamiento.
+        </p>
+        <div className="flex items-center gap-3 justify-center flex-wrap mb-6">
+          {["NFT zodiacal gratis", "Precio lanzamiento $0.001", "+1,000 OMMY bonus"].map((b) => (
+            <span key={b} className="text-xs px-3 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 font-medium">
+              ✓ {b}
+            </span>
+          ))}
+        </div>
+        <div className="flex justify-center">
+          <ConnectButton
+            client={client}
+            chain={avalanche}
+            connectButton={{
+              label: "Conectar wallet → Comenzar",
+              className: "!px-8 !py-4 !rounded-xl !bg-gradient-to-r !from-purple-600 !to-cyan-600 !text-white !font-bold !text-sm hover:!opacity-90 !transition-opacity !shadow-md !shadow-purple-200",
+            }}
+          />
+        </div>
+        <p className="text-xs text-stone-400 mt-4">Compatible con MetaMask, Coinbase Wallet y más.</p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="text-4xl mb-4">🌟</div>
+      <h2 className="font-serif text-3xl font-bold mb-2 text-stone-900">
+        Completa tu <span className="gradient-text">perfil</span>
+      </h2>
+
+      {/* Opción 1: Ir al Dashboard */}
+      <div className="mb-5">
+        <motion.button
+          onClick={() => router.push("/dashboard")}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold text-sm hover:opacity-90 transition-opacity shadow-md shadow-purple-200"
+        >
+          Ir al Dashboard →
+        </motion.button>
+      </div>
+
+      {/* Separador */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex-1 h-px bg-stone-200" />
+        <span className="text-xs text-stone-400">o completa tu perfil para tu NFT zodiacal gratis:</span>
+        <div className="flex-1 h-px bg-stone-200" />
+      </div>
+
+      <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 rounded-xl px-3 py-2 mb-5 justify-center">
+        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+        {account.address.slice(0, 6)}...{account.address.slice(-4)} conectada
+      </div>
+      <form onSubmit={saveProfile} className="space-y-3 text-left">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="tu@email.com"
+          required
+          className="w-full rounded-xl px-5 py-4 text-sm text-stone-800 placeholder-stone-400 border border-stone-300 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 bg-stone-50"
+        />
+        <div>
+          <label className="text-xs text-stone-400 mb-1 block">Fecha de nacimiento (para tu NFT zodiacal)</label>
+          <input
+            type="date"
+            value={birthday}
+            onChange={(e) => setBirthday(e.target.value)}
+            required
+            className="w-full rounded-xl px-5 py-4 text-sm text-stone-800 border border-stone-300 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 bg-stone-50"
+          />
+          {birthday && zodiacPreview && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-800 text-sm font-medium mt-2"
+            >
+              <span className="text-xl">{zodiacPreview.emoji}</span>
+              <span>Tu signo: <strong>{zodiacPreview.name}</strong> · {zodiacPreview.dates}</span>
+            </motion.div>
+          )}
+        </div>
+        <motion.button
+          type="submit"
+          disabled={saving}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-60"
+        >
+          {saving ? "Guardando..." : "Guardar perfil y reclamar NFT →"}
+        </motion.button>
+      </form>
+      <p className="text-xs text-stone-400 mt-4">Verificarás el email y te llegará tu NFT zodiacal.</p>
+      <a
+        href="/claim-zodiac"
+        className="block text-center text-xs text-purple-500 hover:text-purple-700 hover:underline mt-3 transition-colors"
+      >
+        ¿Ya tienes un NFT zodiacal? Reclamarlo →
+      </a>
+    </>
+  );
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
 export function LandingPage() {
   const countdown = useCountdown();
@@ -2413,47 +2733,70 @@ export function LandingPage() {
   const orb3Ref = useRef<HTMLDivElement>(null);
   useGsapHero(heroTitleRef, orb1Ref, orb2Ref, orb3Ref);
 
-  const [waitlistEmail, setWaitlistEmail] = useState("");
-  const [waitlistDone, setWaitlistDone] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
+  const router = useRouter();
 
-  function submitWaitlist(e: React.FormEvent) {
-    e.preventDefault();
-    if (!waitlistEmail) return;
-    setWaitlistDone(true);
-  }
+  useEffect(() => {
+    const saved = localStorage.getItem("om-theme");
+    if (saved) setDarkMode(saved === "dark");
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setDarkMode((prev) => {
+      const next = !prev;
+      localStorage.setItem("om-theme", next ? "dark" : "light");
+      return next;
+    });
+  }, []);
 
   return (
-    <div className="min-h-screen bg-background text-slate-100 overflow-x-hidden">
+    <div className={`min-h-screen overflow-x-hidden transition-colors duration-300 ${darkMode ? "bg-background text-slate-100" : "bg-white text-slate-900"}`}>
 
       {/* ── NAV ───────────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800/40">
+      <nav className={`fixed top-0 left-0 right-0 z-50 border-b transition-colors duration-300 ${darkMode ? "glass border-slate-800/40" : "bg-white/90 backdrop-blur-md border-slate-200/60 shadow-sm"}`}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2.5">
             <OmDomoLogo size={32} />
             <span className="font-bold text-sm gradient-text tracking-wide">Om Domo</span>
           </a>
 
-          <div className="hidden md:flex items-center gap-6 text-sm text-slate-400">
-            <a href="#como-funciona" className="hover:text-slate-100 transition-colors">Cómo funciona</a>
-            <a href="#token" className="hover:text-slate-100 transition-colors">Token</a>
-            <a href="#comunidad" className="hover:text-slate-100 transition-colors">Comunidad</a>
+          <div className={`hidden md:flex items-center gap-6 text-sm ${darkMode ? "text-slate-400" : "text-slate-600"}`}>
+            <a href="#como-funciona" className={`transition-colors ${darkMode ? "hover:text-slate-100" : "hover:text-slate-900"}`}>Cómo funciona</a>
+            <a href="#precompra" className={`transition-colors font-medium ${darkMode ? "hover:text-amber-300 text-amber-400" : "hover:text-amber-600 text-amber-500"}`}>Pre-compra</a>
+            <a href="#token" className={`transition-colors ${darkMode ? "hover:text-slate-100" : "hover:text-slate-900"}`}>Token</a>
+            <a href="#comunidad" className={`transition-colors ${darkMode ? "hover:text-slate-100" : "hover:text-slate-900"}`}>Comunidad</a>
             <a href="/drops" className="hover:text-orange-300 text-orange-400 transition-colors font-medium">🔥 Drops</a>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${darkMode ? "bg-slate-800 text-slate-300 hover:bg-slate-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+              aria-label="Cambiar tema"
+            >
+              {darkMode ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              )}
+            </button>
             <a
               href="/claim"
-              className="hidden md:flex text-xs px-4 py-2 rounded-xl border border-purple-500/40 text-purple-300 hover:bg-purple-900/20 transition-all"
+              className={`hidden md:flex text-xs px-4 py-2 rounded-xl border transition-all ${darkMode ? "border-purple-500/40 text-purple-300 hover:bg-purple-900/20" : "border-purple-400 text-purple-600 hover:bg-purple-50"}`}
             >
               Reclamar NFT
             </a>
-            <a
-              href="#waitlist"
-              className="text-xs px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 font-semibold hover:opacity-90 transition-opacity"
-            >
-              Unirme
-            </a>
+            <ConnectButton
+              client={client}
+              chain={avalanche}
+              connectButton={{
+                label: "Conectar",
+                className: "!text-xs !px-4 !py-2 !rounded-xl !bg-gradient-to-r !from-purple-600 !to-cyan-600 !font-semibold hover:!opacity-90 !transition-opacity",
+              }}
+              onConnect={() => router.push("/dashboard")}
+            />
           </div>
         </div>
       </nav>
@@ -2541,7 +2884,13 @@ export function LandingPage() {
               href="/claim"
               className="flex items-center gap-2 px-8 py-4 rounded-2xl border border-slate-600 text-slate-300 font-semibold text-sm hover:border-purple-500/60 hover:text-white transition-all"
             >
-              <Gift size={16} /> Reclamar mi NFT Fuji
+              <Gift size={16} /> Reclamar mi NFT
+            </a>
+            <a
+              href="#waitlist"
+              className="flex items-center gap-2 px-6 py-4 rounded-2xl border border-purple-500/40 text-purple-300 font-semibold text-sm hover:border-purple-400/70 hover:text-purple-200 hover:bg-purple-500/10 transition-all"
+            >
+              ✨ NFT Zodiacal gratis
             </a>
           </motion.div>
 
@@ -2552,9 +2901,9 @@ export function LandingPage() {
             transition={{ duration: 0.9, delay: 0.55 }}
           >
             <p className="text-xs text-slate-500 mb-4 uppercase tracking-widest">
-              Lanzamiento oficial Ommy Coin
+              Lanzamiento oficial Ommy Coin · Junio 2026
             </p>
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-3 mb-6">
               {[
                 { label: "días",    val: countdown.days },
                 { label: "horas",   val: countdown.hours },
@@ -2581,6 +2930,33 @@ export function LandingPage() {
                 </div>
               ))}
             </div>
+
+            {/* Pre-compra urgency */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-3"
+            >
+              <a
+                href="#precompra"
+                className="group flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-amber-300 text-sm font-semibold hover:from-amber-500/30 hover:to-orange-500/30 transition-all"
+              >
+                <motion.span
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >⚡</motion.span>
+                Anticipa la pre-compra → precio $0.001
+              </a>
+              <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-medium">
+                <motion.span
+                  animate={{ opacity: [1, 0.4, 1] }}
+                  transition={{ duration: 1.2, repeat: Infinity }}
+                  className="w-2 h-2 rounded-full bg-red-400"
+                />
+                Stock exclusivo · Solo 2,997M OMMY disponibles
+              </div>
+            </motion.div>
           </motion.div>
         </motion.div>
 
@@ -2680,14 +3056,46 @@ export function LandingPage() {
             ))}
           </div>
 
-          {/* ── Guías para empezar — accordion integrado ── */}
+          {/* ── Nuevo en Web3 — cards estilo MetaMask Learn ── */}
           <FadeIn delay={0.2}>
             <div className="divider-cream mb-12" />
-            <div className="text-center mb-8">
-              <span className="text-xs text-purple-600 uppercase tracking-widest font-medium">¿Nuevo en Web3?</span>
+            <div className="text-center mb-10">
+              <span className="inline-flex items-center gap-2 text-xs text-purple-600 uppercase tracking-widest font-medium bg-purple-50 px-3 py-1.5 rounded-full border border-purple-200 mb-4">
+                ✦ Nuevo en cripto
+              </span>
               <h3 className="font-serif text-2xl md:text-3xl font-bold mt-2 text-cream-text">
-                Guías para <span className="gradient-text">empezar</span>
+                Todo lo que necesitas saber para <span className="gradient-text">empezar</span>
               </h3>
+              <p className="text-cream-muted text-sm mt-2">Sin jerga. Sin complicaciones. En 4 pasos.</p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              {[
+                { step: "01", icon: "🦊", title: "Instala MetaMask", desc: "Una wallet gratuita en tu navegador o móvil. Es tu identidad digital en Web3.", link: "https://metamask.io", cta: "Instalar gratis" },
+                { step: "02", icon: "🔗", title: "Añade Avalanche", desc: "La red donde vive Ommy Coin. Rápida y económica. Se añade en 1 clic.", link: "https://chainlist.org/chain/43114", cta: "Añadir red" },
+                { step: "03", icon: "🛍️", title: "Compra en Om Domo", desc: "Cualquier prenda activa automáticamente tu recompensa en NFT y OMMY.", link: "https://www.omdomo.com", cta: "Ver tienda" },
+                { step: "04", icon: "🎁", title: "Reclama tus OMMY", desc: "Entra en web3.omdomo.com, conecta tu wallet y reclama tu NFT y tokens.", link: "/claim", cta: "Reclamar NFT" },
+              ].map((item) => (
+                <motion.a
+                  key={item.step}
+                  href={item.link}
+                  target={item.link.startsWith("http") ? "_blank" : undefined}
+                  rel={item.link.startsWith("http") ? "noopener noreferrer" : undefined}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: Number(item.step) * 0.08 }}
+                  whileHover={{ y: -4, transition: { duration: 0.15 } }}
+                  className="group bg-white rounded-2xl p-6 border border-stone-200 shadow-sm hover:shadow-lg hover:border-purple-300 transition-all cursor-pointer block"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl">{item.icon}</span>
+                    <span className="text-xs font-black text-stone-200 font-mono">{item.step}</span>
+                  </div>
+                  <h4 className="font-bold text-stone-800 mb-2 group-hover:text-purple-700 transition-colors">{item.title}</h4>
+                  <p className="text-xs text-stone-500 leading-relaxed mb-4">{item.desc}</p>
+                  <span className="text-xs font-semibold gradient-text group-hover:underline">{item.cta} →</span>
+                </motion.a>
+              ))}
             </div>
             <div className="max-w-2xl mx-auto space-y-3">
               <GuiasWeb3Accordion />
@@ -2697,56 +3105,67 @@ export function LandingPage() {
       </section>
 
       {/* ── REWARDS TABLE ────────────────────────────────────────────── */}
-      <FadeIn>
-        <section className="section-cream-2 py-16 px-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-10">
-              <span className="text-xs text-cyan-600 uppercase tracking-widest font-medium">Gamificación</span>
-              <h2 className="font-serif text-3xl md:text-4xl font-bold mt-3 text-cream-text">Cada acción vale <span className="gradient-text">OMMY</span></h2>
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {[
-                { action: "Compra física",           reward: "5,000+ OMMY",  icon: <ShoppingBag size={14} />, hot: true },
-                { action: "Share Twitter / X",       reward: "+500 OMMY",   icon: <Globe size={14} /> },
-                { action: "Share TikTok",             reward: "+500 OMMY",   icon: <Activity size={14} /> },
-                { action: "Share Instagram",          reward: "+500 OMMY",   icon: <Heart size={14} /> },
-                { action: "Share Threads",            reward: "+500 OMMY",   icon: <Globe size={14} /> },
-                { action: "Referir un amigo",         reward: "+2,000 OMMY", icon: <Users size={14} /> },
-                { action: "Drop limitado (1ª h)",     reward: "+10,000 OMMY",icon: <Flame size={14} />, hot: true },
-                { action: "Staking de NFT/día",       reward: "+50 OMMY",    icon: <Zap size={14} /> },
-                { action: "Meditación 20 min",        reward: "+50 OMMY",    icon: <Music size={14} /> },
-                { action: "Running 5km",              reward: "+250 OMMY",   icon: <Zap size={14} /> },
-                { action: "Reto Medita + Running",    reward: "+500 OMMY",   icon: <Activity size={14} />, hot: true },
-                { action: "Arte consciente → NFT",    reward: "+OMMY",       icon: <Palette size={14} /> },
-                { action: "Música: sube contenido",   reward: "+OMMY",       icon: <Music size={14} /> },
-                { action: "Votación DAO",             reward: "+200 OMMY",   icon: <Star size={14} /> },
-                { action: "Evento Om Domo",           reward: "+3,000 OMMY", icon: <Globe size={14} />, hot: true },
-              ].map((r) => (
-                <motion.div
-                  key={r.action}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                    r.hot
-                      ? "border-purple-400/40 bg-purple-50 shadow-sm"
-                      : "border-stone-200 bg-white hover:border-stone-300 hover:shadow-sm"
-                  }`}
-                >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    r.hot ? "bg-purple-100 text-purple-600" : "bg-stone-100 text-stone-500"
-                  }`}>
-                    {r.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-stone-700 truncate font-medium">{r.action}</p>
-                    <p className={`text-xs font-bold ${r.hot ? "gradient-text" : "text-stone-500"}`}>{r.reward}</p>
-                  </div>
-                  {r.hot && <Flame size={12} className="text-orange-500 flex-shrink-0" />}
-                </motion.div>
-              ))}
-            </div>
+      <section className="section-cream-2 py-20 px-6 overflow-hidden">
+        <div className="max-w-4xl mx-auto">
+          <FadeIn className="text-center mb-12">
+            <span className="text-xs text-cyan-600 uppercase tracking-widest font-medium">Gamificación</span>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mt-3 text-cream-text">
+              Cada acción vale <span className="gradient-text">OMMY</span>
+            </h2>
+            <p className="text-cream-muted text-sm mt-3 max-w-lg mx-auto">
+              Gana tokens por comprar, compartir, meditar, correr o votar. El ecosistema te recompensa por vivir conscientemente.
+            </p>
+          </FadeIn>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[
+              { action: "Compra física",           reward: "5,000+ OMMY",  icon: <ShoppingBag size={15} />, hot: true,  delay: 0 },
+              { action: "Drop limitado (1ª hora)", reward: "+10,000 OMMY", icon: <Flame size={15} />,       hot: true,  delay: 0.05 },
+              { action: "Referir un amigo",        reward: "+2,000 OMMY",  icon: <Users size={15} />,       hot: true,  delay: 0.1 },
+              { action: "Evento Om Domo",          reward: "+3,000 OMMY",  icon: <Globe size={15} />,       hot: true,  delay: 0.15 },
+              { action: "Reto Medita + Running",   reward: "+500 OMMY",    icon: <Activity size={15} />,    hot: true,  delay: 0.2 },
+              { action: "Share Twitter / X",       reward: "+500 OMMY",    icon: <Globe size={15} />,       hot: false, delay: 0.25 },
+              { action: "Share TikTok",            reward: "+500 OMMY",    icon: <Activity size={15} />,    hot: false, delay: 0.3 },
+              { action: "Share Instagram",         reward: "+500 OMMY",    icon: <Heart size={15} />,       hot: false, delay: 0.35 },
+              { action: "Running 5km",             reward: "+250 OMMY",    icon: <Zap size={15} />,         hot: false, delay: 0.4 },
+              { action: "Meditación 20 min",       reward: "+50 OMMY/día", icon: <Music size={15} />,       hot: false, delay: 0.45 },
+              { action: "Staking de NFT",          reward: "+50 OMMY/día", icon: <Zap size={15} />,         hot: false, delay: 0.5 },
+              { action: "Votación DAO",            reward: "+200 OMMY",    icon: <Star size={15} />,        hot: false, delay: 0.55 },
+            ].map((r) => (
+              <motion.div
+                key={r.action}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: r.delay, duration: 0.4 }}
+                whileHover={{ scale: 1.03, y: -3, transition: { duration: 0.15 } }}
+                className={`flex items-center gap-3 p-4 rounded-2xl border cursor-default transition-shadow ${
+                  r.hot
+                    ? "border-purple-300/60 bg-gradient-to-br from-purple-50 to-cyan-50 shadow-md shadow-purple-100"
+                    : "border-stone-200 bg-white hover:shadow-md hover:border-stone-300"
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  r.hot ? "bg-gradient-to-br from-purple-500 to-cyan-500 text-white shadow-sm" : "bg-stone-100 text-stone-500"
+                }`}>
+                  {r.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-stone-700 font-semibold truncate">{r.action}</p>
+                  <p className={`text-sm font-black ${r.hot ? "gradient-text" : "text-stone-400"}`}>{r.reward}</p>
+                </div>
+                {r.hot && (
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, delay: r.delay }}
+                  >
+                    <Flame size={14} className="text-orange-500 flex-shrink-0" />
+                  </motion.div>
+                )}
+              </motion.div>
+            ))}
           </div>
-        </section>
-      </FadeIn>
+        </div>
+      </section>
 
       {/* ── TOKEN ────────────────────────────────────────────────────── */}
       <section id="token" className="py-24 px-6 relative overflow-hidden">
@@ -2934,71 +3353,14 @@ export function LandingPage() {
       {/* ── COMUNIDAD DEV ────────────────────────────────────────────── */}
       <ComunidadDev />
 
-      {/* ── WAITLIST ─────────────────────────────────────────────────── */}
+      {/* ── ÚNETE / PERFIL ────────────────────────────────────────────── */}
       <section id="waitlist" className="section-cream py-24 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <FadeIn>
             <div className="bg-white rounded-3xl p-10 border border-stone-200 shadow-xl relative overflow-hidden">
-              {/* Decorative top accent */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-cyan-400 to-purple-500 rounded-t-3xl" />
-
               <div className="relative z-10">
-                <div className="text-4xl mb-4">🚀</div>
-                <h2 className="font-serif text-3xl font-bold mb-3 text-stone-900">
-                  Acceso <span className="gradient-text">anticipado</span>
-                </h2>
-                <p className="text-stone-500 text-sm mb-6 leading-relaxed">
-                  Entra en la lista de espera. Serás de los primeros en comprar OMMY
-                  al precio de lanzamiento y recibir el drop Genesis con máxima rareza.
-                </p>
-
-                <div className="flex items-center gap-3 justify-center flex-wrap mb-6">
-                  {[
-                    "NFT Genesis (rareza máxima)",
-                    "Precio lanzamiento $0.001",
-                    "+1,000 OMMY bonus",
-                  ].map((b) => (
-                    <span key={b} className="text-xs px-3 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 font-medium">
-                      ✓ {b}
-                    </span>
-                  ))}
-                </div>
-
-                {waitlistDone ? (
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="flex flex-col items-center gap-3 py-4"
-                  >
-                    <div className="text-5xl">🎉</div>
-                    <p className="text-green-600 font-bold text-lg">¡Estás en la lista!</p>
-                    <p className="text-stone-400 text-sm">
-                      Te avisaremos 48h antes del lanzamiento con instrucciones para comprar.
-                    </p>
-                  </motion.div>
-                ) : (
-                  <form onSubmit={submitWaitlist} className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      type="email"
-                      value={waitlistEmail}
-                      onChange={(e) => setWaitlistEmail(e.target.value)}
-                      placeholder="tu@email.com"
-                      required
-                      className="flex-1 rounded-xl px-5 py-4 text-sm text-stone-800 placeholder-stone-400 border border-stone-300 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100 bg-stone-50"
-                    />
-                    <motion.button
-                      type="submit"
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      className="px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold text-sm hover:opacity-90 transition-opacity whitespace-nowrap shadow-md shadow-purple-200"
-                    >
-                      Unirme →
-                    </motion.button>
-                  </form>
-                )}
-                <p className="text-xs text-stone-400 mt-4">
-                  Sin spam. Solo novedades importantes del proyecto.
-                </p>
+                <JoinSection />
               </div>
             </div>
           </FadeIn>

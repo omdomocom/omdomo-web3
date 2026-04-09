@@ -47,7 +47,56 @@ async function claimNFTTo(toAddress: string, tokenId: bigint, contractAddress: s
 
 export async function POST(req: NextRequest) {
   try {
-    const { orderId, walletAddress, tokenId = 0 } = await req.json();
+    const body = await req.json();
+    const type: string = body.type ?? "shopify";
+
+    // ── Zodiac mint (compra con OMMY o claim gratis) ──────────────────────────
+    if (type === "zodiac") {
+      const { wallet, email, tokenId: rawTokenId } = body as {
+        wallet?: string;
+        email?: string;
+        tokenId?: string;
+        paymentTxHash?: string;
+      };
+
+      const walletAddress = wallet ?? "";
+      if (!walletAddress || !/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+        return NextResponse.json({ error: "Invalid wallet address" }, { status: 400 });
+      }
+
+      const parsedTokenId = parseInt(rawTokenId ?? "0", 10);
+      if (isNaN(parsedTokenId) || parsedTokenId < 1 || parsedTokenId > 12) {
+        return NextResponse.json({ error: "tokenId must be between 1 and 12 for zodiac NFTs" }, { status: 400 });
+      }
+
+      const contractAddress = process.env.NEXT_PUBLIC_NFT_CONTRACT_FUJI || "";
+      const minterKey = process.env.MINTER_PRIVATE_KEY || "";
+
+      if (!contractAddress || !minterKey) {
+        return NextResponse.json({
+          success: true,
+          devMode: true,
+          txHash: "0xDEV_MODE",
+          message: "DEV MODE: add NEXT_PUBLIC_NFT_CONTRACT_FUJI and MINTER_PRIVATE_KEY to .env.local",
+        });
+      }
+
+      const receipt = await claimNFTTo(walletAddress, BigInt(parsedTokenId), contractAddress);
+      console.log(`[NFT Zodiac] tokenId=${parsedTokenId} → ${walletAddress} | TX: ${receipt.transactionHash} | email=${email ?? "n/a"}`);
+
+      return NextResponse.json({
+        success: true,
+        txHash: receipt.transactionHash,
+        explorerUrl: `https://testnet.snowtrace.io/tx/${receipt.transactionHash}`,
+      });
+    }
+
+    // ── Shopify purchase mint (flujo original) ────────────────────────────────
+    const { orderId, walletAddress, tokenId = 0 } = body as {
+      orderId?: string;
+      walletAddress?: string;
+      tokenId?: number;
+    };
 
     if (!orderId || !walletAddress) {
       return NextResponse.json(
