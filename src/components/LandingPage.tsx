@@ -112,19 +112,22 @@ function SmartJoinCTA({ className }: { className?: string }) {
     return (
       <button
         onClick={() => router.push("/dashboard")}
-        className={className ?? "flex-shrink-0 text-xs px-4 py-2 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 font-semibold hover:bg-purple-100 transition-colors whitespace-nowrap"}
+        className={className ?? "flex-shrink-0 text-xs px-4 py-2 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 font-semibold hover:bg-orange-100 transition-colors whitespace-nowrap cursor-pointer"}
       >
         Ir al Dashboard →
       </button>
     );
   }
   return (
-    <a
-      href="#waitlist"
-      className={className ?? "flex-shrink-0 text-xs px-4 py-2 rounded-xl bg-green-50 border border-green-200 text-green-700 font-semibold hover:bg-green-100 transition-colors whitespace-nowrap"}
-    >
-      Unirme →
-    </a>
+    <ConnectButton
+      client={client}
+      chain={avalanche}
+      connectButton={{
+        label: "Conectar",
+        className: "!flex-shrink-0 !text-xs !px-4 !py-2 !rounded-xl !bg-gradient-to-r !from-orange-500 !to-amber-500 !text-white !font-semibold hover:!opacity-90 !transition-opacity !whitespace-nowrap !cursor-pointer",
+      }}
+      onConnect={() => router.push("/dashboard")}
+    />
   );
 }
 
@@ -1778,36 +1781,113 @@ function PreCompraSection() {
     if (url) window.location.href = url;
   }
 
+  const precompraRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: pcScroll } = useScroll({ target: precompraRef, offset: ["start end", "end start"] });
+  const pcBgY = useTransform(pcScroll, [0, 1], ["-8%", "8%"]);
+  const pcOrb1Scale = useTransform(pcScroll, [0, 0.5, 1], [0.8, 1.2, 0.9]);
+  const pcOrb2X = useTransform(pcScroll, [0, 1], ["-20px", "20px"]);
+  const pcTitleY = useTransform(pcScroll, [0, 0.4], [40, 0]);
+  const pcTitleOpacity = useTransform(pcScroll, [0, 0.25], [0, 1]);
+
   return (
-    <section id="precompra" className="section-cream py-24 px-6 relative overflow-hidden">
+    <section ref={precompraRef} id="precompra" className="relative py-28 px-6 overflow-hidden" style={{ background: "linear-gradient(135deg, #0c0906 0%, #1a0a2e 40%, #0c1a10 70%, #0c0906 100%)" }}>
+      {/* Animated background orbs */}
+      <motion.div
+        style={{ y: pcBgY }}
+        className="absolute inset-0 pointer-events-none"
+      >
+        <motion.div
+          style={{ scale: pcOrb1Scale, background: "radial-gradient(circle, rgba(251,146,60,0.18) 0%, transparent 70%)" }}
+          className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full pointer-events-none"
+        />
+        <motion.div
+          style={{ x: pcOrb2X, background: "radial-gradient(circle, rgba(245,158,11,0.14) 0%, transparent 70%)" }}
+          className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full pointer-events-none"
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
+          animate={{ scale: [1, 1.1, 1], opacity: [0.06, 0.12, 0.06] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          style={{ background: "radial-gradient(circle, rgba(147,51,234,0.3) 0%, transparent 70%)" }}
+        />
+      </motion.div>
+
+      {/* Grid pattern */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
-        style={{ backgroundImage: "radial-gradient(circle, #9333ea 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+        style={{ backgroundImage: "radial-gradient(circle, #f59e0b 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+
+      {/* Golden shimmer line top */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] pointer-events-none"
+        style={{ background: "linear-gradient(90deg, transparent 0%, #f59e0b 20%, #fbbf24 50%, #f59e0b 80%, transparent 100%)" }} />
+
       <div className="max-w-5xl mx-auto relative z-10">
-        <FadeIn className="text-center mb-14">
-          <span className="text-xs text-amber-600 uppercase tracking-widest font-medium">Acceso anticipado · Exclusivo</span>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mt-3 mb-4 text-cream-text">
-            Pre-compra <span className="gradient-text-gold">OMMY</span>
-          </h2>
-          <p className="text-sm max-w-xl mx-auto text-cream-muted">
+        <motion.div style={{ y: pcTitleY, opacity: pcTitleOpacity }} className="text-center mb-14">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 mb-4"
+          >
+            <span className="w-8 h-[1px] bg-amber-500/60" />
+            <span className="text-xs text-amber-400 uppercase tracking-widest font-bold">Acceso anticipado · Exclusivo</span>
+            <span className="w-8 h-[1px] bg-amber-500/60" />
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="font-serif text-4xl md:text-6xl font-bold mt-2 mb-5 text-white leading-tight"
+          >
+            Pre-compra{" "}
+            <span className="relative inline-block">
+              <span className="gradient-text-gold">OMMY</span>
+              <motion.span
+                className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full"
+                style={{ background: "linear-gradient(90deg, #f59e0b, #fbbf24, #f97316)" }}
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              />
+            </span>
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-sm max-w-xl mx-auto leading-relaxed"
+            style={{ color: "rgba(255,255,255,0.6)" }}
+          >
             El 10% del supply está reservado exclusivamente para early adopters al precio de lanzamiento.
             Entra ahora y asegura tu posición antes de Junio 2026.
-          </p>
-        </FadeIn>
+          </motion.p>
+        </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-4 mb-10">
+        <div className="grid md:grid-cols-3 gap-5 mb-10">
           {[
-            { label: "Supply disponible", value: "2,997,924,580", sub: "OMMY — 10% del total", icon: "🪙", color: "border-amber-300 bg-amber-50" },
-            { label: "Precio pre-compra",  value: "$0.001",        sub: "Precio de lanzamiento", icon: "💰", color: "border-green-300 bg-green-50" },
-            { label: "Lock post-lanzamiento", value: "30 días",   sub: "Liberación Julio 2026",  icon: "🔒", color: "border-purple-300 bg-purple-50" },
-          ].map((item) => (
-            <FadeIn key={item.label}>
-              <div className={`rounded-2xl p-6 border ${item.color} text-center shadow-sm`}>
-                <div className="text-3xl mb-3">{item.icon}</div>
-                <p className="text-xs uppercase tracking-widest mb-1 text-stone-500">{item.label}</p>
-                <p className="text-2xl font-black font-mono gradient-text-gold">{item.value}</p>
-                <p className="text-xs mt-1 text-stone-400">{item.sub}</p>
-              </div>
-            </FadeIn>
+            { label: "Supply disponible", value: "2,997,924,580", sub: "OMMY — 10% del total",   borderColor: "rgba(251,146,60,0.4)", glowColor: "rgba(251,146,60,0.08)" },
+            { label: "Precio pre-compra",  value: "$0.001",        sub: "Precio de lanzamiento",  borderColor: "rgba(34,197,94,0.4)",  glowColor: "rgba(34,197,94,0.08)" },
+            { label: "Lock post-lanzamiento", value: "30 días",   sub: "Liberación Julio 2026",   borderColor: "rgba(147,51,234,0.4)", glowColor: "rgba(147,51,234,0.08)" },
+          ].map((item, i) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.12, duration: 0.5 }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="rounded-2xl p-6 text-center relative overflow-hidden"
+              style={{ border: `1px solid ${item.borderColor}`, background: `linear-gradient(135deg, ${item.glowColor} 0%, rgba(255,255,255,0.02) 100%)` }}
+            >
+              <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-2xl"
+                style={{ background: `radial-gradient(circle at 50% 50%, ${item.glowColor}, transparent 70%)` }} />
+              <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>{item.label}</p>
+              <p className="text-2xl font-black font-mono gradient-text-gold leading-tight">{item.value}</p>
+              <p className="text-xs mt-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>{item.sub}</p>
+            </motion.div>
           ))}
         </div>
 
@@ -1907,17 +1987,17 @@ function PreCompraSection() {
         </FadeIn>
 
         <FadeIn>
-          <div className="rounded-2xl p-6 border border-stone-200 bg-white shadow-sm mt-6">
-            <p className="text-xs uppercase tracking-widest mb-4 text-stone-400">¿Por qué el lock de 30 días?</p>
+          <div className="rounded-2xl p-6 mt-6" style={{ border: "1px solid rgba(245,158,11,0.15)", background: "rgba(255,255,255,0.03)" }}>
+            <p className="text-xs uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.35)" }}>¿Por qué el lock de 30 días?</p>
             <div className="grid sm:grid-cols-3 gap-4">
               {[
-                { icon: "📊", text: "Evita venta masiva que desestabiliza el precio al lanzar" },
-                { icon: "🤝", text: "Premia a early adopters que creen en el proyecto a largo plazo" },
-                { icon: "💎", text: "60% del supply dedicado a comunidad y quema — token sólido" },
+                { text: "Evita venta masiva que desestabiliza el precio al lanzar" },
+                { text: "Premia a early adopters que creen en el proyecto a largo plazo" },
+                { text: "60% del supply dedicado a comunidad y quema — token sólido" },
               ].map((item, i) => (
                 <div key={i} className="flex gap-3 items-start">
-                  <span className="text-xl flex-shrink-0">{item.icon}</span>
-                  <p className="text-xs leading-relaxed text-stone-500">{item.text}</p>
+                  <span className="w-5 h-5 rounded-full flex-shrink-0 mt-0.5 text-xs flex items-center justify-center font-bold" style={{ background: "rgba(245,158,11,0.2)", color: "#f59e0b" }}>{i + 1}</span>
+                  <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{item.text}</p>
                 </div>
               ))}
             </div>
@@ -1929,11 +2009,53 @@ function PreCompraSection() {
 }
 
 // ─── Proyectos Sustentables ───────────────────────────────────────────────────
+const PROYECTOS = [
+  { icon: "🌳", title: "Reforestación activa",       desc: "Plantación de especies adaptadas al ecosistema local, trabajando con comunidades y expertos en restauración ambiental.",  tag: "Medioambiente",    topColor: "#22c55e", tagBg: "#f0fdf4", tagText: "#15803d", from: "left" as const },
+  { icon: "👕", title: "Moda con materiales renovables", desc: "Ropa fabricada con algodón orgánico, fibras recicladas y tintes naturales. Cada prenda lleva su huella de carbono certificada.", tag: "Producto",  topColor: "#10b981", tagBg: "#ecfdf5", tagText: "#065f46", from: "right" as const },
+  { icon: "📦", title: "Producción bajo demanda",    desc: "Sin stock masivo. Cada prenda se produce cuando se pide, eliminando el desperdicio textil y reduciendo CO₂ un 60%.",       tag: "CO₂ Reducción",    topColor: "#14b8a6", tagBg: "#f0fdfa", tagText: "#0f766e", from: "left" as const },
+  { icon: "🧘", title: "dApp Bienestar Consciente",  desc: "Meditación, yoga, running, arte y música generan OMMY verificados on-chain. Incentivamos hábitos que mejoran la vida.",   tag: "Fase 3 · dApp",    topColor: "#9333ea", tagBg: "#faf5ff", tagText: "#7e22ce", from: "right" as const },
+  { icon: "🎨", title: "Arte y creatividad",         desc: "Actividades creativas — pintura, música, escritura — también generan recompensas. La expresión artística es bienestar.",   tag: "Comunidad",        topColor: "#ec4899", tagBg: "#fdf2f8", tagText: "#be185d", from: "left" as const },
+  { icon: "⚡", title: "Energía limpia",             desc: "Instalaciones solares para comunidades sin acceso a energía estable, financiadas parcialmente por el DAO Treasury.",       tag: "Infraestructura",  topColor: "#eab308", tagBg: "#fefce8", tagText: "#a16207", from: "right" as const },
+];
+
+function ProyectoCard({ p, i }: { p: typeof PROYECTOS[0]; i: number }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, x: p.from === "left" ? -50 : 50, y: 20 }}
+      animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
+      transition={{ duration: 0.65, delay: (i % 3) * 0.12, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+      className="card-cream-hover p-6 h-full relative overflow-hidden group cursor-default"
+      style={{ borderTop: `3px solid ${p.topColor}` }}
+    >
+      {/* Hover glow */}
+      <div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ background: `radial-gradient(circle at 30% 30%, ${p.topColor}10, transparent 65%)` }}
+      />
+      <div className="relative z-10">
+        <div className="text-4xl mb-4">{p.icon}</div>
+        <span
+          className="text-xs px-2.5 py-1 rounded-full border font-medium"
+          style={{ background: p.tagBg, color: p.tagText, borderColor: `${p.topColor}40` }}
+        >
+          {p.tag}
+        </span>
+        <h3 className="text-base font-bold text-cream-text mt-3 mb-2 group-hover:text-purple-700 transition-colors">{p.title}</h3>
+        <p className="text-sm text-cream-muted leading-relaxed">{p.desc}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 function ProyectosSustentables() {
   return (
     <section id="sustentable" className="section-cream py-24 px-6">
       <div className="max-w-5xl mx-auto">
-        <FadeIn className="text-center mb-14">
+        <FadeIn className="text-center mb-16">
           <span className="text-xs text-green-600 uppercase tracking-widest font-medium">Impacto real</span>
           <h2 className="font-serif text-4xl md:text-5xl font-bold mt-3 mb-4 text-cream-text">
             Proyectos <span className="gradient-text">Sustentables</span>
@@ -1944,72 +2066,18 @@ function ProyectosSustentables() {
           </p>
         </FadeIn>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-          {[
-            {
-              icon: "🌳",
-              title: "Reforestación activa",
-              desc: "Plantación de especies adaptadas al ecosistema local de cada zona de intervención, trabajando con comunidades y expertos en restauración ambiental.",
-              tag: "Medioambiente",
-              color: "border-green-300",
-              tagColor: "bg-green-50 text-green-700 border-green-200",
-            },
-            {
-              icon: "👕",
-              title: "Moda con materiales renovables",
-              desc: "Toda la ropa Om Domo se fabrica con algodón orgánico, fibras recicladas y tintes naturales. Cada prenda lleva su huella de carbono certificada.",
-              tag: "Producto",
-              color: "border-emerald-300",
-              tagColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-            },
-            {
-              icon: "📦",
-              title: "Producción bajo demanda",
-              desc: "Sin stock masivo. Cada prenda se produce cuando se pide, eliminando el desperdicio textil y reduciendo emisiones de CO₂ en un 60% vs. moda tradicional.",
-              tag: "CO₂ Reducción",
-              color: "border-teal-300",
-              tagColor: "bg-teal-50 text-teal-700 border-teal-200",
-            },
-            {
-              icon: "🧘",
-              title: "dApp Bienestar Consciente",
-              desc: "Meditación, yoga, running, arte y música generan OMMY verificados on-chain. Incentivamos hábitos que mejoran la vida, no solo la economía.",
-              tag: "Fase 3 · dApp",
-              color: "border-purple-300",
-              tagColor: "bg-purple-50 text-purple-700 border-purple-200",
-            },
-            {
-              icon: "🎨",
-              title: "Arte y creatividad",
-              desc: "Actividades creativas — pintura, música, escritura — también generan recompensas. Creemos que la expresión artística es bienestar colectivo.",
-              tag: "Comunidad",
-              color: "border-pink-300",
-              tagColor: "bg-pink-50 text-pink-700 border-pink-200",
-            },
-            {
-              icon: "⚡",
-              title: "Energía limpia",
-              desc: "Apoyo a comunidades sin acceso a energía estable mediante instalaciones solares compartidas, financiadas parcialmente por el DAO Treasury.",
-              tag: "Infraestructura",
-              color: "border-yellow-300",
-              tagColor: "bg-yellow-50 text-yellow-700 border-yellow-200",
-            },
-          ].map((p, i) => (
-            <FadeIn key={p.title} delay={i * 0.08}>
-              <div className={`card-cream-hover p-6 h-full border-t-4 ${p.color}`}>
-                <div className="text-4xl mb-4">{p.icon}</div>
-                <span className={`text-xs px-2.5 py-1 rounded-full border font-medium ${p.tagColor}`}>{p.tag}</span>
-                <h3 className="text-base font-bold text-cream-text mt-3 mb-2">{p.title}</h3>
-                <p className="text-sm text-cream-muted leading-relaxed">{p.desc}</p>
-              </div>
-            </FadeIn>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+          {PROYECTOS.map((p, i) => (
+            <ProyectoCard key={p.title} p={p} i={i} />
           ))}
         </div>
 
         <FadeIn>
-          <div className="bg-white rounded-2xl p-6 border border-stone-200">
+          <div className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-              <div className="text-3xl flex-shrink-0">🗳</div>
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-xl flex-shrink-0 shadow-md">
+                🗳
+              </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-cream-text mb-1">La comunidad decide qué construimos juntos</p>
                 <p className="text-xs text-cream-muted">
@@ -2719,6 +2787,231 @@ function JoinSection() {
   );
 }
 
+// ─── Nuevo en Web3 — collapsible ─────────────────────────────────────────────
+function NuevoEnWeb3Section() {
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  return (
+    <FadeIn delay={0.2}>
+      <div className="divider-cream mb-10" />
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full text-center mb-2 cursor-pointer group"
+        aria-expanded={open}
+      >
+        <span className="inline-flex items-center gap-2 text-xs text-purple-600 uppercase tracking-widest font-medium bg-purple-50 px-3 py-1.5 rounded-full border border-purple-200 mb-3">
+          ✦ Nuevo en cripto
+        </span>
+        <div className="flex items-center justify-center gap-3">
+          <h3 className="font-serif text-2xl md:text-3xl font-bold text-cream-text group-hover:text-purple-700 transition-colors">
+            Guía para <span className="gradient-text">empezar</span>
+          </h3>
+          <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
+            <ChevronDown size={22} className="text-purple-400" />
+          </motion.div>
+        </div>
+        <p className="text-cream-muted text-sm mt-2">Sin jerga. Sin complicaciones. En 4 pasos.</p>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="nuevo-content"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              {[
+                { step: "01", icon: "🦊", title: "Instala MetaMask", desc: "Una wallet gratuita en tu navegador o móvil. Es tu identidad digital en Web3.", link: "https://metamask.io", cta: "Instalar gratis" },
+                { step: "02", icon: "🔗", title: "Añade Avalanche", desc: "La red donde vive Ommy Coin. Rápida y económica. Se añade en 1 clic.", link: "https://chainlist.org/chain/43114", cta: "Añadir red" },
+                { step: "03", icon: "🛍️", title: "Compra en Om Domo", desc: "Cualquier prenda activa automáticamente tu recompensa en NFT y OMMY.", link: "https://www.omdomo.com", cta: "Ver tienda" },
+                { step: "04", icon: "🎁", title: "Reclama tus OMMY", desc: "Entra en web3.omdomo.com, conecta tu wallet y reclama tu NFT y tokens.", link: "/claim", cta: "Reclamar NFT" },
+              ].map((item) => (
+                <motion.a
+                  key={item.step}
+                  href={item.link}
+                  target={item.link.startsWith("http") ? "_blank" : undefined}
+                  rel={item.link.startsWith("http") ? "noopener noreferrer" : undefined}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Number(item.step) * 0.08 }}
+                  whileHover={{ y: -4, transition: { duration: 0.15 } }}
+                  className="group bg-white rounded-2xl p-6 border border-stone-200 shadow-sm hover:shadow-lg hover:border-purple-300 transition-all cursor-pointer block"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-3xl">{item.icon}</span>
+                    <span className="text-xs font-black text-stone-200 font-mono">{item.step}</span>
+                  </div>
+                  <h4 className="font-bold text-stone-800 mb-2 group-hover:text-purple-700 transition-colors">{item.title}</h4>
+                  <p className="text-xs text-stone-500 leading-relaxed mb-4">{item.desc}</p>
+                  <span className="text-xs font-semibold gradient-text group-hover:underline">{item.cta} →</span>
+                </motion.a>
+              ))}
+            </div>
+            <div className="max-w-2xl mx-auto space-y-3 mb-8">
+              <GuiasWeb3Accordion />
+            </div>
+            {/* Academy CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="text-center"
+            >
+              <div className="inline-flex flex-col sm:flex-row items-center gap-4 bg-gradient-to-r from-purple-50 via-white to-cyan-50 border border-purple-200 rounded-2xl px-6 py-5 shadow-sm max-w-xl mx-auto">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white text-xl flex-shrink-0 shadow-md">
+                  🎓
+                </div>
+                <div className="text-center sm:text-left flex-1">
+                  <p className="text-sm font-bold text-stone-800 leading-tight">Sigue ganando y aprendiendo en nuestra Academy</p>
+                  <p className="text-xs text-stone-500 mt-1">Artículos Web3 · Gana OMMY por leer · Totalmente gratis</p>
+                </div>
+                <button
+                  onClick={() => router.push("/dashboard")}
+                  className="flex-shrink-0 text-xs px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-semibold hover:opacity-90 transition-opacity whitespace-nowrap cursor-pointer"
+                >
+                  Ir a la Academy →
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </FadeIn>
+  );
+}
+
+// ─── Gamificación — collapsible carousel ─────────────────────────────────────
+function GamificacionSection() {
+  const [open, setOpen] = useState(false);
+  const enabled = [
+    { action: "Compra física",           reward: "5,000+ OMMY",  icon: <ShoppingBag size={15} /> },
+    { action: "Drop limitado (1ª hora)", reward: "+10,000 OMMY", icon: <Flame size={15} /> },
+    { action: "Referir un amigo",        reward: "+2,000 OMMY",  icon: <Users size={15} /> },
+    { action: "Evento Om Domo",          reward: "+3,000 OMMY",  icon: <Globe size={15} /> },
+    { action: "Reto Medita + Running",   reward: "+500 OMMY",    icon: <Activity size={15} /> },
+  ];
+  const upcoming = [
+    { action: "Share Twitter / X",  reward: "+500 OMMY",    icon: <Globe size={15} /> },
+    { action: "Share TikTok",       reward: "+500 OMMY",    icon: <Activity size={15} /> },
+    { action: "Share Instagram",    reward: "+500 OMMY",    icon: <Heart size={15} /> },
+    { action: "Running 5km",        reward: "+250 OMMY",    icon: <Zap size={15} /> },
+    { action: "Meditación 20 min",  reward: "+50 OMMY/día", icon: <Music size={15} /> },
+    { action: "Staking de NFT",     reward: "+50 OMMY/día", icon: <Zap size={15} /> },
+    { action: "Votación DAO",       reward: "+200 OMMY",    icon: <Star size={15} /> },
+  ];
+  return (
+    <section className="section-cream-2 py-20 px-6 overflow-hidden">
+      <div className="max-w-4xl mx-auto">
+        <FadeIn className="text-center mb-6">
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="w-full cursor-pointer group"
+            aria-expanded={open}
+          >
+            <span className="text-xs text-cyan-600 uppercase tracking-widest font-medium">Gamificación</span>
+            <div className="flex items-center justify-center gap-3 mt-1">
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-cream-text group-hover:text-purple-700 transition-colors">
+                Cada acción vale <span className="gradient-text">OMMY</span>
+              </h2>
+              <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                <ChevronDown size={22} className="text-cyan-500" />
+              </motion.div>
+            </div>
+            <p className="text-cream-muted text-sm mt-3 max-w-lg mx-auto">
+              Gana tokens por comprar, compartir, meditar, correr o votar.
+            </p>
+          </button>
+        </FadeIn>
+
+        <AnimatePresence initial={false}>
+          {open && (
+            <motion.div
+              key="gamif-content"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="pt-4">
+                {/* Habilitadas */}
+                <div className="mb-7">
+                  <div className="flex items-center gap-2 mb-4 px-1">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+                    <p className="text-xs font-bold text-green-600 uppercase tracking-widest">Habilitadas ahora</p>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+                    {enabled.map((r, i) => (
+                      <motion.div
+                        key={r.action}
+                        initial={{ opacity: 0, x: 40 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.07, duration: 0.4 }}
+                        whileHover={{ scale: 1.04, y: -3, transition: { duration: 0.15 } }}
+                        className="flex-shrink-0 flex items-center gap-3 p-4 rounded-2xl border border-purple-300/60 bg-gradient-to-br from-purple-50 to-cyan-50 shadow-md shadow-purple-100/60 w-56 cursor-default"
+                      >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-purple-500 to-cyan-500 text-white shadow-sm">
+                          {r.icon}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm text-stone-700 font-semibold leading-tight">{r.action}</p>
+                          <p className="text-sm font-black gradient-text mt-0.5">{r.reward}</p>
+                        </div>
+                        <motion.div
+                          animate={{ rotate: [0, 10, -10, 0] }}
+                          transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
+                          className="flex-shrink-0"
+                        >
+                          <Flame size={13} className="text-orange-500" />
+                        </motion.div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Próximamente */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4 px-1">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
+                    <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">Próximamente</p>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+                    {upcoming.map((r, i) => (
+                      <motion.div
+                        key={r.action}
+                        initial={{ opacity: 0, x: 40 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.25 + i * 0.06, duration: 0.4 }}
+                        className="flex-shrink-0 flex items-center gap-3 p-4 rounded-2xl border border-stone-200 bg-white/80 w-48 cursor-default relative overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px]" />
+                        <div className="absolute top-2 right-2 z-10">
+                          <Lock size={10} className="text-stone-300" />
+                        </div>
+                        <div className="relative z-10 w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-stone-100 text-stone-300">
+                          {r.icon}
+                        </div>
+                        <div className="relative z-10 min-w-0">
+                          <p className="text-xs text-stone-400 font-semibold leading-tight">{r.action}</p>
+                          <p className="text-xs font-bold text-stone-300 mt-0.5">{r.reward}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </section>
+  );
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
 export function LandingPage() {
   const countdown = useCountdown();
@@ -2793,7 +3086,7 @@ export function LandingPage() {
               chain={avalanche}
               connectButton={{
                 label: "Conectar",
-                className: "!text-xs !px-4 !py-2 !rounded-xl !bg-gradient-to-r !from-purple-600 !to-cyan-600 !font-semibold hover:!opacity-90 !transition-opacity",
+                className: "!text-xs !px-4 !py-2 !rounded-xl !bg-gradient-to-r !from-orange-500 !to-amber-500 !text-white !font-semibold hover:!opacity-90 !transition-opacity",
               }}
               onConnect={() => router.push("/dashboard")}
             />
@@ -2887,7 +3180,7 @@ export function LandingPage() {
               <Gift size={16} /> Reclamar mi NFT
             </a>
             <a
-              href="#waitlist"
+              href="/nft"
               className="flex items-center gap-2 px-6 py-4 rounded-2xl border border-purple-500/40 text-purple-300 font-semibold text-sm hover:border-purple-400/70 hover:text-purple-200 hover:bg-purple-500/10 transition-all"
             >
               ✨ NFT Zodiacal gratis
@@ -3056,116 +3349,12 @@ export function LandingPage() {
             ))}
           </div>
 
-          {/* ── Nuevo en Web3 — cards estilo MetaMask Learn ── */}
-          <FadeIn delay={0.2}>
-            <div className="divider-cream mb-12" />
-            <div className="text-center mb-10">
-              <span className="inline-flex items-center gap-2 text-xs text-purple-600 uppercase tracking-widest font-medium bg-purple-50 px-3 py-1.5 rounded-full border border-purple-200 mb-4">
-                ✦ Nuevo en cripto
-              </span>
-              <h3 className="font-serif text-2xl md:text-3xl font-bold mt-2 text-cream-text">
-                Todo lo que necesitas saber para <span className="gradient-text">empezar</span>
-              </h3>
-              <p className="text-cream-muted text-sm mt-2">Sin jerga. Sin complicaciones. En 4 pasos.</p>
-            </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {[
-                { step: "01", icon: "🦊", title: "Instala MetaMask", desc: "Una wallet gratuita en tu navegador o móvil. Es tu identidad digital en Web3.", link: "https://metamask.io", cta: "Instalar gratis" },
-                { step: "02", icon: "🔗", title: "Añade Avalanche", desc: "La red donde vive Ommy Coin. Rápida y económica. Se añade en 1 clic.", link: "https://chainlist.org/chain/43114", cta: "Añadir red" },
-                { step: "03", icon: "🛍️", title: "Compra en Om Domo", desc: "Cualquier prenda activa automáticamente tu recompensa en NFT y OMMY.", link: "https://www.omdomo.com", cta: "Ver tienda" },
-                { step: "04", icon: "🎁", title: "Reclama tus OMMY", desc: "Entra en web3.omdomo.com, conecta tu wallet y reclama tu NFT y tokens.", link: "/claim", cta: "Reclamar NFT" },
-              ].map((item) => (
-                <motion.a
-                  key={item.step}
-                  href={item.link}
-                  target={item.link.startsWith("http") ? "_blank" : undefined}
-                  rel={item.link.startsWith("http") ? "noopener noreferrer" : undefined}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: Number(item.step) * 0.08 }}
-                  whileHover={{ y: -4, transition: { duration: 0.15 } }}
-                  className="group bg-white rounded-2xl p-6 border border-stone-200 shadow-sm hover:shadow-lg hover:border-purple-300 transition-all cursor-pointer block"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <span className="text-3xl">{item.icon}</span>
-                    <span className="text-xs font-black text-stone-200 font-mono">{item.step}</span>
-                  </div>
-                  <h4 className="font-bold text-stone-800 mb-2 group-hover:text-purple-700 transition-colors">{item.title}</h4>
-                  <p className="text-xs text-stone-500 leading-relaxed mb-4">{item.desc}</p>
-                  <span className="text-xs font-semibold gradient-text group-hover:underline">{item.cta} →</span>
-                </motion.a>
-              ))}
-            </div>
-            <div className="max-w-2xl mx-auto space-y-3">
-              <GuiasWeb3Accordion />
-            </div>
-          </FadeIn>
+          <NuevoEnWeb3Section />
         </div>
       </section>
 
-      {/* ── REWARDS TABLE ────────────────────────────────────────────── */}
-      <section className="section-cream-2 py-20 px-6 overflow-hidden">
-        <div className="max-w-4xl mx-auto">
-          <FadeIn className="text-center mb-12">
-            <span className="text-xs text-cyan-600 uppercase tracking-widest font-medium">Gamificación</span>
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mt-3 text-cream-text">
-              Cada acción vale <span className="gradient-text">OMMY</span>
-            </h2>
-            <p className="text-cream-muted text-sm mt-3 max-w-lg mx-auto">
-              Gana tokens por comprar, compartir, meditar, correr o votar. El ecosistema te recompensa por vivir conscientemente.
-            </p>
-          </FadeIn>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[
-              { action: "Compra física",           reward: "5,000+ OMMY",  icon: <ShoppingBag size={15} />, hot: true,  delay: 0 },
-              { action: "Drop limitado (1ª hora)", reward: "+10,000 OMMY", icon: <Flame size={15} />,       hot: true,  delay: 0.05 },
-              { action: "Referir un amigo",        reward: "+2,000 OMMY",  icon: <Users size={15} />,       hot: true,  delay: 0.1 },
-              { action: "Evento Om Domo",          reward: "+3,000 OMMY",  icon: <Globe size={15} />,       hot: true,  delay: 0.15 },
-              { action: "Reto Medita + Running",   reward: "+500 OMMY",    icon: <Activity size={15} />,    hot: true,  delay: 0.2 },
-              { action: "Share Twitter / X",       reward: "+500 OMMY",    icon: <Globe size={15} />,       hot: false, delay: 0.25 },
-              { action: "Share TikTok",            reward: "+500 OMMY",    icon: <Activity size={15} />,    hot: false, delay: 0.3 },
-              { action: "Share Instagram",         reward: "+500 OMMY",    icon: <Heart size={15} />,       hot: false, delay: 0.35 },
-              { action: "Running 5km",             reward: "+250 OMMY",    icon: <Zap size={15} />,         hot: false, delay: 0.4 },
-              { action: "Meditación 20 min",       reward: "+50 OMMY/día", icon: <Music size={15} />,       hot: false, delay: 0.45 },
-              { action: "Staking de NFT",          reward: "+50 OMMY/día", icon: <Zap size={15} />,         hot: false, delay: 0.5 },
-              { action: "Votación DAO",            reward: "+200 OMMY",    icon: <Star size={15} />,        hot: false, delay: 0.55 },
-            ].map((r) => (
-              <motion.div
-                key={r.action}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: r.delay, duration: 0.4 }}
-                whileHover={{ scale: 1.03, y: -3, transition: { duration: 0.15 } }}
-                className={`flex items-center gap-3 p-4 rounded-2xl border cursor-default transition-shadow ${
-                  r.hot
-                    ? "border-purple-300/60 bg-gradient-to-br from-purple-50 to-cyan-50 shadow-md shadow-purple-100"
-                    : "border-stone-200 bg-white hover:shadow-md hover:border-stone-300"
-                }`}
-              >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                  r.hot ? "bg-gradient-to-br from-purple-500 to-cyan-500 text-white shadow-sm" : "bg-stone-100 text-stone-500"
-                }`}>
-                  {r.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-stone-700 font-semibold truncate">{r.action}</p>
-                  <p className={`text-sm font-black ${r.hot ? "gradient-text" : "text-stone-400"}`}>{r.reward}</p>
-                </div>
-                {r.hot && (
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, delay: r.delay }}
-                  >
-                    <Flame size={14} className="text-orange-500 flex-shrink-0" />
-                  </motion.div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── GAMIFICACIÓN ─────────────────────────────────────────────── */}
+      <GamificacionSection />
 
       {/* ── TOKEN ────────────────────────────────────────────────────── */}
       <section id="token" className="py-24 px-6 relative overflow-hidden">
@@ -3352,20 +3541,6 @@ export function LandingPage() {
 
       {/* ── COMUNIDAD DEV ────────────────────────────────────────────── */}
       <ComunidadDev />
-
-      {/* ── ÚNETE / PERFIL ────────────────────────────────────────────── */}
-      <section id="waitlist" className="section-cream py-24 px-6">
-        <div className="max-w-2xl mx-auto text-center">
-          <FadeIn>
-            <div className="bg-white rounded-3xl p-10 border border-stone-200 shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-cyan-400 to-purple-500 rounded-t-3xl" />
-              <div className="relative z-10">
-                <JoinSection />
-              </div>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
 
       {/* ── FOOTER ────────────────────────────────────────────────────── */}
       <footer className="border-t border-slate-800/40 py-10 px-6">
