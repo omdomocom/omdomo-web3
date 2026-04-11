@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "orderId and txHash required" }, { status: 400 });
     }
 
-    const updated = updateClaim(orderId, {
+    const updated = await updateClaim(orderId, {
       status: "claimed",
       claimedAt: new Date().toISOString(),
       txHash,
@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
     console.log(`[NFT Confirmed] Order ${orderId} | TX: ${txHash}`);
     return NextResponse.json({ success: true, claim: updated });
   } catch (error) {
+    console.error("[NFT confirm-claimed]", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

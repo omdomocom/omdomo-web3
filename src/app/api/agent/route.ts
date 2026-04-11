@@ -1,22 +1,39 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { requireApiKey } from "@/lib/auth";
+import { getRedis } from "@/lib/redis";
 
-// ── Rate limiter en memoria (10 req/min por IP) ───────────────────────────
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+// ── Rate limiter Redis (persistente entre instancias Vercel) ─────────────────
 const RATE_LIMIT = 10;
-const RATE_WINDOW_MS = 60_000;
+const RATE_WINDOW_S = 60;
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+async function checkRateLimit(ip: string): Promise<boolean> {
+  const redis = await getRedis();
+
+  if (!redis) {
+    // Fallback in-memory si no hay Redis
+    const now = Date.now();
+    const windowKey = `${ip}:${Math.floor(now / 60000)}`;
+    const entry = _memoryRateLimit.get(windowKey);
+    if (!entry) { _memoryRateLimit.set(windowKey, 1); return true; }
+    if (entry >= RATE_LIMIT) return false;
+    _memoryRateLimit.set(windowKey, entry + 1);
     return true;
   }
-  if (entry.count >= RATE_LIMIT) return false;
-  entry.count++;
-  return true;
+
+  try {
+    const windowMinute = Math.floor(Date.now() / 60000);
+    const key = `rate-limit:agent:${ip}:${windowMinute}`;
+    const count = await redis.incr(key);
+    if (count === 1) await redis.expire(key, RATE_WINDOW_S);
+    return count <= RATE_LIMIT;
+  } catch {
+    return true; // permitir si Redis falla (no bloquear por error de infra)
+  }
 }
+
+const _memoryRateLimit = new Map<string, number>();
+
 import {
   AGENTS,
   COORDINATOR_SYSTEM_PROMPT,
@@ -129,9 +146,13 @@ NEXT ACTIONS:
 
 export async function POST(req: NextRequest) {
   try {
-    // Rate limiting por IP
+    // API Key auth
+    const denied = requireApiKey(req);
+    if (denied) return denied;
+
+    // Rate limiting por IP (Redis persistente)
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    if (!checkRateLimit(ip)) {
+    if (!(await checkRateLimit(ip))) {
       return NextResponse.json(
         { error: "Demasiadas solicitudes. Espera 1 minuto." },
         { status: 429 }

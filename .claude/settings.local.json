@@ -6,18 +6,19 @@
       "Bash(curl:*)",
       "Bash(python3 -c \":*)",
       "Bash(npx tsc:*)",
-      "Bash(node -e \"console.log\\(require\\(''./node_modules/next/package.json''\\).version\\)\")",
-      "Bash(git checkout:*)",
-      "Bash(git add:*)",
-      "Bash(git push:*)",
-      "Bash(npm view:*)",
-      "Bash(node -e \"const v=require\\(''''fs''''\\).readFileSync\\(''''/dev/stdin'''',''''utf8''''\\); const arr=JSON.parse\\(v\\); console.log\\(arr.filter\\(x=>x.startsWith\\(''''15.''''\\)\\).slice\\(-5\\).join\\(''''\\\\n''''\\)\\)\")",
-      "Bash(git commit:*)",
-      "Bash(node -e \":*)",
       "Bash(npx next:*)",
-      "Bash(ls /Users/carleone/Desktop/web3/README*)",
-      "Bash(npx:*)",
-      "Bash(pkill -f 'next dev')"
+      "Bash(find /Users/carleone/Desktop/web3/.next -name *.js)",
+      "Bash(ls:*)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"next-server\")",
+      "Bash(python3:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(claude mcp:*)",
+      "WebFetch(domain:claude.com)",
+      "Bash(claude plugin:*)",
+      "Bash(npm list:*)"
     ]
   }
 }

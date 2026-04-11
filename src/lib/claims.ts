@@ -1,13 +1,16 @@
 // ─── Claims Store ────────────────────────────────────────────────────────────
-// Persists NFT claims to Redis via ioredis (supports any standard redis:// URL).
+// Persiste NFT claims usando Supabase como fuente de verdad.
+// Fallback a Redis si Supabase no está configurado.
+// Fallback a in-memory Map si tampoco hay Redis (dev local).
 //
-// Redis key schema:
-//   claim:{id}              → JSON of the full Claim object
-//   order-index:{orderId}   → JSON array of claim IDs for a Shopify order
-//   email-index:{email}     → JSON array of claim IDs for an email
-//
-// DEV FALLBACK: if REDIS_URL is not set, falls back to an in-memory Map
-// so local development works without Redis configured.
+// Supabase tabla `claims` — schema en /supabase/migrations/001_claims.sql
+// Redis key schema (legacy/fallback):
+//   claim:{id}              → JSON del Claim completo
+//   order-index:{orderId}   → JSON array de claim IDs por orden Shopify
+//   email-index:{email}     → JSON array de claim IDs por email
+
+import { getRedis } from "@/lib/redis";
+import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
 
 export interface Claim {
   id: string;             // `${shopifyOrderId}-${product_id}`
@@ -24,19 +27,42 @@ export interface Claim {
   tokenId?: string;
 }
 
-// ─── Redis client (singleton, lazy) ──────────────────────────────────────────
+// ─── Mapeo Supabase ↔ TypeScript ─────────────────────────────────────────────
 
-let _redis: import("ioredis").Redis | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function fromSupabase(row: Record<string, any>): Claim {
+  return {
+    id:            row.id,
+    email:         row.email,
+    productTitle:  row.product_title,
+    productImage:  row.product_image ?? "",
+    orderTotal:    Number(row.order_total),
+    ommyReward:    Number(row.ommy_reward),
+    walletAddress: row.wallet_address ?? undefined,
+    status:        row.status,
+    createdAt:     row.created_at,
+    claimedAt:     row.claimed_at ?? undefined,
+    txHash:        row.tx_hash ?? undefined,
+    tokenId:       row.token_id ?? undefined,
+  };
+}
 
-async function getRedis(): Promise<import("ioredis").Redis | null> {
-  const url = process.env.REDIS_URL || process.env.KV_REDIS_URL;
-  if (!url) return null;
-
-  if (!_redis) {
-    const { default: Redis } = await import("ioredis");
-    _redis = new Redis(url, { lazyConnect: false, maxRetriesPerRequest: 3 });
-  }
-  return _redis;
+function toSupabase(claim: Claim) {
+  return {
+    id:               claim.id,
+    email:            claim.email,
+    product_title:    claim.productTitle,
+    product_image:    claim.productImage,
+    order_total:      claim.orderTotal,
+    ommy_reward:      claim.ommyReward,
+    wallet_address:   claim.walletAddress ?? null,
+    status:           claim.status,
+    created_at:       claim.createdAt,
+    claimed_at:       claim.claimedAt ?? null,
+    tx_hash:          claim.txHash ?? null,
+    token_id:         claim.tokenId ?? null,
+    shopify_order_id: extractOrderId(claim.id),
+  };
 }
 
 // ─── Dev fallback ─────────────────────────────────────────────────────────────
@@ -48,12 +74,12 @@ function warnDev() {
   if (devWarnShown) return;
   devWarnShown = true;
   console.warn(
-    "[Claims] REDIS_URL not set — using in-memory store (data lost on restart).\n" +
-    "  Set REDIS_URL=redis://... in .env.local to persist claims."
+    "[Claims] Sin Supabase ni Redis — usando in-memory store (datos perdidos al reiniciar).\n" +
+    "  Configura NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY en .env.local"
   );
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Redis helpers (fallback) ─────────────────────────────────────────────────
 
 function extractOrderId(claimId: string): string {
   const lastDash = claimId.lastIndexOf("-");
@@ -83,30 +109,66 @@ async function appendToIndex(redis: import("ioredis").Redis, key: string, value:
 export async function createClaim(data: Omit<Claim, "status" | "createdAt">): Promise<Claim> {
   const claim: Claim = { ...data, status: "pending", createdAt: new Date().toISOString() };
 
+  // ── Supabase (fuente de verdad) ──
+  if (isSupabaseConfigured()) {
+    try {
+      const { error } = await getSupabaseAdmin().from("claims").insert(toSupabase(claim));
+      if (error) throw error;
+      return claim;
+    } catch (err) {
+      console.error("[Claims] Supabase createClaim falló, intentando Redis:", err);
+    }
+  }
+
+  // ── Redis (fallback) ──
   const redis = await getRedis();
-  if (!redis) {
-    warnDev();
-    devStore.set(claim.id, claim);
+  if (redis) {
+    const orderId = extractOrderId(claim.id);
+    await redisSet(redis, `claim:${claim.id}`, claim);
+    await appendToIndex(redis, `order-index:${orderId}`, claim.id);
+    await appendToIndex(redis, `email-index:${claim.email.toLowerCase()}`, claim.id);
     return claim;
   }
 
-  const orderId = extractOrderId(claim.id);
-  await redisSet(redis, `claim:${claim.id}`, claim);
-  await appendToIndex(redis, `order-index:${orderId}`, claim.id);
-  await appendToIndex(redis, `email-index:${claim.email.toLowerCase()}`, claim.id);
+  warnDev();
+  devStore.set(claim.id, claim);
   return claim;
 }
 
-// Exact match — used internally when claim.id is the full key (e.g. from mint route)
+// Exact match — usado cuando se tiene el claim.id completo
 export async function getClaimByOrderId(claimId: string): Promise<Claim | undefined> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await getSupabaseAdmin()
+        .from("claims")
+        .select("*")
+        .eq("id", claimId)
+        .single();
+      if (!error && data) return fromSupabase(data);
+    } catch (err) {
+      console.error("[Claims] Supabase getClaimByOrderId falló:", err);
+    }
+  }
+
   const redis = await getRedis();
   if (!redis) { warnDev(); return devStore.get(claimId); }
-
   return await redisGet<Claim>(redis, `claim:${claimId}`) ?? undefined;
 }
 
-// Prefix search — used when customer enters their Shopify order ID
+// Busca por shopify order ID (el cliente introduce su número de pedido)
 export async function getClaimsByShopifyOrderId(shopifyOrderId: string): Promise<Claim[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await getSupabaseAdmin()
+        .from("claims")
+        .select("*")
+        .eq("shopify_order_id", shopifyOrderId);
+      if (!error && data) return data.map(fromSupabase);
+    } catch (err) {
+      console.error("[Claims] Supabase getClaimsByShopifyOrderId falló:", err);
+    }
+  }
+
   const redis = await getRedis();
   if (!redis) {
     warnDev();
@@ -123,6 +185,18 @@ export async function getClaimsByShopifyOrderId(shopifyOrderId: string): Promise
 }
 
 export async function getClaimsByEmail(email: string): Promise<Claim[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await getSupabaseAdmin()
+        .from("claims")
+        .select("*")
+        .ilike("email", email);
+      if (!error && data) return data.map(fromSupabase);
+    } catch (err) {
+      console.error("[Claims] Supabase getClaimsByEmail falló:", err);
+    }
+  }
+
   const redis = await getRedis();
   if (!redis) {
     warnDev();
@@ -138,6 +212,27 @@ export async function getClaimsByEmail(email: string): Promise<Claim[]> {
 }
 
 export async function updateClaim(claimId: string, updates: Partial<Claim>): Promise<Claim | null> {
+  if (isSupabaseConfigured()) {
+    try {
+      const supabaseUpdates: Record<string, unknown> = {};
+      if (updates.status !== undefined)        supabaseUpdates.status         = updates.status;
+      if (updates.walletAddress !== undefined) supabaseUpdates.wallet_address  = updates.walletAddress;
+      if (updates.claimedAt !== undefined)     supabaseUpdates.claimed_at      = updates.claimedAt;
+      if (updates.txHash !== undefined)        supabaseUpdates.tx_hash         = updates.txHash;
+      if (updates.tokenId !== undefined)       supabaseUpdates.token_id        = updates.tokenId;
+
+      const { data, error } = await getSupabaseAdmin()
+        .from("claims")
+        .update(supabaseUpdates)
+        .eq("id", claimId)
+        .select()
+        .single();
+      if (!error && data) return fromSupabase(data);
+    } catch (err) {
+      console.error("[Claims] Supabase updateClaim falló:", err);
+    }
+  }
+
   const redis = await getRedis();
   if (!redis) {
     warnDev();
@@ -156,6 +251,18 @@ export async function updateClaim(claimId: string, updates: Partial<Claim>): Pro
 }
 
 export async function getAllClaims(): Promise<Claim[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await getSupabaseAdmin()
+        .from("claims")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (!error && data) return data.map(fromSupabase);
+    } catch (err) {
+      console.error("[Claims] Supabase getAllClaims falló:", err);
+    }
+  }
+
   const redis = await getRedis();
   if (!redis) {
     warnDev();
@@ -173,6 +280,19 @@ export async function getAllClaims(): Promise<Claim[]> {
 }
 
 export async function getPendingClaims(): Promise<Claim[]> {
+  if (isSupabaseConfigured()) {
+    try {
+      const { data, error } = await getSupabaseAdmin()
+        .from("claims")
+        .select("*")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+      if (!error && data) return data.map(fromSupabase);
+    } catch (err) {
+      console.error("[Claims] Supabase getPendingClaims falló:", err);
+    }
+  }
+
   const all = await getAllClaims();
   return all.filter((c) => c.status === "pending");
 }

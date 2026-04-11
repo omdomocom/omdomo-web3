@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { REWARDS, BURN } from "@/lib/tokenomics";
+import { requireApiKey } from "@/lib/auth";
 
 async function getKV() {
   if (!process.env.KV_REST_API_URL) return null;
@@ -26,6 +27,9 @@ interface ShareRecord {
 
 export async function POST(req: NextRequest) {
   try {
+    const denied = requireApiKey(req);
+    if (denied) return denied;
+
     const body = await req.json();
     const { walletAddress, platform, orderId, postUrl } = body;
 
@@ -108,6 +112,9 @@ export async function POST(req: NextRequest) {
 // GET /api/share?wallet=0x...  — historial de shares de un wallet
 export async function GET(req: NextRequest) {
   try {
+    const denied = requireApiKey(req);
+    if (denied) return denied;
+
     const wallet = req.nextUrl.searchParams.get("wallet");
     if (!wallet) {
       return NextResponse.json({ error: "wallet param requerido" }, { status: 400 });

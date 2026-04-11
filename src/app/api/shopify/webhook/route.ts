@@ -32,11 +32,16 @@ export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text();
     const hmac = req.headers.get("x-shopify-hmac-sha256") || "";
-    const secret = process.env.SHOPIFY_WEBHOOK_SECRET || "";
+    const secret = process.env.SHOPIFY_WEBHOOK_SECRET;
 
-    // Verify webhook authenticity (skip in dev if no secret set)
-    if (secret && !verifyShopifyWebhook(rawBody, hmac, secret)) {
-      console.warn("Invalid Shopify webhook signature");
+    // SHOPIFY_WEBHOOK_SECRET es obligatorio en producción
+    if (!secret) {
+      console.error("[Shopify webhook] SHOPIFY_WEBHOOK_SECRET no configurado — rechazando request");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+    }
+
+    if (!verifyShopifyWebhook(rawBody, hmac, secret)) {
+      console.warn("[Shopify webhook] Firma HMAC inválida");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

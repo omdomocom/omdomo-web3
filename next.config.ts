@@ -31,7 +31,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https://*.thirdweb.com https://*.ipfs.io https://ipfs.io https://gateway.pinata.cloud https://*.amazonaws.com",
-      "connect-src 'self' https://*.thirdweb.com https://api.thirdweb.com wss://*.thirdweb.com https://api.avax.network https://api.avax-test.network https://avalanche-mainnet.infura.io https://api.coingecko.com https://vercel.live wss://ws.pusherapp.com",
+      "connect-src 'self' https://*.thirdweb.com https://api.thirdweb.com wss://*.thirdweb.com https://api.avax.network https://api.avax-test.network https://avalanche-mainnet.infura.io https://api.coingecko.com https://vercel.live wss://ws.pusherapp.com https://*.supabase.co wss://*.supabase.co",
       "frame-src 'self' https://auth.thirdweb.com https://embedded-wallet.thirdweb.com",
       "worker-src 'self' blob:",
     ].join("; "),
@@ -60,7 +60,7 @@ const nextConfig: NextConfig = {
   },
 
   // Previene que headers de servidor se filtren al cliente
-  serverExternalPackages: ["ioredis"],
+  serverExternalPackages: ["ioredis", "@supabase/supabase-js"],
 };
 
 export default nextConfig;
