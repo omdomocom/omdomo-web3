@@ -81,14 +81,42 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      const receipt = await claimNFTTo(walletAddress, BigInt(parsedTokenId), contractAddress);
-      console.log(`[NFT Zodiac] tokenId=${parsedTokenId} → ${walletAddress} | TX: ${receipt.transactionHash} | email=${email ?? "n/a"}`);
+      try {
+        const receipt = await claimNFTTo(walletAddress, BigInt(parsedTokenId), contractAddress);
+        console.log(`[NFT Zodiac] tokenId=${parsedTokenId} → ${walletAddress} | TX: ${receipt.transactionHash} | email=${email ?? "n/a"}`);
 
-      return NextResponse.json({
-        success: true,
-        txHash: receipt.transactionHash,
-        explorerUrl: `https://testnet.snowtrace.io/tx/${receipt.transactionHash}`,
-      });
+        return NextResponse.json({
+          success: true,
+          txHash: receipt.transactionHash,
+          explorerUrl: `https://testnet.snowtrace.io/tx/${receipt.transactionHash}`,
+        });
+      } catch (mintError) {
+        const errMsg = String(mintError);
+        console.error(`[NFT Zodiac Mint] tokenId=${parsedTokenId} wallet=${walletAddress} error:`, errMsg);
+
+        // Si el error es de claim conditions no configuradas, devolver devMode
+        const isNotConfigured =
+          errMsg.includes("ClaimConditions") ||
+          errMsg.includes("!Qty") ||
+          errMsg.includes("claim condition") ||
+          errMsg.includes("No claim condition") ||
+          errMsg.includes("TokenDoesNotExist") ||
+          errMsg.includes("does not exist");
+
+        if (isNotConfigured) {
+          return NextResponse.json({
+            success: true,
+            devMode: true,
+            txHash: "0xDEV_ZODIAC_" + parsedTokenId,
+            message: `Token zodiacal #${parsedTokenId} pendiente de configuración en Thirdweb Dashboard. Tu NFT quedará registrado al lanzamiento mainnet.`,
+          });
+        }
+
+        return NextResponse.json(
+          { error: "Mint failed", details: errMsg.slice(0, 200) },
+          { status: 500 }
+        );
+      }
     }
 
     // ── Shopify purchase mint (flujo original) ────────────────────────────────

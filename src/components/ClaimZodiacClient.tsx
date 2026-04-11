@@ -150,7 +150,7 @@ export default function ClaimZodiacClient() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al mintear");
+      if (!res.ok) throw new Error(data.details || data.error || "Error al mintear");
 
       // Marcar como reclamado en el perfil
       if (emailParam || walletParam) {
@@ -164,7 +164,7 @@ export default function ClaimZodiacClient() {
         }).catch(() => null);
       }
 
-      setTxHash(data.txHash || data.devMode ? "DEV_MODE" : "");
+      setTxHash(data.devMode ? "" : (data.txHash || ""));
       setStep("done");
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Error desconocido");
