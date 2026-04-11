@@ -8,16 +8,19 @@ import { buildNFTMetadata } from "@/lib/nft";
 
 async function claimNFTTo(toAddress: string, tokenId: bigint, contractAddress: string) {
   const { createThirdwebClient, getContract } = await import("thirdweb");
-  const { avalancheFuji } = await import("thirdweb/chains");
+  const { avalancheFuji, avalanche } = await import("thirdweb/chains");
   const { claimTo } = await import("thirdweb/extensions/erc1155");
   const { sendTransaction } = await import("thirdweb");
   const { privateKeyToAccount } = await import("thirdweb/wallets");
+
+  const isMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
+  const activeChain = isMainnet ? avalanche : avalancheFuji;
 
   const serverClient = createThirdwebClient({
     secretKey: process.env.THIRDWEB_SECRET_KEY || "",
   });
 
-  // Minter wallet — needs AVAX on Fuji for gas fees
+  // Minter wallet — needs AVAX on the active chain for gas fees
   // Address: 0x648FD67c26E607324B860d95b2ee8834EE30b146
   const minterAccount = privateKeyToAccount({
     client: serverClient,
@@ -26,7 +29,7 @@ async function claimNFTTo(toAddress: string, tokenId: bigint, contractAddress: s
 
   const contract = getContract({
     client: serverClient,
-    chain: avalancheFuji,
+    chain: activeChain,
     address: contractAddress,
   });
 
@@ -69,7 +72,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "tokenId must be between 1 and 12 for zodiac NFTs" }, { status: 400 });
       }
 
-      const contractAddress = process.env.NEXT_PUBLIC_NFT_CONTRACT_FUJI || "";
+      const useMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
+      const contractAddress = useMainnet
+        ? (process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET || "")
+        : (process.env.NEXT_PUBLIC_NFT_CONTRACT_FUJI || "");
       const minterKey = process.env.MINTER_PRIVATE_KEY || "";
 
       if (!contractAddress || !minterKey) {
@@ -77,7 +83,9 @@ export async function POST(req: NextRequest) {
           success: true,
           devMode: true,
           txHash: "0xDEV_MODE",
-          message: "DEV MODE: add NEXT_PUBLIC_NFT_CONTRACT_FUJI and MINTER_PRIVATE_KEY to .env.local",
+          message: useMainnet
+            ? "DEV MODE: añade NEXT_PUBLIC_NFT_CONTRACT_MAINNET y MINTER_PRIVATE_KEY en Vercel"
+            : "DEV MODE: añade NEXT_PUBLIC_NFT_CONTRACT_FUJI y MINTER_PRIVATE_KEY en .env.local",
         });
       }
 
@@ -148,7 +156,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const contractAddress = process.env.NEXT_PUBLIC_NFT_CONTRACT_FUJI || "";
+    const useMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
+    const contractAddress = useMainnet
+      ? (process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET || "")
+      : (process.env.NEXT_PUBLIC_NFT_CONTRACT_FUJI || "");
     const minterKey = process.env.MINTER_PRIVATE_KEY || "";
 
     // Dev mode — no contract or key configured yet
@@ -163,7 +174,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         devMode: true,
-        message: "DEV MODE: add NEXT_PUBLIC_NFT_CONTRACT_FUJI and MINTER_PRIVATE_KEY to .env.local",
+        message: useMainnet
+          ? "Añade NEXT_PUBLIC_NFT_CONTRACT_MAINNET y MINTER_PRIVATE_KEY en Vercel"
+          : "DEV MODE: add NEXT_PUBLIC_NFT_CONTRACT_FUJI and MINTER_PRIVATE_KEY to .env.local",
         claim: mockClaim,
       });
     }
