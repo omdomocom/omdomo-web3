@@ -1747,6 +1747,8 @@ function PreCompraSection() {
   const [ommyAmount, setOmmyAmount] = useState(10000);
   const [payMethod, setPayMethod] = useState<"avax" | "card">("avax");
   const [step, setStep] = useState<"idle" | "confirm" | "done">("idle");
+  const [cardLoading, setCardLoading] = useState(false);
+  const [cardError, setCardError] = useState("");
   const AVAX_PRICE = 25; // USD aproximado — se actualizará con feed en Fase 2
   const OMMY_PRICE = 0.001;
   const usdTotal = ommyAmount * OMMY_PRICE;
@@ -1772,13 +1774,25 @@ function PreCompraSection() {
   }
 
   async function handleCardPay() {
-    const res = await fetch("/api/precompra/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ommyAmount, wallet: account?.address }),
-    });
-    const { url } = await res.json();
-    if (url) window.location.href = url;
+    setCardLoading(true);
+    setCardError("");
+    try {
+      const res = await fetch("/api/precompra/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ommyAmount, wallet: account?.address }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setCardError(data.error || "Error al iniciar el pago. Inténtalo de nuevo.");
+      }
+    } catch {
+      setCardError("Error de conexión. Comprueba tu internet e inténtalo de nuevo.");
+    } finally {
+      setCardLoading(false);
+    }
   }
 
   const precompraRef = useRef<HTMLElement>(null);
@@ -1970,12 +1984,28 @@ function PreCompraSection() {
                     {step === "confirm" ? "Confirmando..." : `Pagar ${avaxTotal} AVAX`}
                   </button>
                 ) : (
-                  <button
-                    onClick={handleCardPay}
-                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold text-sm hover:opacity-90 transition-opacity"
-                  >
-                    Pagar ${usdTotal.toFixed(2)} con tarjeta →
-                  </button>
+                  <>
+                    <button
+                      onClick={handleCardPay}
+                      disabled={cardLoading}
+                      className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      {cardLoading ? (
+                        <>
+                          <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                          </svg>
+                          Abriendo pago seguro...
+                        </>
+                      ) : (
+                        `Pagar $${usdTotal.toFixed(2)} con tarjeta →`
+                      )}
+                    </button>
+                    {cardError && (
+                      <p className="text-xs text-red-400 text-center mt-1 px-2">{cardError}</p>
+                    )}
+                  </>
                 )}
 
                 <p className="text-xs text-center" style={{ color: "var(--dark-muted)" }}>

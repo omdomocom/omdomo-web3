@@ -2,7 +2,41 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Check, Edit3, Wallet, Palette } from "lucide-react";
+import { Camera, Check, Edit3, Wallet, Palette, Sparkles, Star } from "lucide-react";
+
+// ─── Zodiac helper ───────────────────────────────────────────────────────────
+const ZODIAC_SIGNS: { name: string; emoji: string; start: [number, number]; end: [number, number] }[] = [
+  { name: "Capricornio", emoji: "♑", start: [12, 22], end: [1,  19] },
+  { name: "Acuario",     emoji: "♒", start: [1,  20], end: [2,  18] },
+  { name: "Piscis",      emoji: "♓", start: [2,  19], end: [3,  20] },
+  { name: "Aries",       emoji: "♈", start: [3,  21], end: [4,  19] },
+  { name: "Tauro",       emoji: "♉", start: [4,  20], end: [5,  20] },
+  { name: "Géminis",     emoji: "♊", start: [5,  21], end: [6,  20] },
+  { name: "Cáncer",      emoji: "♋", start: [6,  21], end: [7,  22] },
+  { name: "Leo",         emoji: "♌", start: [7,  23], end: [8,  22] },
+  { name: "Virgo",       emoji: "♍", start: [8,  23], end: [9,  22] },
+  { name: "Libra",       emoji: "♎", start: [9,  23], end: [10, 22] },
+  { name: "Escorpio",    emoji: "♏", start: [10, 23], end: [11, 21] },
+  { name: "Sagitario",   emoji: "♐", start: [11, 22], end: [12, 21] },
+];
+
+function getZodiacSign(birthday: string): { name: string; emoji: string } | null {
+  if (!birthday) return null;
+  const d = new Date(birthday + "T12:00:00");
+  if (isNaN(d.getTime())) return null;
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  for (const z of ZODIAC_SIGNS) {
+    const [sm, sd] = z.start;
+    const [em, ed] = z.end;
+    if (sm === 12) {
+      if ((m === 12 && day >= sd) || (m === 1 && day <= ed)) return z;
+    } else {
+      if ((m === sm && day >= sd) || (m === em && day <= ed)) return z;
+    }
+  }
+  return null;
+}
 
 export interface BgTheme {
   label:       string;
@@ -38,6 +72,10 @@ export interface UserProfile {
   avatarType: "emoji" | "image";
   bgTheme: string;
   joinDate: string;
+  email: string;
+  birthday: string;
+  profileRewardClaimed: boolean;
+  zodiacClaimed: boolean;
 }
 
 export const DEFAULT_PROFILE: UserProfile = {
@@ -47,6 +85,10 @@ export const DEFAULT_PROFILE: UserProfile = {
   avatarType: "emoji",
   bgTheme: "space",
   joinDate: new Date().toISOString(),
+  email: "",
+  birthday: "",
+  profileRewardClaimed: false,
+  zodiacClaimed: false,
 };
 
 export function loadProfile(): UserProfile {
@@ -117,6 +159,7 @@ export function ProfilePanel({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<UserProfile>(DEFAULT_PROFILE);
   const [saved, setSaved] = useState(false);
+  const [rewardEarned, setRewardEarned] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -131,12 +174,19 @@ export function ProfilePanel({
   }
 
   function handleSave() {
-    saveProfile(draft);
-    setProfile(draft);
-    if (draft.bgTheme !== profile.bgTheme) onThemeChange?.(draft.bgTheme);
+    const isNewReward = draft.email && draft.birthday && !draft.profileRewardClaimed;
+    const updatedDraft = isNewReward ? { ...draft, profileRewardClaimed: true } : draft;
+    saveProfile(updatedDraft);
+    setProfile(updatedDraft);
+    if (updatedDraft.bgTheme !== profile.bgTheme) onThemeChange?.(updatedDraft.bgTheme);
     setEditing(false);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    if (isNewReward) {
+      setRewardEarned(true);
+      setTimeout(() => { setSaved(false); setRewardEarned(false); }, 4000);
+    } else {
+      setTimeout(() => setSaved(false), 2500);
+    }
   }
 
   function handleCancel() {
@@ -197,19 +247,41 @@ export function ProfilePanel({
         <div>
           <p className="text-base font-bold text-slate-100">{displayName}</p>
           {profile.bio && <p className="text-xs text-slate-500 mt-1 leading-relaxed">{profile.bio}</p>}
-          {walletAddress && (
-            <div className="inline-flex items-center gap-1.5 mt-2 px-2 py-1 rounded-lg bg-green-900/20 border border-green-500/20">
-              <Wallet size={10} className="text-green-400" />
-              <span className="text-xs text-green-400 font-mono">{walletAddress.slice(0, 6)}…{walletAddress.slice(-4)}</span>
-              <span className="text-xs text-green-400">✓</span>
-            </div>
-          )}
+          <div className="flex flex-wrap justify-center gap-2 mt-2">
+            {walletAddress && (
+              <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-green-900/20 border border-green-500/20">
+                <Wallet size={10} className="text-green-400" />
+                <span className="text-xs text-green-400 font-mono">{walletAddress.slice(0, 6)}…{walletAddress.slice(-4)}</span>
+                <span className="text-xs text-green-400">✓</span>
+              </div>
+            )}
+            {profile.email && (
+              <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-purple-900/20 border border-purple-500/20">
+                <span className="text-xs text-purple-400">✉ {profile.email}</span>
+              </div>
+            )}
+            {profile.profileRewardClaimed && (() => {
+              const z = getZodiacSign(profile.birthday);
+              return z ? (
+                <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-900/20 border border-amber-500/20">
+                  <span className="text-xs text-amber-400 font-semibold">{z.emoji} {z.name}</span>
+                </div>
+              ) : null;
+            })()}
+          </div>
         </div>
 
         {saved && (
-          <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-green-400 flex items-center justify-center gap-1">
-            <Check size={12} /> Perfil guardado
-          </motion.p>
+          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-1">
+            <p className="text-xs text-green-400 flex items-center justify-center gap-1">
+              <Check size={12} /> Perfil guardado
+            </p>
+            {rewardEarned && (
+              <p className="text-xs text-amber-400 flex items-center justify-center gap-1 font-semibold">
+                ✨ ¡NFT Zodiacal desbloqueado! Reclámalo abajo
+              </p>
+            )}
+          </motion.div>
         )}
       </div>
 
@@ -274,6 +346,59 @@ export function ProfilePanel({
               </div>
             </div>
 
+            {/* Email + birthday — recompensa NFT zodiacal */}
+            <div className="glass rounded-2xl p-4 border border-amber-500/20 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-slate-500 uppercase tracking-wider">Contacto & NFT Zodiacal</p>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold flex items-center gap-1">
+                  <Sparkles size={10} /> NFT gratis
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">Completa tu email y fecha de nacimiento para desbloquear tu <span className="text-amber-400 font-semibold">NFT Zodiacal gratis</span> y acceso a drops exclusivos.</p>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Email</label>
+                <input
+                  type="email"
+                  value={draft.email}
+                  onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))}
+                  placeholder="tu@email.com"
+                  className="w-full bg-slate-800/60 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 border border-slate-700/40 focus:border-amber-500/50 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Fecha de nacimiento</label>
+                <input
+                  type="date"
+                  value={draft.birthday}
+                  onChange={(e) => setDraft((d) => ({ ...d, birthday: e.target.value }))}
+                  className="w-full bg-slate-800/60 rounded-lg px-3 py-2 text-sm text-slate-200 border border-slate-700/40 focus:border-amber-500/50 focus:outline-none"
+                />
+              </div>
+              {(() => {
+                const z = getZodiacSign(draft.birthday);
+                if (z && draft.birthday) return (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-900/20 border border-purple-500/20">
+                    <span className="text-xl">{z.emoji}</span>
+                    <div>
+                      <p className="text-xs text-purple-300 font-semibold">{z.name}</p>
+                      <p className="text-xs text-slate-600">Tu signo zodiacal detectado</p>
+                    </div>
+                  </div>
+                );
+                return null;
+              })()}
+              {draft.email && draft.birthday && !draft.profileRewardClaimed && (
+                <p className="text-xs text-amber-400 flex items-center gap-1.5">
+                  <Sparkles size={10} /> Al guardar desbloqueas tu NFT Zodiacal gratis
+                </p>
+              )}
+              {draft.profileRewardClaimed && (
+                <p className="text-xs text-green-400 flex items-center gap-1.5">
+                  <Check size={12} /> NFT Zodiacal desbloqueado — reclámalo en tu perfil
+                </p>
+              )}
+            </div>
+
             {/* Background themes */}
             <div className="glass rounded-2xl p-4 border border-slate-700/30 space-y-3">
               <p className="text-xs text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
@@ -317,11 +442,89 @@ export function ProfilePanel({
         )}
       </AnimatePresence>
 
+      {/* ── NFT Zodiacal card (solo vista) ── */}
+      {!editing && (() => {
+        const z = getZodiacSign(profile.birthday);
+        if (!profile.email || !profile.birthday) {
+          // Prompt para completar perfil
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass rounded-2xl p-4 border border-dashed border-amber-500/30 space-y-2"
+            >
+              <div className="flex items-center gap-2">
+                <Star size={14} className="text-amber-400" />
+                <p className="text-xs text-amber-400 font-semibold uppercase tracking-wider">NFT Zodiacal gratis</p>
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">Completa tu email y fecha de nacimiento en <strong className="text-slate-400">Editar perfil</strong> para desbloquear tu NFT zodiacal gratis.</p>
+              <button
+                onClick={startEdit}
+                className="text-xs px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+              >
+                Completar perfil →
+              </button>
+            </motion.div>
+          );
+        }
+        if (profile.profileRewardClaimed && !profile.zodiacClaimed && z) {
+          // Botón para reclamar NFT
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass rounded-2xl p-4 border border-amber-500/40 space-y-3"
+              style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(139,92,246,0.08) 100%)" }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={14} className="text-amber-400" />
+                  <p className="text-xs text-amber-400 font-semibold uppercase tracking-wider">Tu NFT Zodiacal</p>
+                </div>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">Desbloqueado</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-900/60 to-amber-900/40 border border-amber-500/30 flex items-center justify-center text-3xl flex-shrink-0">
+                  {z.emoji}
+                </div>
+                <div>
+                  <p className="text-base font-bold text-white">{z.name}</p>
+                  <p className="text-xs text-slate-500">Om Domo Zodiac Collection</p>
+                  <p className="text-xs text-amber-400 mt-0.5">Genesis · Gratis</p>
+                </div>
+              </div>
+              <a
+                href={`/claim-zodiac?zodiac=${encodeURIComponent(z.name)}&email=${encodeURIComponent(profile.email)}`}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              >
+                <Sparkles size={14} /> Reclamar NFT {z.emoji} {z.name}
+              </a>
+            </motion.div>
+          );
+        }
+        if (profile.zodiacClaimed && z) {
+          // NFT ya reclamado
+          return (
+            <div className="glass rounded-2xl p-4 border border-green-500/20 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-900/40 to-purple-900/40 border border-green-500/20 flex items-center justify-center text-2xl flex-shrink-0">
+                {z.emoji}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-green-400">{z.name} — NFT reclamado</p>
+                <p className="text-xs text-slate-500">Om Domo Zodiac Collection · Genesis</p>
+              </div>
+              <Check size={16} className="text-green-400 ml-auto flex-shrink-0" />
+            </div>
+          );
+        }
+        return null;
+      })()}
+
       {/* ── Stats rápidas (solo vista) ── */}
       {!editing && (
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: "NFTs",   value: "1",  color: "text-purple-300" },
+            { label: "NFTs",   value: profile.zodiacClaimed ? "1" : "0",  color: "text-purple-300" },
             { label: "OMMY",   value: "—",  color: "text-cyan-300"   },
             { label: "Nivel",  value: "Seeker", color: "text-yellow-400" },
           ].map((s) => (
