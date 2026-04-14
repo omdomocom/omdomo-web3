@@ -48,7 +48,7 @@ function getZodiacFromBirthday(birthday: string): { name: string; tokenId: numbe
 async function mintZodiacNFT(toAddress: string, tokenId: bigint, contractAddress: string) {
   const { createThirdwebClient, getContract } = await import("thirdweb");
   const { avalancheFuji, avalanche } = await import("thirdweb/chains");
-  const { mintAdditionalSupplyTo } = await import("thirdweb/extensions/erc1155");
+  const { claimTo } = await import("thirdweb/extensions/erc1155");
   const { sendTransaction } = await import("thirdweb");
   const { privateKeyToAccount } = await import("thirdweb/wallets");
 
@@ -70,11 +70,13 @@ async function mintZodiacNFT(toAddress: string, tokenId: bigint, contractAddress
     address: contractAddress,
   });
 
-  const transaction = mintAdditionalSupplyTo({
+  // claimTo con precio 0 — requiere Claim Condition a 0 AVAX en Thirdweb Dashboard
+  // La seguridad es la API: Redis anti-double-claim + verificación perfil completo
+  const transaction = claimTo({
     contract,
     to: toAddress,
     tokenId,
-    supply: BigInt(1),
+    quantity: BigInt(1),
   });
 
   const receipt = await sendTransaction({
