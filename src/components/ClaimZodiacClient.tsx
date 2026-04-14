@@ -7,6 +7,7 @@ import { useActiveAccount, ConnectButton, useSendTransaction } from "thirdweb/re
 import { claimTo } from "thirdweb/extensions/erc1155";
 import { client, avalanche, avalancheFuji } from "@/lib/thirdweb";
 import { getNFTContract, isMainnet } from "@/lib/nft";
+import { loadProfile, saveProfile } from "./ProfilePanel";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
 // (precio gestionado por Claim Conditions en Thirdweb — 0.5 AVAX)
@@ -141,6 +142,10 @@ export default function ClaimZodiacClient() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error + (data.raw ? `\n\n${data.raw}` : ""));
 
+      // Marcar zodiacClaimed en el perfil local
+      const profile = loadProfile();
+      saveProfile({ ...profile, zodiacClaimed: true });
+
       setTxHash(data.devMode ? "" : (data.txHash || ""));
       setStep("done");
     } catch (err) {
@@ -169,6 +174,11 @@ export default function ClaimZodiacClient() {
       });
 
       const receipt = await sendTx(transaction);
+
+      // Marcar zodiacClaimed en el perfil local
+      const profile = loadProfile();
+      saveProfile({ ...profile, zodiacClaimed: true });
+
       setTxHash(receipt.transactionHash);
       setStep("done");
     } catch (err) {
