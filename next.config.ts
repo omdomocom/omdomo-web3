@@ -61,6 +61,12 @@ const nextConfig: NextConfig = {
 
   // Previene que headers de servidor se filtren al cliente
   serverExternalPackages: ["ioredis", "@supabase/supabase-js"],
+
+  // Silencia el warning de pino-pretty (dependencia opcional de WalletConnect)
+  webpack(config) {
+    config.resolve.fallback = { ...config.resolve.fallback, "pino-pretty": false };
+    return config;
+  },
 };
 
 export default nextConfig;
