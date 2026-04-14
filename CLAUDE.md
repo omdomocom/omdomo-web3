@@ -43,7 +43,7 @@ Contexto completo del proyecto para sesiones de Claude Code.
 |----------|-----|-----------|
 | Ommy Coin (ERC-20) | Avalanche Mainnet (43114) | `0x70EdA9Bb95eeE2551261c37720933905f9425596` |
 | Om Domo NFT (ERC-1155) | Avalanche Fuji Testnet (43113) | `0xd51de87FbC012b694922036C30E5C82e16594958` |
-| Om Domo NFT (ERC-1155) | Avalanche Mainnet (43114) | ⏳ Pendiente migración |
+| Om Domo NFT (ERC-1155) | Avalanche Mainnet (43114) | `0xf71abB919CFE72B0985f44f518A2432CA891AE27` |
 
 - Ommy Coin symbol: OMMY | Decimals: 18
 - NFT symbol: OMDNFT | Type: Edition Drop ERC-1155 v5.0.7

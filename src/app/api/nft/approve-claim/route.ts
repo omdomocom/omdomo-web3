@@ -38,7 +38,9 @@ export async function POST(req: NextRequest) {
       approved: true,
       orderId,
       walletAddress,
-      contractAddress: process.env.NEXT_PUBLIC_NFT_CONTRACT_FUJI || "",
+      contractAddress: process.env.NEXT_PUBLIC_USE_MAINNET === "true"
+        ? (process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET || "")
+        : (process.env.NEXT_PUBLIC_NFT_CONTRACT_FUJI || ""),
       tokenId: 0,
       quantity: 1,
       ommyReward: claim.ommyReward,

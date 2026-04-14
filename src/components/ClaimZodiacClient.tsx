@@ -3,15 +3,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useActiveAccount, useWalletBalance, ConnectButton, useSendTransaction } from "thirdweb/react";
-import { prepareContractCall } from "thirdweb";
-import { client, avalanche, avalancheFuji, getOmmyContract } from "@/lib/thirdweb";
+import { useActiveAccount, ConnectButton, useSendTransaction } from "thirdweb/react";
+import { claimTo } from "thirdweb/extensions/erc1155";
+import { client, avalanche, avalancheFuji } from "@/lib/thirdweb";
 import { getNFTContract } from "@/lib/nft";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
-
-const ECOSISTEMA_WALLET = "0xF49FBE7764932c5Ca95f0Da80F54C3C65C6ec294";
-const OMMY_PRICE = BigInt(500) * BigInt(10) ** BigInt(18); // 500 OMMY en wei
+// (precio gestionado por Claim Conditions en Thirdweb — 0.5 AVAX)
 
 // ─── Configuración Zodiacal ────────────────────────────────────────────────────
 
@@ -72,15 +70,6 @@ export default function ClaimZodiacClient() {
   const isMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
   const activeChain = isMainnet ? avalanche : avalancheFuji;
 
-  // Balance OMMY del usuario
-  const ommyContract = getOmmyContract();
-  const { data: balanceData } = useWalletBalance({
-    chain: avalanche,
-    address: account?.address,
-    tokenAddress: ommyContract.address,
-    client,
-  });
-
   const { mutateAsync: sendTx } = useSendTransaction();
 
   // ─── Cargar zodíaco del perfil o parámetros URL ─────────────────────────────
@@ -133,36 +122,25 @@ export default function ClaimZodiacClient() {
     setStep("buy");
   }
 
-  // ─── Claim gratuito ─────────────────────────────────────────────────────────
+  // ─── Claim gratuito (perfil completo → servidor mintea gratis) ──────────────
 
   async function handleFreeClaim() {
     if (!account || !zodiacInfo) return;
+    // Necesitamos email y birthday del perfil — están en los searchParams o localStorage
+    const birthdayParam = searchParams.get("birthday") ?? "";
     setMinting(true);
     try {
-      const res = await fetch("/api/nft/mint", {
+      const res = await fetch("/api/nft/claim-zodiac", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           wallet: account.address,
           email: emailParam,
-          tokenId: zodiacInfo.tokenId.toString(),
-          type: "zodiac",
+          birthday: birthdayParam,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.details || data.error || "Error al mintear");
-
-      // Marcar como reclamado en el perfil
-      if (emailParam || walletParam) {
-        await fetch("/api/profile", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            wallet: walletParam || account.address,
-            email: emailParam,
-          }),
-        }).catch(() => null);
-      }
+      if (!res.ok) throw new Error(data.error || "Error al mintear");
 
       setTxHash(data.devMode ? "" : (data.txHash || ""));
       setStep("done");
@@ -174,38 +152,25 @@ export default function ClaimZodiacClient() {
     }
   }
 
-  // ─── Compra con OMMY ────────────────────────────────────────────────────────
+  // ─── Compra con 0.5 AVAX (claimTo directo al contrato) ──────────────────────
+  // El precio viene de la Claim Condition configurada en Thirdweb Dashboard (0.5 AVAX)
 
-  async function handleBuyWithOmmy() {
+  async function handleBuyWithAvax() {
     if (!account || !zodiacInfo) return;
     setMinting(true);
     try {
-      // 1. Transferir OMMY al wallet de ecosistema
-      const ommyContractInstance = getOmmyContract();
-      const transferTx = prepareContractCall({
-        contract: ommyContractInstance,
-        method: "function transfer(address to, uint256 amount) returns (bool)",
-        params: [ECOSISTEMA_WALLET, OMMY_PRICE],
+      const nftContract = getNFTContract();
+      if (!nftContract) throw new Error("Contrato NFT no configurado");
+
+      const transaction = claimTo({
+        contract: nftContract,
+        to: account.address,
+        tokenId: zodiacInfo.tokenId,
+        quantity: BigInt(1),
       });
 
-      const receipt = await sendTx(transferTx);
-
-      // 2. Mintear el NFT zodiacal
-      const mintRes = await fetch("/api/nft/mint", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          wallet: account.address,
-          email: emailParam,
-          tokenId: zodiacInfo.tokenId.toString(),
-          type: "zodiac",
-          paymentTxHash: receipt.transactionHash,
-        }),
-      });
-      const mintData = await mintRes.json();
-      if (!mintRes.ok) throw new Error(mintData.error || "Error al mintear");
-
-      setTxHash(mintData.txHash || receipt.transactionHash || "");
+      const receipt = await sendTx(transaction);
+      setTxHash(receipt.transactionHash);
       setStep("done");
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Error desconocido");
@@ -214,13 +179,6 @@ export default function ClaimZodiacClient() {
       setMinting(false);
     }
   }
-
-  // ─── Cálculo de balance OMMY ────────────────────────────────────────────────
-
-  const ommyBalance = balanceData
-    ? parseFloat(balanceData.displayValue)
-    : 0;
-  const hasEnoughOmmy = ommyBalance >= 500;
 
   // ─── Colores del elemento ───────────────────────────────────────────────────
 
@@ -320,7 +278,7 @@ export default function ClaimZodiacClient() {
               {/* Stats */}
               <div className="grid grid-cols-4 gap-2 mb-6">
                 {[
-                  { label: "Precio", value: isFreeClaimAvailable ? "Gratis" : "500 OMMY COIN" },
+                  { label: "Precio", value: isFreeClaimAvailable ? "Gratis" : "0.5 AVAX" },
                   { label: "Tipo",   value: "ERC-1155" },
                   { label: "Red",    value: "Avalanche" },
                   { label: "Rareza", value: "Genesis" },
@@ -331,14 +289,6 @@ export default function ClaimZodiacClient() {
                   </div>
                 ))}
               </div>
-
-              {/* Balance OMMY */}
-              {account && !isFreeClaimAvailable && (
-                <div className={`flex items-center justify-between px-4 py-3 rounded-xl mb-4 border text-sm ${hasEnoughOmmy ? "bg-green-500/10 border-green-500/30 text-green-300" : "bg-red-500/10 border-red-500/30 text-red-300"}`}>
-                  <span>Tu balance OMMY COIN</span>
-                  <span className="font-bold">{ommyBalance.toFixed(0)} OMMY</span>
-                </div>
-              )}
 
               {/* CTA */}
               {!account ? (
@@ -371,29 +321,27 @@ export default function ClaimZodiacClient() {
                 </motion.button>
               ) : (
                 <motion.button
-                  onClick={handleBuyWithOmmy}
-                  disabled={minting || !hasEnoughOmmy}
-                  whileHover={{ scale: hasEnoughOmmy ? 1.02 : 1 }}
-                  whileTap={{ scale: hasEnoughOmmy ? 0.98 : 1 }}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg shadow-purple-900/40"
+                  onClick={handleBuyWithAvax}
+                  disabled={minting}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-red-600 to-orange-500 text-white font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg shadow-red-900/40"
                 >
                   {minting ? (
                     <span className="flex items-center justify-center gap-2">
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Procesando...
                     </span>
-                  ) : !hasEnoughOmmy ? (
-                    "Saldo OMMY COIN insuficiente"
                   ) : (
-                    "Comprar · 500 OMMY COIN →"
+                    "Comprar · 0.5 AVAX →"
                   )}
                 </motion.button>
               )}
 
-              {!hasEnoughOmmy && account && !isFreeClaimAvailable && (
+              {account && !isFreeClaimAvailable && (
                 <p className="text-xs text-slate-500 text-center mt-3">
-                  Necesitas al menos 500 OMMY COIN para comprar este NFT.
-                  <a href="https://www.omdomo.com" className="text-purple-400 hover:underline ml-1">Compra ropa para ganar OMMY COIN →</a>
+                  También puedes obtenerlo gratis completando tu perfil con email y fecha de nacimiento.
+                  <a href="/dashboard" className="text-purple-400 hover:underline ml-1">Ir al perfil →</a>
                 </p>
               )}
             </motion.div>
@@ -411,7 +359,7 @@ export default function ClaimZodiacClient() {
               <div className="glass border border-slate-700/50 rounded-3xl p-6 mb-4">
                 <h2 className="text-xl font-serif font-bold text-white mb-2 text-center">Elige tu signo zodiacal</h2>
                 <p className="text-slate-400 text-sm text-center mb-6">
-                  Selecciona tu signo para comprar tu NFT zodiacal por 500 OMMY COIN.
+                  Selecciona tu signo para comprar tu NFT zodiacal por 0.5 AVAX.
                 </p>
 
                 <div className="grid grid-cols-4 gap-2">

@@ -511,7 +511,7 @@ export function ProfilePanel({
                 </div>
               </div>
               <a
-                href={`/claim-zodiac?zodiac=${encodeURIComponent(z.name)}&email=${encodeURIComponent(profile.email)}`}
+                href={`/claim-zodiac?zodiac=${encodeURIComponent(z.name)}&email=${encodeURIComponent(profile.email)}&birthday=${encodeURIComponent(profile.birthday)}${walletAddress ? `&wallet=${encodeURIComponent(walletAddress)}` : ""}`}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
               >
                 <Sparkles size={14} /> Reclamar NFT {z.emoji} {z.name}
