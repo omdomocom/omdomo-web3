@@ -80,7 +80,7 @@ export function InviteFriendPanel({ walletAddress }: { walletAddress?: string })
     saveReferrals(next);
     setEmailSent(true);
     setEmail("");
-    if (isRewarded) showToast(`+${earned.toLocaleString()} OMMY ganados`);
+    if (isRewarded) showToast(`+${earned.toLocaleString()} OMMY COIN ganados`);
     setTimeout(() => setEmailSent(false), 2500);
   }
 
@@ -157,7 +157,7 @@ export function InviteFriendPanel({ walletAddress }: { walletAddress?: string })
           </div>
           <div className="text-right">
             <p className="text-xs text-slate-500">Ganado</p>
-            <p className="text-sm font-black gradient-text">+{refs.totalEarned.toLocaleString()} OMMY</p>
+            <p className="text-sm font-black gradient-text">+{refs.totalEarned.toLocaleString()} OMMY COIN</p>
           </div>
         </div>
 
@@ -244,7 +244,7 @@ export function InviteFriendPanel({ walletAddress }: { walletAddress?: string })
           <p className="text-xs text-slate-400 font-semibold">Comparte en redes</p>
           {refs.socialShared.length < 2 ? (
             <span className="text-xs text-amber-400 font-bold flex items-center gap-1">
-              <Star size={11} /> +{SOCIAL_REWARD} OMMY c/u (máx. 2)
+              <Star size={11} /> +{SOCIAL_REWARD} OMMY COIN c/u (máx. 2)
             </span>
           ) : (
             <span className="text-xs text-green-400 font-semibold flex items-center gap-1">
@@ -290,7 +290,7 @@ export function InviteFriendPanel({ walletAddress }: { walletAddress?: string })
         <p className="text-xs text-slate-500 uppercase tracking-wider px-1">
           Invitar por email
           {rewardsRemaining > 0 && (
-            <span className="ml-2 text-purple-400 normal-case">· +{REWARD_PER_INVITE.toLocaleString()} OMMY si compra</span>
+            <span className="ml-2 text-purple-400 normal-case">· +{REWARD_PER_INVITE.toLocaleString()} OMMY COIN si compra</span>
           )}
         </p>
         <form onSubmit={sendEmailInvite} className="flex gap-2">
@@ -327,8 +327,8 @@ export function InviteFriendPanel({ walletAddress }: { walletAddress?: string })
           {[
             { icon: "🔗", text: `Comparte tu link → amigo registra wallet` },
             { icon: "🛍️", text: `Amigo compra en omdomo.com` },
-            { icon: "🎁", text: `Ambos recibís +${REWARD_PER_INVITE.toLocaleString()} OMMY (primeras ${MAX_REWARDED} invitaciones)` },
-            { icon: "📱", text: `Comparte en 2 redes = +${SOCIAL_REWARD} OMMY adicionales c/u` },
+            { icon: "🎁", text: `Ambos recibís +${REWARD_PER_INVITE.toLocaleString()} OMMY COIN (primeras ${MAX_REWARDED} invitaciones)` },
+            { icon: "📱", text: `Comparte en 2 redes = +${SOCIAL_REWARD} OMMY COIN adicionales c/u` },
           ].map((item, i) => (
             <div key={i} className="flex items-start gap-2 text-xs text-slate-500">
               <span>{item.icon}</span>

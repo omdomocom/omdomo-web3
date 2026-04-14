@@ -78,7 +78,7 @@ function CommunityAvatar({ user, size = "sm" }: { user: typeof COMMUNITY_USERS[0
   const fakeProfile: UserProfile = {
     username: user.name, bio: "", avatar: user.avatar,
     avatarType: user.avatarType, bgTheme: "space", joinDate: "",
-    email: "", birthday: "", profileRewardClaimed: false, zodiacClaimed: false,
+    email: "", birthday: "", gender: "", profileRewardClaimed: false, zodiacClaimed: false,
   };
   return <UserAvatar profile={fakeProfile} size={size} />;
 }
@@ -470,7 +470,7 @@ export function CommunityPanel() {
   const [openConvId, setOpenConvId] = useState<string | null>(null);
   const [myProfile, setMyProfile] = useState<UserProfile>({
     username: "", bio: "", avatar: "🧘", avatarType: "emoji", bgTheme: "space", joinDate: "",
-    email: "", birthday: "", profileRewardClaimed: false, zodiacClaimed: false,
+    email: "", birthday: "", gender: "", profileRewardClaimed: false, zodiacClaimed: false,
   });
 
   useEffect(() => {

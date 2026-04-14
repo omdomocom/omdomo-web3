@@ -74,6 +74,7 @@ export interface UserProfile {
   joinDate: string;
   email: string;
   birthday: string;
+  gender: "masculino" | "femenino" | "no-binario" | "prefiero-no-decir" | "";
   profileRewardClaimed: boolean;
   zodiacClaimed: boolean;
 }
@@ -87,6 +88,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   joinDate: new Date().toISOString(),
   email: "",
   birthday: "",
+  gender: "",
   profileRewardClaimed: false,
   zodiacClaimed: false,
 };
@@ -346,7 +348,7 @@ export function ProfilePanel({
               </div>
             </div>
 
-            {/* Email + birthday — recompensa NFT zodiacal */}
+            {/* Email + birthday + gender — recompensa NFT zodiacal */}
             <div className="glass rounded-2xl p-4 border border-amber-500/20 space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-slate-500 uppercase tracking-wider">Contacto & NFT Zodiacal</p>
@@ -354,7 +356,8 @@ export function ProfilePanel({
                   <Sparkles size={10} /> NFT gratis
                 </span>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">Completa tu email y fecha de nacimiento para desbloquear tu <span className="text-amber-400 font-semibold">NFT Zodiacal gratis</span> y acceso a drops exclusivos.</p>
+              <p className="text-xs text-amber-300 font-semibold tracking-wide uppercase">✦ Obtén tu recompensa · Edición Limitada</p>
+              <p className="text-xs text-slate-600 leading-relaxed">Completa tus datos y recibe tu <span className="text-amber-400 font-semibold">NFT Zodiacal gratis</span> — Genesis exclusivo, solo disponible ahora.</p>
               <div>
                 <label className="text-xs text-slate-500 mb-1 block">Email</label>
                 <input
@@ -373,6 +376,20 @@ export function ProfilePanel({
                   onChange={(e) => setDraft((d) => ({ ...d, birthday: e.target.value }))}
                   className="w-full bg-slate-800/60 rounded-lg px-3 py-2 text-sm text-slate-200 border border-slate-700/40 focus:border-amber-500/50 focus:outline-none"
                 />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Sexo</label>
+                <select
+                  value={draft.gender}
+                  onChange={(e) => setDraft((d) => ({ ...d, gender: e.target.value as UserProfile["gender"] }))}
+                  className="w-full bg-slate-800/60 rounded-lg px-3 py-2 text-sm text-slate-200 border border-slate-700/40 focus:border-amber-500/50 focus:outline-none"
+                >
+                  <option value="">Seleccionar…</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="femenino">Femenino</option>
+                  <option value="no-binario">No binario</option>
+                  <option value="prefiero-no-decir">Prefiero no decir</option>
+                </select>
               </div>
               {(() => {
                 const z = getZodiacSign(draft.birthday);
@@ -394,7 +411,7 @@ export function ProfilePanel({
               )}
               {draft.profileRewardClaimed && (
                 <p className="text-xs text-green-400 flex items-center gap-1.5">
-                  <Check size={12} /> NFT Zodiacal desbloqueado — reclámalo en tu perfil
+                  <Check size={12} /> NFT Zodiacal desbloqueado — reclámalo abajo
                 </p>
               )}
             </div>
@@ -525,7 +542,7 @@ export function ProfilePanel({
         <div className="grid grid-cols-3 gap-2">
           {[
             { label: "NFTs",   value: profile.zodiacClaimed ? "1" : "0",  color: "text-purple-300" },
-            { label: "OMMY",   value: "—",  color: "text-cyan-300"   },
+            { label: "OMMY COIN",   value: "—",  color: "text-cyan-300"   },
             { label: "Nivel",  value: "Seeker", color: "text-yellow-400" },
           ].map((s) => (
             <div key={s.label} className="glass rounded-xl p-3 text-center border border-slate-700/30">

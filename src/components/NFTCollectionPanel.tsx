@@ -315,7 +315,7 @@ function NFTCard({
               {isMyZodiac ? (
                 <><Sparkles size={9} /> Reclamar gratis</>
               ) : nft.ommyPrice ? (
-                <><ShoppingCart size={9} /> Comprar {nft.ommyPrice} OMMY</>
+                <><ShoppingCart size={9} /> Comprar {nft.ommyPrice} OMMY COIN</>
               ) : (
                 <><ExternalLink size={9} /> Ver en tienda</>
               )}
@@ -507,7 +507,7 @@ export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
             {(view === "all" || displayNfts.some((n) => n.category === "zodiac")) && (
               <div>
                 <p className="text-[10px] text-slate-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                  <span className="w-4 h-px bg-slate-700" /> Colección Zodiacal · 500 OMMY c/u <span className="w-4 h-px bg-slate-700" />
+                  <span className="w-4 h-px bg-slate-700" /> Colección Zodiacal · 500 OMMY COIN c/u <span className="w-4 h-px bg-slate-700" />
                 </p>
                 <div className="grid grid-cols-4 gap-2">
                   {(view === "mine" ? displayNfts : allNfts).filter((n) => n.category === "zodiac").map((nft) => (

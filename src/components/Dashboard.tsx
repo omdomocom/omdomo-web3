@@ -64,7 +64,7 @@ function DAppPanel() {
     { icon: "🛍", label: "Tienda",          desc: "Comprar ropa consciente en omdomo.com.",          href: "https://www.omdomo.com", cta: "Ir a tienda", external: true },
   ];
   const SOON = [
-    { icon: "🧘", label: "Yoga & Meditación",   desc: "Sesiones guiadas que te recompensan con OMMY.",       fase: "Fase 3" },
+    { icon: "🧘", label: "Yoga & Meditación",   desc: "Sesiones guiadas que te recompensan con OMMY COIN.",       fase: "Fase 3" },
     { icon: "🏃", label: "Actividad Física",     desc: "Registra entrenamientos y gana tokens por tu esfuerzo.", fase: "Fase 3" },
     { icon: "🎨", label: "Arte Consciente",      desc: "Crea y comparte arte digital — mintea tu obra como NFT.", fase: "Fase 3" },
     { icon: "🏛",  label: "Staking NFT",         desc: "+50 OMMY/día por mantener tu NFT en staking.",         fase: "Fase 2" },
@@ -122,7 +122,7 @@ function DAppPanel() {
         <span className="text-xs text-slate-500">Links:</span>
         {[
           { label: "omdomo.com",     href: "https://www.omdomo.com" },
-          { label: "Snowtrace OMMY", href: "https://snowtrace.io/token/0x70EdA9Bb95eeE2551261c37720933905f9425596" },
+          { label: "Snowtrace OMMY COIN", href: "https://snowtrace.io/token/0x70EdA9Bb95eeE2551261c37720933905f9425596" },
           { label: "Snowtrace Fuji", href: "https://testnet.snowtrace.io/token/0xd51de87FbC012b694922036C30E5C82e16594958" },
         ].map((l) => (
           <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
@@ -231,7 +231,7 @@ function SobreNosotrosPanel() {
             {
               icon: "🏛️",
               title: "DAO — Gobernanza comunitaria",
-              desc: "La comunidad vota sobre nuevos diseños, drops y uso del Treasury. Tus NFTs y OMMY en staking son tu poder de voto.",
+              desc: "La comunidad vota sobre nuevos diseños, drops y uso del Treasury. Tus NFTs y OMMY COIN en staking son tu poder de voto.",
             },
           ].map((item) => (
             <div key={item.title} className="flex gap-3 items-start">
@@ -319,7 +319,7 @@ function FinanzasPanel({ address }: { address?: string }) {
         </div>
         <div className="space-y-5">
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wider mb-3">Tokenomics OMMY</p>
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-3">Tokenomics OMMY COIN</p>
             <TokenomicsPanel />
           </div>
         </div>
@@ -401,7 +401,7 @@ function OverviewPanel({ address }: { address?: string }) {
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-lg flex-shrink-0">🔥</div>
           <div className="min-w-0">
             <p className="text-sm font-bold text-slate-100">Drop #1 Genesis Hoodie</p>
-            <p className="text-xs text-slate-500">100 unidades · €89 · 10,000 OMMY Bonus</p>
+            <p className="text-xs text-slate-500">100 unidades · €89 · 10,000 OMMY COIN Bonus</p>
           </div>
         </div>
         <div className="flex items-center gap-4 flex-shrink-0">
@@ -862,7 +862,7 @@ export function Dashboard() {
                 <span className="text-xs text-orange-400 font-bold">Burn en vivo</span>
               </div>
               <p className="text-xs text-slate-500">Por compra se queman</p>
-              <p className="text-base font-black text-orange-300">500 OMMY</p>
+              <p className="text-base font-black text-orange-300">500 OMMY COIN</p>
               <p className="text-xs text-slate-600 mt-0.5">+ 2% de rewards</p>
             </div>
 
@@ -891,7 +891,7 @@ export function Dashboard() {
 
             {/* Pre-compra CTA */}
             <div className="glass rounded-xl p-4 border border-purple-500/20 text-center space-y-2">
-              <p className="text-xs font-bold text-slate-100">Pre-compra OMMY</p>
+              <p className="text-xs font-bold text-slate-100">Pre-compra OMMY COIN</p>
               <p className="text-xs text-slate-500">Precio: <strong className="text-purple-300">$0.001</strong> · Jun 2026</p>
               <a href="/#precompra" className="block w-full py-2 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-600 text-xs font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5">
                 <ShoppingBag size={12} /> Reservar OMMY

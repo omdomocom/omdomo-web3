@@ -320,7 +320,7 @@ export default function ClaimZodiacClient() {
               {/* Stats */}
               <div className="grid grid-cols-4 gap-2 mb-6">
                 {[
-                  { label: "Precio", value: isFreeClaimAvailable ? "Gratis" : "500 OMMY" },
+                  { label: "Precio", value: isFreeClaimAvailable ? "Gratis" : "500 OMMY COIN" },
                   { label: "Tipo",   value: "ERC-1155" },
                   { label: "Red",    value: "Avalanche" },
                   { label: "Rareza", value: "Genesis" },
@@ -335,7 +335,7 @@ export default function ClaimZodiacClient() {
               {/* Balance OMMY */}
               {account && !isFreeClaimAvailable && (
                 <div className={`flex items-center justify-between px-4 py-3 rounded-xl mb-4 border text-sm ${hasEnoughOmmy ? "bg-green-500/10 border-green-500/30 text-green-300" : "bg-red-500/10 border-red-500/30 text-red-300"}`}>
-                  <span>Tu balance OMMY</span>
+                  <span>Tu balance OMMY COIN</span>
                   <span className="font-bold">{ommyBalance.toFixed(0)} OMMY</span>
                 </div>
               )}
@@ -383,17 +383,17 @@ export default function ClaimZodiacClient() {
                       Procesando...
                     </span>
                   ) : !hasEnoughOmmy ? (
-                    "Saldo OMMY insuficiente"
+                    "Saldo OMMY COIN insuficiente"
                   ) : (
-                    "Comprar · 500 OMMY →"
+                    "Comprar · 500 OMMY COIN →"
                   )}
                 </motion.button>
               )}
 
               {!hasEnoughOmmy && account && !isFreeClaimAvailable && (
                 <p className="text-xs text-slate-500 text-center mt-3">
-                  Necesitas al menos 500 OMMY para comprar este NFT.
-                  <a href="https://www.omdomo.com" className="text-purple-400 hover:underline ml-1">Compra ropa para ganar OMMY →</a>
+                  Necesitas al menos 500 OMMY COIN para comprar este NFT.
+                  <a href="https://www.omdomo.com" className="text-purple-400 hover:underline ml-1">Compra ropa para ganar OMMY COIN →</a>
                 </p>
               )}
             </motion.div>
@@ -411,7 +411,7 @@ export default function ClaimZodiacClient() {
               <div className="glass border border-slate-700/50 rounded-3xl p-6 mb-4">
                 <h2 className="text-xl font-serif font-bold text-white mb-2 text-center">Elige tu signo zodiacal</h2>
                 <p className="text-slate-400 text-sm text-center mb-6">
-                  Selecciona tu signo para comprar tu NFT zodiacal por 500 OMMY.
+                  Selecciona tu signo para comprar tu NFT zodiacal por 500 OMMY COIN.
                 </p>
 
                 <div className="grid grid-cols-4 gap-2">

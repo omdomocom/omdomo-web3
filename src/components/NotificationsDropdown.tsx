@@ -19,7 +19,7 @@ interface Notification {
 const INITIAL_NOTIFICATIONS: Notification[] = [
   { id: "n1", type: "drop",   title: "Drop #1 Genesis Hoodie",        desc: "El drop se lanza en 72 días. Solo 100 unidades a €89.",         time: "1h",  read: false, icon: "🔥", href: "/drops"  },
   { id: "n2", type: "dao",    title: "Nueva propuesta en la DAO",      desc: "Propuesta #3: Cambio en distribución de treasury — vota ahora.", time: "3h",  read: false, icon: "🗳️", href: undefined },
-  { id: "n3", type: "ommy",   title: "+500 OMMY acreditados",          desc: "Recompensa por compartir en Twitter/X.",                        time: "5h",  read: false, icon: "💰", href: undefined },
+  { id: "n3", type: "ommy",   title: "+500 OMMY COIN acreditados",          desc: "Recompensa por compartir en Twitter/X.",                        time: "5h",  read: false, icon: "💰", href: undefined },
   { id: "n4", type: "nft",    title: "NFT listo para reclamar",        desc: "Tu compra en omdomo.com tiene un NFT Genesis pendiente.",        time: "1d",  read: true,  icon: "🎁", href: "/claim"  },
   { id: "n5", type: "social", title: "Bienvenido a Om Domo",           desc: "Ya formas parte del ecosistema Web3 más consciente.",           time: "2d",  read: true,  icon: "🌟", href: undefined },
 ];

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Om Domo NFT — Vista Previa</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #05050f; color: #fff; font-family: system-ui, sans-serif; padding: 24px; }
+  h1 { font-size: 22px; color: #a78bfa; margin-bottom: 6px; }
+  .sub { color: #475569; font-size: 13px; margin-bottom: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .card {
+    background: #0a0a18;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #1e2535;
+    transition: border-color .2s, transform .2s;
+    cursor: default;
+  }
+  .card:hover { border-color: #7c3aed; transform: translateY(-3px); }
+  .card img { width: 100%; display: block; }
+  .card-footer { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .card-name { font-size: 12px; font-weight: 600; color: #cbd5e1; }
+  .card-sub { font-size: 11px; color: #475569; }
+  .btn-row { display: flex; gap: 6px; margin-top: 2px; }
+  .btn { flex: 1; padding: 7px 4px; border-radius: 8px; border: none; font-size: 11px; font-weight: 600; cursor: pointer; text-decoration: none; text-align: center; display: block; }
+  .btn-dl { background: #312e81; color: #a5b4fc; }
+  .btn-dl:hover { background: #3730a3; }
+  .notice {
+    background: #0a1020; border: 1px solid #1e3a5f; border-radius: 10px;
+    padding: 14px 18px; margin-bottom: 24px; font-size: 13px; color: #64748b; line-height: 1.8;
+  }
+  .notice strong { color: #93c5fd; }
+</style>
+</head>
+<body>
+
+<h1>Om Domo NFT — Vista Previa de Imágenes</h1>
+<p class="sub">13 imágenes generadas · 1000×1000 px · listas para Thirdweb</p>
+
+<div class="notice">
+  <strong>Instrucciones Thirdweb:</strong><br>
+  1. Descarga el <a href="/nft-assets/metadata.csv" style="color:#38bdf8" download>metadata.csv</a><br>
+  2. Descarga los PNGs con el botón de cada carta (o abre la carpeta <code>public/nft-assets/</code> directamente en Finder)<br>
+  3. En Thirdweb: NFT → Batch Upload → arrastra <strong>CSV + todos los PNGs juntos</strong><br>
+  4. Para los WebM animados: ejecuta <code>node scripts/generate-nft-images.js</code> (ya están en la carpeta)
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const NFTs = [
+  { id:0,  name:"Genesis Hoodie", label:"Genesis Drop · 100 unidades",   color:"#f59e0b" },
+  { id:1,  name:"Aries",          label:"Fuego · 21 Mar – 19 Abr",       color:"#f97316" },
+  { id:2,  name:"Tauro",          label:"Tierra · 20 Abr – 20 May",      color:"#22c55e" },
+  { id:3,  name:"Géminis",        label:"Aire · 21 May – 20 Jun",        color:"#06b6d4" },
+  { id:4,  name:"Cáncer",         label:"Agua · 21 Jun – 22 Jul",        color:"#8b5cf6" },
+  { id:5,  name:"Leo",            label:"Fuego · 23 Jul – 22 Ago",       color:"#f97316" },
+  { id:6,  name:"Virgo",          label:"Tierra · 23 Ago – 22 Sep",      color:"#22c55e" },
+  { id:7,  name:"Libra",          label:"Aire · 23 Sep – 22 Oct",        color:"#06b6d4" },
+  { id:8,  name:"Escorpio",       label:"Agua · 23 Oct – 21 Nov",        color:"#8b5cf6" },
+  { id:9,  name:"Sagitario",      label:"Fuego · 22 Nov – 21 Dic",       color:"#f97316" },
+  { id:10, name:"Capricornio",    label:"Tierra · 22 Dic – 19 Ene",      color:"#22c55e" },
+  { id:11, name:"Acuario",        label:"Aire · 20 Ene – 18 Feb",        color:"#06b6d4" },
+  { id:12, name:"Piscis",         label:"Agua · 19 Feb – 20 Mar",        color:"#8b5cf6" },
+];
+
+const grid = document.getElementById('grid');
+NFTs.forEach(nft => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.borderColor = nft.color + '30';
+  card.innerHTML = `
+    <img src="/nft-assets/${nft.id}.png" alt="${nft.name}" loading="lazy">
+    <div class="card-footer">
+      <div class="card-name">${nft.id}.png — ${nft.name}</div>
+      <div class="card-sub">${nft.label}</div>
+      <div class="btn-row">
+        <a class="btn btn-dl" href="/nft-assets/${nft.id}.png" download="${nft.id}.png">
+          ⬇ Descargar PNG
+        </a>
+      </div>
+    </div>
+  `;
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>
