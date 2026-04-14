@@ -2,12 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Sparkles, Coins, Lock, ShoppingCart, Check, Layers, Grid3X3 } from "lucide-react";
+import { useReadContract } from "thirdweb/react";
+import { getOwnedNFTs } from "thirdweb/extensions/erc1155";
+import {
+  Wallet,
+  Sparkles,
+  Layers,
+  ChevronDown,
+  ExternalLink,
+  Lock,
+  Check,
+  ShoppingCart,
+} from "lucide-react";
+import { getNFTContract } from "@/lib/nft";
+import type { NFT } from "thirdweb";
 import { loadProfile } from "./ProfilePanel";
 
-// ─── Tipos ─────────────────────────────────────────────────────────────────
+// ─── Tipos ──────────────────────────────────────────────────────────────────
 type Rarity = "Genesis" | "Founder" | "Community" | "Standard";
-type NFTStatus = "owned" | "available" | "locked";
 type NFTCategory = "drop" | "zodiac";
 
 interface CatalogNFT {
@@ -17,20 +29,20 @@ interface CatalogNFT {
   tokenId: string;
   category: NFTCategory;
   emoji: string;
-  ommyPrice: number | null;   // null = no se vende con OMMY (compra tienda)
-  lockDate?: string;          // solo si status = "locked"
-  claimUrl?: string;          // URL para reclamar/comprar
+  ommyPrice: number | null;
+  lockDate?: string;
+  claimUrl?: string;
   shopUrl?: string;
   ommyReward: number;
   element?: string;
 }
 
-// ─── Estilos por rareza ────────────────────────────────────────────────────
+// ─── Estilos por rareza ─────────────────────────────────────────────────────
 const RARITY_STYLES: Record<Rarity, {
   border: string; bg: string; badge: string; glow: string;
   gradientText: string; fullBg: string;
 }> = {
-  Genesis:   {
+  Genesis: {
     border: "border-yellow-400/60",
     bg: "from-yellow-900/30 to-orange-900/30",
     badge: "bg-yellow-400/20 text-yellow-300 border border-yellow-400/30",
@@ -38,7 +50,7 @@ const RARITY_STYLES: Record<Rarity, {
     gradientText: "from-yellow-300 to-orange-300",
     fullBg: "from-yellow-900/60 to-orange-900/60",
   },
-  Founder:   {
+  Founder: {
     border: "border-purple-400/60",
     bg: "from-purple-900/30 to-pink-900/30",
     badge: "bg-purple-400/20 text-purple-300 border border-purple-400/30",
@@ -54,7 +66,7 @@ const RARITY_STYLES: Record<Rarity, {
     gradientText: "from-cyan-300 to-blue-300",
     fullBg: "from-cyan-900/60 to-blue-900/60",
   },
-  Standard:  {
+  Standard: {
     border: "border-slate-600/50",
     bg: "from-slate-900/20 to-slate-800/20",
     badge: "bg-slate-700/40 text-slate-400 border border-slate-600/30",
@@ -64,7 +76,7 @@ const RARITY_STYLES: Record<Rarity, {
   },
 };
 
-// ─── Colores por elemento zodiacal ─────────────────────────────────────────
+// ─── Colores por elemento zodiacal ──────────────────────────────────────────
 const ELEMENT_COLORS: Record<string, { glow: string; from: string; to: string }> = {
   Fuego:  { glow: "shadow-orange-500/40", from: "from-orange-900/60", to: "to-red-900/60" },
   Tierra: { glow: "shadow-green-500/40",  from: "from-green-900/60",  to: "to-amber-900/60" },
@@ -72,7 +84,7 @@ const ELEMENT_COLORS: Record<string, { glow: string; from: string; to: string }>
   Agua:   { glow: "shadow-purple-500/40", from: "from-blue-900/60",   to: "to-purple-900/60" },
 };
 
-// ─── Catálogo completo de NFTs ─────────────────────────────────────────────
+// ─── Catálogo completo de NFTs ───────────────────────────────────────────────
 const NFT_CATALOG: CatalogNFT[] = [
   // ── Drops ──
   {
@@ -126,7 +138,10 @@ const NFT_CATALOG: CatalogNFT[] = [
   { id: "zodiac-piscis",      name: "Piscis",      rarity: "Genesis", tokenId: "12", category: "zodiac", emoji: "♓", element: "Agua",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Piscis",      ommyReward: 1000 },
 ];
 
-// ─── Helper: calcular signo desde birthday ─────────────────────────────────
+const ZODIAC_NFTS = NFT_CATALOG.filter((n) => n.category === "zodiac");
+const DROP_NFTS   = NFT_CATALOG.filter((n) => n.category === "drop");
+
+// ─── Helper: calcular signo desde birthday ───────────────────────────────────
 function getZodiacIdFromBirthday(birthday: string): string | null {
   if (!birthday) return null;
   const d = new Date(birthday + "T12:00:00");
@@ -157,386 +172,623 @@ function getZodiacIdFromBirthday(birthday: string): string | null {
   return null;
 }
 
-// ─── NFT Card ──────────────────────────────────────────────────────────────
-function NFTCard({
+// ─── Skeleton loader ─────────────────────────────────────────────────────────
+function SkeletonCard() {
+  return (
+    <div className="rounded-2xl border border-slate-700/30 bg-slate-800/30 overflow-hidden animate-pulse">
+      <div className="aspect-square bg-slate-700/40" />
+      <div className="p-2.5 space-y-1.5">
+        <div className="h-3 w-3/4 rounded bg-slate-700/40" />
+        <div className="h-2.5 w-1/2 rounded bg-slate-700/30" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Zodiac Card para el grid Om Domo ────────────────────────────────────────
+function ZodiacCard({
   nft,
-  status,
+  isOwned,
   isMyZodiac,
 }: {
   nft: CatalogNFT;
-  status: NFTStatus;
+  isOwned: boolean;
   isMyZodiac: boolean;
 }) {
-  const style = RARITY_STYLES[nft.rarity];
   const elemColor = nft.element ? ELEMENT_COLORS[nft.element] : null;
-  const isLocked = status === "locked";
-  const isOwned = status === "owned";
-
-  const cardBg = nft.category === "zodiac" && elemColor
-    ? `${elemColor.from} ${elemColor.to}`
-    : style.fullBg;
-
-  const cardGlow = nft.category === "zodiac" && elemColor ? elemColor.glow : style.glow;
+  const cardBg = elemColor ? `${elemColor.from} ${elemColor.to}` : "from-purple-900/60 to-blue-900/60";
+  const cardGlow = elemColor ? elemColor.glow : "shadow-purple-500/30";
 
   return (
     <motion.div
-      whileHover={!isLocked ? { y: -4, scale: 1.02 } : {}}
-      transition={{ duration: 0.2 }}
-      className={`group relative rounded-2xl border overflow-hidden cursor-pointer
-        shadow-lg ${cardGlow}
-        ${isOwned ? `${style.border} bg-gradient-to-br ${cardBg}` : "border-slate-700/30 bg-gradient-to-br from-slate-900/40 to-slate-800/30"}
-        ${isLocked ? "opacity-40" : ""}
-        transition-all duration-300
+      whileHover={{ y: -3, scale: 1.03 }}
+      transition={{ duration: 0.18 }}
+      className={`group relative rounded-xl border overflow-hidden shadow-md ${cardGlow} transition-all duration-300
+        ${isOwned
+          ? `border-yellow-400/40 bg-gradient-to-br ${cardBg}`
+          : "border-slate-700/30 bg-gradient-to-br from-slate-900/50 to-slate-800/40"}
       `}
     >
-      {/* Overlay de colores en hover para no poseídos */}
-      {!isOwned && !isLocked && (
-        <div className={`absolute inset-0 bg-gradient-to-br ${cardBg} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
+      {/* hover overlay para no poseídos */}
+      {!isOwned && (
+        <div className={`absolute inset-0 bg-gradient-to-br ${cardBg} opacity-0 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none`} />
       )}
 
-      {/* Imagen / Emoji area */}
-      <div className={`aspect-square relative flex flex-col items-center justify-center gap-1 overflow-hidden
-        ${isOwned ? "" : "grayscale group-hover:grayscale-0"}
-        transition-all duration-300
-      `}>
-        {/* Fondo decorativo */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${isOwned ? cardBg : "from-slate-800/60 to-slate-900/60 group-hover:" + cardBg} opacity-60`} />
+      {/* Imagen */}
+      <div className={`aspect-square flex flex-col items-center justify-center gap-0.5 relative overflow-hidden
+        ${isOwned ? "" : "grayscale group-hover:grayscale-0"} transition-all duration-300`}
+      >
+        <div className={`absolute inset-0 bg-gradient-to-br ${isOwned ? cardBg : "from-slate-800/60 to-slate-900/60"} opacity-70 group-hover:opacity-0 transition-opacity duration-300`} />
 
-        {/* Glow pulsante si es poseído */}
         {isOwned && (
           <motion.div
-            animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
+            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.5, 0.2] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            className={`absolute inset-0 rounded-full pointer-events-none`}
-            style={{ background: `radial-gradient(circle, ${nft.category === "zodiac" && elemColor ? elemColor.glow.replace("shadow-", "").replace("/40", "") : "#8B5CF6"} 0%, transparent 70%)`, filter: "blur(20px)" }}
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)", filter: "blur(16px)" }}
           />
         )}
 
-        {/* Emoji principal */}
-        <span
-          className={`relative z-10 select-none
-            ${nft.category === "zodiac" ? "text-5xl" : "text-4xl"}
-            ${isOwned ? "" : "opacity-40 group-hover:opacity-100"}
-            transition-opacity duration-300
-          `}
-        >
+        <span className={`relative z-10 text-3xl select-none
+          ${isOwned ? "" : "opacity-30 group-hover:opacity-100"} transition-opacity duration-300`}>
           {nft.emoji}
         </span>
-
-        {nft.category === "drop" && (
-          <span className={`relative z-10 text-xs text-slate-400 ${isOwned ? "text-slate-300" : "opacity-40 group-hover:opacity-80"} transition-opacity duration-300`}>
-            Om Domo
-          </span>
-        )}
-        {nft.category === "zodiac" && nft.element && (
-          <span className={`relative z-10 text-xs ${isOwned ? "text-slate-300" : "text-slate-600 group-hover:text-slate-400"} transition-colors duration-300`}>
+        {nft.element && (
+          <span className={`relative z-10 text-[9px] ${isOwned ? "text-slate-300" : "text-slate-600 group-hover:text-slate-400"} transition-colors duration-300`}>
             {nft.element}
           </span>
         )}
 
-        {/* Badges de estado */}
-        <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-20">
-          {isOwned && (
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-0.5">
-              <Check size={8} /> Tuyo
+        {/* badges */}
+        <div className="absolute top-1 left-1 right-1 flex items-center justify-between z-20">
+          {isOwned ? (
+            <span className="px-1 py-0.5 rounded-full text-[9px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-0.5">
+              <Check size={7} /> Tuyo
             </span>
-          )}
-          {isMyZodiac && !isOwned && (
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-0.5">
-              <Sparkles size={8} /> Gratis
+          ) : isMyZodiac ? (
+            <span className="px-1 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-0.5">
+              <Sparkles size={7} /> Gratis
             </span>
+          ) : (
+            <span />
           )}
-          {!isOwned && !isMyZodiac && <span />}
-
-          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${style.badge}`}>
-            {nft.rarity}
-          </span>
         </div>
-
-        {/* Lock overlay */}
-        {isLocked && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 z-20 bg-slate-900/60">
-            <Lock size={18} className="text-slate-500" />
-            <span className="text-[10px] text-slate-600">{nft.lockDate}</span>
-          </div>
-        )}
       </div>
 
-      {/* Info footer */}
-      <div className={`p-2.5 relative z-10
-        ${isOwned ? "" : "opacity-50 group-hover:opacity-100"}
-        transition-opacity duration-300
-      `}>
-        <p className={`text-xs font-bold truncate
-          ${isOwned ? `bg-gradient-to-r ${style.gradientText} bg-clip-text text-transparent` : "text-slate-400 group-hover:text-slate-200"}
-          transition-colors duration-300
-        `}>
+      {/* Footer */}
+      <div className={`p-2 relative z-10 ${isOwned ? "" : "opacity-50 group-hover:opacity-100"} transition-opacity duration-300`}>
+        <p className={`text-[11px] font-bold truncate
+          ${isOwned ? "text-yellow-300" : "text-slate-400 group-hover:text-slate-200"} transition-colors duration-300`}>
           {nft.name}
         </p>
-
-        {/* OMMY reward / price */}
-        {!isLocked && (
-          <div className="flex items-center justify-between mt-1.5 gap-1">
-            {isOwned ? (
-              <span className="text-[10px] text-purple-400 flex items-center gap-0.5">
-                <Coins size={9} /> +{nft.ommyReward.toLocaleString()} OMMY
-              </span>
-            ) : nft.ommyPrice ? (
-              <span className="text-[10px] text-amber-400 flex items-center gap-0.5 font-semibold">
-                <Coins size={9} /> {nft.ommyPrice.toLocaleString()} OMMY
-              </span>
-            ) : (
-              <span className="text-[10px] text-slate-600">Compra en tienda</span>
-            )}
-            <span className="text-[10px] text-slate-600">#{nft.tokenId}</span>
-          </div>
+        {!isOwned && (
+          <p className="text-[10px] text-slate-600 group-hover:text-slate-400 transition-colors duration-300">
+            {isMyZodiac ? "Reclamar gratis" : "0.5 AVAX"}
+          </p>
         )}
-
-        {/* Botón de acción para disponibles (visible en hover) */}
-        {!isOwned && !isLocked && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            className="overflow-hidden"
+        {/* CTA en hover */}
+        {!isOwned && (
+          <a
+            href={nft.claimUrl || "#"}
+            onClick={(e) => e.stopPropagation()}
+            className={`mt-1.5 w-full py-1 rounded-lg text-[9px] font-bold hidden group-hover:flex items-center justify-center gap-0.5 transition-colors cursor-pointer
+              ${isMyZodiac
+                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30"
+                : "bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30"
+              }`}
           >
-            <a
-              href={nft.claimUrl || nft.shopUrl || "#"}
-              onClick={(e) => e.stopPropagation()}
-              className={`mt-2 w-full py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1
-                hidden group-hover:flex
-                ${isMyZodiac
-                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30"
-                  : nft.ommyPrice
-                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30"
-                    : "bg-slate-700/40 text-slate-300 border border-slate-600/30 hover:bg-slate-700/60"
-                }
-                transition-colors cursor-pointer
-              `}
-            >
-              {isMyZodiac ? (
-                <><Sparkles size={9} /> Reclamar gratis</>
-              ) : nft.ommyPrice ? (
-                <><ShoppingCart size={9} /> Comprar {nft.ommyPrice} OMMY COIN</>
-              ) : (
-                <><ExternalLink size={9} /> Ver en tienda</>
-              )}
-            </a>
-          </motion.div>
+            {isMyZodiac ? <><Sparkles size={8} /> Reclamar</> : <><ShoppingCart size={8} /> Obtener</>}
+          </a>
         )}
       </div>
     </motion.div>
   );
 }
 
-// ─── Panel principal ────────────────────────────────────────────────────────
+// ─── Drop Card para Genesis Drops ────────────────────────────────────────────
+function DropCard({ nft, isOwned }: { nft: CatalogNFT; isOwned: boolean }) {
+  const style = RARITY_STYLES[nft.rarity];
+  const isLocked = !!nft.lockDate;
+
+  return (
+    <motion.div
+      whileHover={!isLocked ? { y: -3, scale: 1.02 } : {}}
+      transition={{ duration: 0.18 }}
+      className={`group relative rounded-2xl border overflow-hidden shadow-lg transition-all duration-300
+        ${isOwned ? `${style.border} bg-gradient-to-br ${style.fullBg} ${style.glow}` : "border-slate-700/30 bg-slate-900/40"}
+        ${isLocked ? "opacity-50" : ""}
+      `}
+    >
+      <div className={`aspect-video flex flex-col items-center justify-center relative overflow-hidden
+        ${isLocked ? "" : isOwned ? "" : "group-hover:grayscale-0 grayscale"} transition-all duration-300`}
+      >
+        <div className={`absolute inset-0 bg-gradient-to-br ${isOwned ? style.fullBg : "from-slate-800/60 to-slate-900/60"} opacity-80`} />
+        <span className="relative z-10 text-5xl select-none">{nft.emoji}</span>
+        <span className={`relative z-10 text-[10px] mt-1 ${isOwned ? "text-slate-300" : "text-slate-500"}`}>Om Domo</span>
+
+        <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-20">
+          {isOwned && (
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-0.5">
+              <Check size={8} /> Tuyo
+            </span>
+          )}
+          {!isOwned && <span />}
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${style.badge}`}>
+            {nft.rarity}
+          </span>
+        </div>
+
+        {isLocked && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 z-30 bg-slate-900/70">
+            <Lock size={20} className="text-slate-500" />
+            <span className="text-[10px] text-slate-500 font-semibold">{nft.lockDate} · Próximamente</span>
+          </div>
+        )}
+      </div>
+
+      <div className={`p-3 relative z-10 ${isLocked ? "" : isOwned ? "" : "opacity-60 group-hover:opacity-100"} transition-opacity duration-300`}>
+        <p className={`text-sm font-bold ${isOwned ? `bg-gradient-to-r ${style.gradientText} bg-clip-text text-transparent` : "text-slate-300"}`}>
+          {nft.name}
+        </p>
+        <p className="text-[10px] text-slate-500 mt-0.5">Token ID #{nft.tokenId}</p>
+        {!isLocked && !isOwned && (
+          <div className="flex gap-2 mt-2">
+            <a href={nft.claimUrl || "#"}
+              className="flex-1 py-1.5 rounded-lg text-[10px] font-bold text-center bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30 transition-colors cursor-pointer flex items-center justify-center gap-1">
+              <ExternalLink size={9} /> Reclamar
+            </a>
+            {nft.shopUrl && (
+              <a href={nft.shopUrl} target="_blank" rel="noopener noreferrer"
+                className="flex-1 py-1.5 rounded-lg text-[10px] font-bold text-center bg-slate-700/40 text-slate-300 border border-slate-600/30 hover:bg-slate-700/60 transition-colors cursor-pointer flex items-center justify-center gap-1">
+                <ShoppingCart size={9} /> Tienda
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── On-chain NFT Card (Tab 1) ───────────────────────────────────────────────
+function OnChainNFTCard({ nft }: { nft: NFT }) {
+  const name = nft.metadata?.name ?? `NFT #${nft.id.toString()}`;
+  const image = nft.metadata?.image;
+
+  return (
+    <motion.div
+      whileHover={{ y: -3, scale: 1.02 }}
+      transition={{ duration: 0.18 }}
+      className="rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-900/30 to-slate-900/40 overflow-hidden shadow-lg shadow-purple-500/10"
+    >
+      <div className="aspect-square bg-slate-800/40 flex items-center justify-center overflow-hidden relative">
+        {image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image} alt={name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <Layers size={28} className="text-purple-400/60" />
+            <span className="text-[10px] text-slate-500">Sin imagen</span>
+          </div>
+        )}
+        <div className="absolute top-2 right-2">
+          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-0.5">
+            <Check size={8} /> Tuyo
+          </span>
+        </div>
+      </div>
+      <div className="p-2.5">
+        <p className="text-xs font-bold text-purple-200 truncate">{name}</p>
+        <p className="text-[10px] text-slate-500 mt-0.5">ID #{nft.id.toString()} · Om Domo</p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Panel principal ─────────────────────────────────────────────────────────
 interface NFTCollectionPanelProps {
   walletAddress?: string;
 }
 
 export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
-  const [view, setView] = useState<"mine" | "all">("mine");
-  const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set(["genesis-hoodie"]));
+  const [activeTab, setActiveTab] = useState<"wallet" | "ommy" | "omdomo">("wallet");
+  const [expandedCollection, setExpandedCollection] = useState<string | null>("zodiac");
+  const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set());
   const [myZodiacId, setMyZodiacId] = useState<string | null>(null);
+  const [profile, setProfile] = useState(loadProfile());
 
+  // Cargar perfil y datos locales
   useEffect(() => {
-    const profile = loadProfile();
+    const p = loadProfile();
+    setProfile(p);
     const owned = new Set<string>();
 
-    // Genesis Hoodie — siempre aparece como poseído (placeholder)
-    owned.add("genesis-hoodie");
-
-    // NFT zodiacal reclamado
-    if (profile.zodiacClaimed && profile.birthday) {
-      const zodiacId = getZodiacIdFromBirthday(profile.birthday);
+    if (p.zodiacClaimed && p.birthday) {
+      const zodiacId = getZodiacIdFromBirthday(p.birthday);
       if (zodiacId) owned.add(zodiacId);
     }
 
-    // Zodiac libre desbloqueado (profileRewardClaimed + birthday + no zodiacClaimed)
-    if (profile.birthday) {
-      setMyZodiacId(getZodiacIdFromBirthday(profile.birthday));
+    if (p.birthday) {
+      setMyZodiacId(getZodiacIdFromBirthday(p.birthday));
     }
 
     setOwnedIds(owned);
   }, [walletAddress]);
 
-  function getStatus(nft: CatalogNFT): NFTStatus {
-    if (ownedIds.has(nft.id)) return "owned";
-    if (nft.lockDate) return "locked";
-    return "available";
-  }
+  // On-chain NFTs
+  const nftContract = getNFTContract();
+  const shouldFetch = !!nftContract && !!walletAddress;
 
-  const allNfts = NFT_CATALOG;
-  const myNfts = allNfts.filter((n) => getStatus(n) === "owned");
-  const displayNfts = view === "mine" ? myNfts : allNfts;
+  const { data: ownedNFTs, isLoading: nftsLoading } = useReadContract(
+    getOwnedNFTs,
+    shouldFetch
+      ? { contract: nftContract!, address: walletAddress! }
+      : { contract: nftContract!, address: "" }
+  );
 
-  const totalOmmy = myNfts.reduce((s, n) => s + n.ommyReward, 0);
-  const availableCount = allNfts.filter((n) => getStatus(n) === "available").length;
+  // Stats para tab "MY OMMY"
+  const ommyNftsEarned = profile.zodiacClaimed ? 1 : 0;
+  const ommyEarned = ommyNftsEarned * 1000;
+
+  // Colecciones Om Domo
+  const COLLECTIONS = [
+    {
+      id: "zodiac",
+      name: "Zodiac Collection",
+      description: "12 NFTs zodiacales · Genesis Rarity",
+      active: true,
+      gradient: "from-purple-600 to-blue-600",
+      badgeText: null,
+      nftCount: 12,
+    },
+    {
+      id: "genesis-drops",
+      name: "Genesis Drops",
+      description: "Drop #1 Genesis Hoodie · 100 unidades",
+      active: true,
+      gradient: "from-yellow-600 to-orange-600",
+      badgeText: null,
+      nftCount: 1,
+    },
+    {
+      id: "solsticio",
+      name: "Drop #2 Solsticio",
+      description: "50 unidades exclusivas",
+      active: false,
+      gradient: "from-slate-700 to-slate-800",
+      badgeText: "Sep 2026 · Próximamente",
+      nftCount: 0,
+    },
+    {
+      id: "ommylab",
+      name: "Ommy Lab Vol.1",
+      description: "200 unidades · Edición especial",
+      active: false,
+      gradient: "from-slate-700 to-slate-800",
+      badgeText: "Dic 2026 · Próximamente",
+      nftCount: 0,
+    },
+  ];
+
+  const TABS = [
+    { id: "wallet" as const, label: "NFTs",     icon: Wallet },
+    { id: "ommy"   as const, label: "MY OMMY",  icon: Sparkles },
+    { id: "omdomo" as const, label: "Om Domo",  icon: Layers },
+  ];
 
   return (
     <div className="space-y-4">
 
-      {/* ── Header stats ── */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="glass rounded-xl p-3 text-center border border-slate-700/30">
-          <p className="text-base font-black text-purple-300">{myNfts.length}</p>
-          <p className="text-xs text-slate-500 mt-0.5">Mis NFTs</p>
-        </div>
-        <div className="glass rounded-xl p-3 text-center border border-slate-700/30">
-          <p className="text-base font-black text-amber-300">{totalOmmy.toLocaleString()}</p>
-          <p className="text-xs text-slate-500 mt-0.5">OMMY earned</p>
-        </div>
-        <div className="glass rounded-xl p-3 text-center border border-slate-700/30">
-          <p className="text-base font-black text-cyan-300">{allNfts.length - myNfts.length}</p>
-          <p className="text-xs text-slate-500 mt-0.5">Por conseguir</p>
-        </div>
-      </div>
-
-      {/* ── Toggle de vista ── */}
+      {/* ── Tabs ── */}
       <div className="flex rounded-xl overflow-hidden border border-slate-700/40 p-0.5 gap-0.5 bg-slate-900/40">
-        <button
-          onClick={() => setView("mine")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer
-            ${view === "mine"
-              ? "bg-gradient-to-r from-purple-600 to-cyan-600 text-white shadow-lg"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
-            }`}
-        >
-          <Layers size={12} /> Mi Colección
-          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold
-            ${view === "mine" ? "bg-white/20 text-white" : "bg-slate-700/60 text-slate-500"}`}>
-            {myNfts.length}
-          </span>
-        </button>
-        <button
-          onClick={() => setView("all")}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer
-            ${view === "all"
-              ? "bg-gradient-to-r from-purple-600 to-cyan-600 text-white shadow-lg"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
-            }`}
-        >
-          <Grid3X3 size={12} /> Todas
-          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold
-            ${view === "all" ? "bg-white/20 text-white" : "bg-slate-700/60 text-slate-500"}`}>
-            {allNfts.length}
-          </span>
-        </button>
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer
+              ${activeTab === id
+                ? "bg-gradient-to-r from-purple-600 to-cyan-600 text-white shadow-lg"
+                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+              }`}
+          >
+            <Icon size={12} /> {label}
+          </button>
+        ))}
       </div>
 
-      {/* ── Banner "disponibles para conseguir" (solo en vista Todas) ── */}
-      <AnimatePresence>
-        {view === "all" && availableCount > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="glass rounded-xl p-3 border border-amber-500/20 flex items-center gap-3"
-          >
-            <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-              <Sparkles size={14} className="text-amber-400" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-amber-300">
-                {availableCount} NFTs disponibles para conseguir
-              </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">
-                Pasa el cursor sobre cualquier NFT opacado para ver precio y cómo obtenerlo
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Grid de NFTs ── */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          TAB 1 — NFTs (on-chain)
+      ══════════════════════════════════════════════════════════════════════ */}
       <AnimatePresence mode="wait">
-        {displayNfts.length === 0 ? (
+        {activeTab === "wallet" && (
           <motion.div
-            key="empty"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-10 space-y-3"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-slate-800/60 flex items-center justify-center mx-auto">
-              <Layers size={24} className="text-slate-600" />
-            </div>
-            <p className="text-slate-400 text-sm">Aún no tienes NFTs</p>
-            <div className="flex flex-col items-center gap-2">
-              <a
-                href="/claim-zodiac"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                <Sparkles size={12} /> Reclamar NFT Zodiacal gratis
-              </a>
-              <a
-                href="https://www.omdomo.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                <ShoppingCart size={12} /> Comprar en omdomo.com
-              </a>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key={view}
+            key="wallet"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
+            className="space-y-3"
           >
-            {/* Drops */}
-            {(view === "all" || displayNfts.some((n) => n.category === "drop")) && (
-              <div className="mb-4">
-                <p className="text-[10px] text-slate-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                  <span className="w-4 h-px bg-slate-700" /> Drops exclusivos <span className="w-4 h-px bg-slate-700" />
+            {/* Sin wallet */}
+            {!walletAddress && (
+              <div className="glass rounded-2xl p-8 border border-purple-500/20 text-center space-y-3">
+                <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto">
+                  <Wallet size={22} className="text-purple-400" />
+                </div>
+                <p className="text-slate-300 text-sm font-medium">Conecta tu wallet</p>
+                <p className="text-slate-500 text-xs">Conecta tu wallet para ver tus NFTs on-chain en la red Avalanche</p>
+              </div>
+            )}
+
+            {/* Cargando */}
+            {walletAddress && nftsLoading && (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-500 px-1">Cargando NFTs on-chain...</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </div>
+              </div>
+            )}
+
+            {/* Con NFTs */}
+            {walletAddress && !nftsLoading && ownedNFTs && ownedNFTs.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-500 px-1">
+                  {ownedNFTs.length} NFT{ownedNFTs.length !== 1 ? "s" : ""} en tu wallet
                 </p>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {(view === "mine" ? displayNfts : allNfts).filter((n) => n.category === "drop").map((nft) => (
-                    <NFTCard
-                      key={nft.id}
-                      nft={nft}
-                      status={getStatus(nft)}
-                      isMyZodiac={false}
-                    />
+                <div className="grid grid-cols-2 gap-3">
+                  {ownedNFTs.map((nft) => (
+                    <OnChainNFTCard key={nft.id.toString()} nft={nft} />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Zodiacales */}
-            {(view === "all" || displayNfts.some((n) => n.category === "zodiac")) && (
-              <div>
-                <p className="text-[10px] text-slate-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                  <span className="w-4 h-px bg-slate-700" /> Colección Zodiacal · 500 OMMY COIN c/u <span className="w-4 h-px bg-slate-700" />
-                </p>
-                <div className="grid grid-cols-4 gap-2">
-                  {(view === "mine" ? displayNfts : allNfts).filter((n) => n.category === "zodiac").map((nft) => (
-                    <NFTCard
-                      key={nft.id}
-                      nft={nft}
-                      status={getStatus(nft)}
-                      isMyZodiac={nft.id === myZodiacId && getStatus(nft) === "available"}
-                    />
-                  ))}
+            {/* Sin NFTs */}
+            {walletAddress && !nftsLoading && (!ownedNFTs || ownedNFTs.length === 0) && (
+              <div className="glass rounded-2xl p-8 border border-slate-700/30 text-center space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-slate-800/60 flex items-center justify-center mx-auto">
+                  <Wallet size={22} className="text-slate-600" />
                 </div>
+                <div>
+                  <p className="text-slate-300 text-sm font-medium">Sin NFTs on-chain</p>
+                  <p className="text-slate-500 text-xs mt-1">Esta wallet no tiene NFTs de Om Domo todavía</p>
+                </div>
+                <a
+                  href="/claim-zodiac"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  <Sparkles size={12} /> Reclamar NFT Zodiacal
+                </a>
               </div>
             )}
           </motion.div>
         )}
-      </AnimatePresence>
 
-      {/* ── CTA wallet ── */}
-      {!walletAddress && (
-        <div className="glass rounded-xl p-4 border border-purple-500/20 text-center space-y-2">
-          <p className="text-xs text-slate-400">Conecta tu wallet para sincronizar tu colección real on-chain</p>
-          <a
-            href="/claim"
-            className="inline-flex items-center gap-1.5 text-xs text-purple-300 hover:text-purple-200 transition-colors cursor-pointer"
+        {/* ══════════════════════════════════════════════════════════════════════
+            TAB 2 — MY OMMY (perfil local)
+        ══════════════════════════════════════════════════════════════════════ */}
+        {activeTab === "ommy" && (
+          <motion.div
+            key="ommy"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-4"
           >
-            → Reclamar NFT de compra
-          </a>
-        </div>
-      )}
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="glass rounded-xl p-3 text-center border border-slate-700/30">
+                <p className="text-base font-black text-purple-300">{ommyNftsEarned}</p>
+                <p className="text-xs text-slate-500 mt-0.5">NFTs ganados</p>
+              </div>
+              <div className="glass rounded-xl p-3 text-center border border-slate-700/30">
+                <p className="text-base font-black text-amber-300">{ommyEarned.toLocaleString()}</p>
+                <p className="text-xs text-slate-500 mt-0.5">OMMY earned</p>
+              </div>
+            </div>
+
+            {/* NFT zodiacal reclamado */}
+            {profile.zodiacClaimed && myZodiacId && (() => {
+              const nft = NFT_CATALOG.find((n) => n.id === myZodiacId);
+              if (!nft) return null;
+              const elemColor = nft.element ? ELEMENT_COLORS[nft.element] : null;
+              const cardBg = elemColor ? `${elemColor.from} ${elemColor.to}` : "from-purple-900/60 to-blue-900/60";
+              return (
+                <div className={`rounded-2xl border border-yellow-400/40 bg-gradient-to-br ${cardBg} overflow-hidden shadow-lg shadow-yellow-500/10 p-4`}>
+                  <div className="flex items-center gap-4">
+                    <span className="text-5xl select-none">{nft.emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-1">
+                          <Check size={9} /> Reclamado
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-400/20 text-yellow-300 border border-yellow-400/30">Genesis</span>
+                      </div>
+                      <p className="text-sm font-bold text-white">{nft.name}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">{nft.element} · Token #{nft.tokenId}</p>
+                      <p className="text-[11px] text-purple-300 mt-1">+{nft.ommyReward.toLocaleString()} OMMY reward</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Pendiente de reclamar */}
+            {profile.profileRewardClaimed && !profile.zodiacClaimed && myZodiacId && (() => {
+              const nft = NFT_CATALOG.find((n) => n.id === myZodiacId);
+              if (!nft) return null;
+              return (
+                <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-900/20 to-slate-900/40 p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-4xl select-none opacity-70">{nft.emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                        Pendiente de reclamar
+                      </span>
+                      <p className="text-sm font-bold text-slate-200 mt-1">{nft.name}</p>
+                      <p className="text-[11px] text-slate-400">{nft.element} · Gratis para ti</p>
+                    </div>
+                  </div>
+                  <a
+                    href={nft.claimUrl || "/claim-zodiac"}
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer"
+                  >
+                    <Sparkles size={12} /> Reclamar gratis
+                  </a>
+                </div>
+              );
+            })()}
+
+            {/* Sin nada todavía */}
+            {!profile.zodiacClaimed && !profile.profileRewardClaimed && (
+              <div className="glass rounded-2xl p-8 border border-slate-700/30 text-center space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-slate-800/60 flex items-center justify-center mx-auto">
+                  <Sparkles size={22} className="text-slate-600" />
+                </div>
+                <div>
+                  <p className="text-slate-300 text-sm font-medium">Completa tu perfil</p>
+                  <p className="text-slate-500 text-xs mt-1">Añade tu email y fecha de nacimiento para ganar tu NFT Zodiacal gratis</p>
+                </div>
+                <button
+                  onClick={() => {}}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  <Sparkles size={12} /> Ir a Mi Perfil
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            TAB 3 — Om Domo (colecciones)
+        ══════════════════════════════════════════════════════════════════════ */}
+        {activeTab === "omdomo" && (
+          <motion.div
+            key="omdomo"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-3"
+          >
+            {/* Slides horizontales */}
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {COLLECTIONS.map((col) => (
+                <motion.button
+                  key={col.id}
+                  whileHover={col.active ? { scale: 1.03 } : {}}
+                  whileTap={col.active ? { scale: 0.98 } : {}}
+                  onClick={() => {
+                    if (!col.active) return;
+                    setExpandedCollection(expandedCollection === col.id ? null : col.id);
+                  }}
+                  className={`flex-shrink-0 w-44 rounded-2xl border overflow-hidden transition-all duration-200 cursor-pointer text-left
+                    ${expandedCollection === col.id
+                      ? "border-purple-500/60 shadow-lg shadow-purple-500/20"
+                      : "border-slate-700/40"
+                    }
+                    ${!col.active ? "opacity-50 cursor-default" : ""}
+                  `}
+                >
+                  <div className={`bg-gradient-to-br ${col.gradient} p-4`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <Layers size={16} className="text-white/80" />
+                      {col.active && col.nftCount > 0 && (
+                        <span className="text-[10px] font-bold bg-white/20 text-white px-1.5 py-0.5 rounded-full">
+                          {col.nftCount} NFTs
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs font-bold text-white leading-tight">{col.name}</p>
+                    <p className="text-[10px] text-white/60 mt-0.5 leading-tight">{col.description}</p>
+                  </div>
+                  {col.badgeText && (
+                    <div className="px-3 py-2 bg-slate-900/60">
+                      <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                        <Lock size={9} /> {col.badgeText}
+                      </span>
+                    </div>
+                  )}
+                  {col.active && !col.badgeText && (
+                    <div className={`px-3 py-2 flex items-center justify-between bg-slate-900/40
+                      ${expandedCollection === col.id ? "text-purple-400" : "text-slate-500"}`}
+                    >
+                      <span className="text-[10px] font-semibold">
+                        {expandedCollection === col.id ? "Ocultar" : "Ver colección"}
+                      </span>
+                      <ChevronDown
+                        size={12}
+                        className={`transition-transform duration-200 ${expandedCollection === col.id ? "rotate-180" : ""}`}
+                      />
+                    </div>
+                  )}
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Colección expandida — Zodiac */}
+            <AnimatePresence>
+              {expandedCollection === "zodiac" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="glass rounded-2xl border border-purple-500/20 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-purple-300">Zodiac Collection — 12 NFTs Genesis</p>
+                      <span className="text-[10px] text-slate-500">500 OMMY c/u</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {ZODIAC_NFTS.map((nft) => (
+                        <ZodiacCard
+                          key={nft.id}
+                          nft={nft}
+                          isOwned={ownedIds.has(nft.id)}
+                          isMyZodiac={nft.id === myZodiacId && !ownedIds.has(nft.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Colección expandida — Genesis Drops */}
+            <AnimatePresence>
+              {expandedCollection === "genesis-drops" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="glass rounded-2xl border border-yellow-500/20 p-4 space-y-3">
+                    <p className="text-xs font-bold text-yellow-300">Genesis Drops</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      {DROP_NFTS.map((nft) => (
+                        <DropCard
+                          key={nft.id}
+                          nft={nft}
+                          isOwned={ownedIds.has(nft.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

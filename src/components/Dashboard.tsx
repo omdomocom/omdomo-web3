@@ -37,7 +37,7 @@ type TabId = "overview" | "nosotros" | "nft" | "dapp" | "finanzas" | "dao" | "pe
 const SIDEBAR_TABS: { id: TabId; label: string; icon: React.ReactNode; badge?: string; secondary?: boolean }[] = [
   { id: "overview",  label: "Overview",       icon: <LayoutDashboard size={15} /> },
   { id: "nosotros",  label: "Sobre nosotros",  icon: <Info size={15} /> },
-  { id: "nft",       label: "Mi Colección",   icon: <Image size={15} /> },
+  { id: "nft",       label: "NFTs",            icon: <Image size={15} /> },
   { id: "dao",       label: "DAO",             icon: <Vote size={15} />, badge: "1" },
   { id: "social",    label: "Comunidad",       icon: <MessagesSquare size={15} /> },
   { id: "academy",   label: "Web3 Academy ✦", icon: <BookOpen size={15} />, badge: "🎓" },
@@ -505,7 +505,7 @@ export function Dashboard() {
 
   // Label map for tab header
   const TAB_LABELS: Record<TabId, string> = {
-    overview: "Overview", nosotros: "Sobre Nosotros", nft: "Mi Colección",
+    overview: "Overview", nosotros: "Sobre Nosotros", nft: "NFTs",
     dapp: "dApp", finanzas: "Finanzas", dao: "DAO", perfil: "Mi Perfil",
     social: "Comunidad", academy: "Web3 Academy",
   };
