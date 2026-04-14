@@ -13,7 +13,7 @@ async function claimNFTTo(toAddress: string, tokenId: bigint, contractAddress: s
   const { sendTransaction } = await import("thirdweb");
   const { privateKeyToAccount } = await import("thirdweb/wallets");
 
-  const isMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
+  const isMainnet = !!(process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET);
   const activeChain = isMainnet ? avalanche : avalancheFuji;
 
   const serverClient = createThirdwebClient({
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "tokenId must be between 1 and 12 for zodiac NFTs" }, { status: 400 });
       }
 
-      const useMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
+      const useMainnet = !!(process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET);
       const contractAddress = useMainnet
         ? (process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET || "")
         : (process.env.NEXT_PUBLIC_NFT_CONTRACT_FUJI || "");
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const useMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
+    const useMainnet = !!(process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET);
     const contractAddress = useMainnet
       ? (process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET || "")
       : (process.env.NEXT_PUBLIC_NFT_CONTRACT_FUJI || "");

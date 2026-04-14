@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useActiveAccount, ConnectButton, useSendTransaction } from "thirdweb/react";
 import { claimTo } from "thirdweb/extensions/erc1155";
 import { client, avalanche, avalancheFuji } from "@/lib/thirdweb";
-import { getNFTContract } from "@/lib/nft";
+import { getNFTContract, isMainnet } from "@/lib/nft";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
 // (precio gestionado por Claim Conditions en Thirdweb — 0.5 AVAX)
@@ -67,7 +67,6 @@ export default function ClaimZodiacClient() {
   const [minting, setMinting] = useState(false);
   const [zodiacInput, setZodiacInput] = useState<string>("");
 
-  const isMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
   const activeChain = isMainnet ? avalanche : avalancheFuji;
 
   const { mutateAsync: sendTx } = useSendTransaction();
@@ -521,7 +520,7 @@ export default function ClaimZodiacClient() {
 
         {/* Footer */}
         <p className="text-center text-xs text-slate-600 mt-8">
-          Om Domo Zodiac Collection · Avalanche {process.env.NEXT_PUBLIC_USE_MAINNET === "true" ? "Mainnet" : "Fuji Testnet"} · ERC-1155
+          Om Domo Zodiac Collection · Avalanche {isMainnet ? "Mainnet" : "Fuji Testnet"} · ERC-1155
         </p>
       </div>
     </div>

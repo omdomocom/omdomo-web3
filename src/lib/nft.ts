@@ -18,8 +18,8 @@ export const NFT_CONTRACT_ADDRESS_FUJI =
 export const NFT_CONTRACT_ADDRESS_MAINNET =
   process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET || "";
 
-// Activo: switch a mainnet cuando NEXT_PUBLIC_USE_MAINNET=true
-const isMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
+// Usa mainnet si el contrato mainnet está configurado, sin depender de USE_MAINNET flag
+export const isMainnet = !!NFT_CONTRACT_ADDRESS_MAINNET;
 
 export function getNFTContract() {
   const address = isMainnet

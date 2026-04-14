@@ -52,7 +52,8 @@ async function mintZodiacNFT(toAddress: string, tokenId: bigint, contractAddress
   const { sendTransaction } = await import("thirdweb");
   const { privateKeyToAccount } = await import("thirdweb/wallets");
 
-  const isMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
+  // Usa mainnet si el contrato mainnet está configurado
+  const isMainnet = !!(process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET);
 
   const serverClient = createThirdwebClient({
     secretKey: process.env.THIRDWEB_SECRET_KEY || "",
@@ -130,8 +131,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Obtener dirección del contrato
-    const isMainnet = process.env.NEXT_PUBLIC_USE_MAINNET === "true";
+    // Obtener dirección del contrato — mainnet si está configurado
+    const isMainnet = !!(process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET);
     const contractAddress = isMainnet
       ? (process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET || "")
       : (process.env.NEXT_PUBLIC_NFT_CONTRACT_FUJI || "");
