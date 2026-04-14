@@ -139,7 +139,7 @@ export default function ClaimZodiacClient() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al mintear");
+      if (!res.ok) throw new Error(data.error + (data.raw ? `\n\n${data.raw}` : ""));
 
       setTxHash(data.devMode ? "" : (data.txHash || ""));
       setStep("done");

@@ -199,8 +199,18 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Clasificar el error para dar mensaje útil al usuario
+      let userMsg = "Error al mintear NFT";
+      if (errMsg.includes("insufficient funds") || errMsg.includes("gas")) {
+        userMsg = "El minter wallet no tiene AVAX suficiente para gas en Mainnet. Recarga 0x648FD67...30b146 con AVAX.";
+      } else if (errMsg.includes("MINTER_ROLE") || errMsg.includes("unauthorized") || errMsg.includes("AccessControl")) {
+        userMsg = "El minter no tiene permisos. Ve a Thirdweb → Permissions → añade 0x648FD67...30b146 como Minter y firma con MetaMask.";
+      } else if (errMsg.includes("TokenDoesNotExist") || errMsg.includes("does not exist") || errMsg.includes("token")) {
+        userMsg = "El token zodiacal no existe aún en el contrato. Configura Claim Conditions en Thirdweb Dashboard.";
+      }
+
       return NextResponse.json(
-        { error: "Error al mintear NFT", details: process.env.NODE_ENV === "development" ? errMsg.slice(0, 300) : undefined },
+        { error: userMsg, raw: errMsg.slice(0, 400) },
         { status: 500 }
       );
     }
