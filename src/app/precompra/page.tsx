@@ -1,6 +1,4 @@
-import dynamic from "next/dynamic";
-
-const PreCompraClient = dynamic(() => import("@/components/PreCompraClient"), { ssr: false });
+import PreCompraLoader from "./PreCompraLoader";
 
 export const metadata = {
   title: "Pre-compra OMMY COIN — Om Domo",
@@ -8,5 +6,5 @@ export const metadata = {
 };
 
 export default function PreCompraPage() {
-  return <PreCompraClient />;
+  return <PreCompraLoader />;
 }
