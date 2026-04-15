@@ -15,6 +15,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SpaceBackground } from "./SpaceBackground";
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { client, avalanche } from "@/lib/thirdweb";
+import { WALLET_DISTRIBUTION } from "@/lib/tokenomics";
 import {
   Flame,
   Coins,
@@ -286,16 +287,13 @@ function Orb({ className }: { className: string }) {
 }
 
 // ─── Donut chart — tokenomics distribution ────────────────────────────────────
-const DISTRIBUTION = [
-  { label: "Ecosistema & Rewards", pct: 25, color: "#9333ea" },
-  { label: "Pre-compra (lock 30d)",pct: 10, color: "#f59e0b" },
-  { label: "Quema programada",     pct: 25, color: "#f97316" },
-  { label: "Liquidez DEX",         pct: 15, color: "#0891b2" },
-  { label: "Equipo (4yr vesting)", pct: 10, color: "#10b981" },
-  { label: "Marketing",            pct:  7, color: "#eab308" },
-  { label: "DAO Treasury",         pct:  5, color: "#6366f1" },
-  { label: "Reserva drops",        pct:  3, color: "#ec4899" },
-];
+// Colores en el mismo orden que WALLET_DISTRIBUTION en tokenomics.ts
+const DONUT_COLORS = ["#9333ea", "#f97316", "#0891b2", "#f59e0b", "#10b981", "#eab308", "#6366f1", "#ec4899"];
+const DISTRIBUTION = WALLET_DISTRIBUTION.map((seg, i) => ({
+  label: seg.label,
+  pct:   seg.percent,
+  color: DONUT_COLORS[i] ?? "#9333ea",
+}));
 
 function DonutChart() {
   const R = 70;

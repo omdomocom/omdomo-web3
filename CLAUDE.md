@@ -28,7 +28,7 @@ Contexto completo del proyecto para sesiones de Claude Code.
 | 🔥 Burn permanente | 25% | 7,494,811,450 | `0x000000000000000000000000000000000000dEaD` |
 | 🌱 Ecosistema & Rewards | 25% | 7,494,811,450 | `0xF49FBE7764932c5Ca95f0Da80F54C3C65C6ec294` |
 | 💧 Liquidez DEX | 15% | 4,496,886,870 | `0x9EE85AE6D167bb5737aB85407088E766237Ed38a` |
-| 🔒 Pre-compra (lock 30d) | 10% | 2,997,924,580 | `0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2` |
+| 🔒 Pre-compra (lock→21 Dic 2026) | 10% | 2,997,924,580 | `0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2` |
 | 👥 Equipo (4yr vesting) | 10% | 2,997,924,580 | `0xF8099E1cFc08FE7845188e5d77d70fedCd40802c` ✅ Safe 2/2 |
 | 📣 Marketing | 7% | 2,098,547,206 | `0x1f1a22351F1CD24f5aaF70AA72F130Ec52Fa7c06` ✅ Safe 2/2 |
 | 🏛️ DAO Treasury | 5% | 1,498,962,290 | `0x6d7d88dBC7266Cfd9F5BF6B2324372eA9Cb70867` ✅ Safe 2/2 |
@@ -237,7 +237,7 @@ Fallback: si `REDIS_URL` no está configurado → usa Map en memoria con warning
 | Parámetro | Valor |
 |-----------|-------|
 | Supply inicial | 29,979,245,800 OMMY |
-| Supply final (objetivo) | 2,997,924,580 OMMY (90% burn en ~7-8 años) |
+| Supply final (objetivo) | 8,993,773,740 OMMY (70% burn en ~4 años) |
 | Precio lanzamiento | $0.001 |
 | Market Cap lanzamiento | ~$3M |
 | FDV | ~$30M |
@@ -247,7 +247,7 @@ Fallback: si `REDIS_URL` no está configurado → usa Map en memoria con warning
 | Segmento | % | OMMY aprox |
 |----------|---|-----------|
 | Ecosistema & Rewards | 25% | ~7.49M |
-| Pre-compra (lock 30d) | 10% | ~3.00M |
+| Pre-compra (lock→21 Dic 2026) | 10% | ~3.00M |
 | Quema programada | 25% | ~7.49M |
 | Liquidez DEX | 15% | ~4.50M |
 | Equipo (4yr vesting) | 10% | ~3.00M |
