@@ -13,7 +13,7 @@ import { ConnectButton, useActiveAccount, useReadContract } from "thirdweb/react
 import { client } from "@/lib/thirdweb";
 import { getOwnedNFTs } from "thirdweb/extensions/erc1155";
 import { getNFTContract } from "@/lib/nft";
-import { OmmyCoinLogo } from "@/components/OmmyCoinLogo";
+import NextImage from "next/image";
 
 import { SpaceBackground }       from "@/components/SpaceBackground";
 import { CloudsBackground, OceanBackground, LavaBackground, ForestBackground, SolidBackground } from "@/components/AnimatedBackground";
@@ -257,7 +257,7 @@ function SobreNosotrosPanel() {
             {
               icon: "🪙",
               title: "OMMY Coin — Token en Avalanche",
-              desc: "ERC-20 desplegado en Avalanche Mainnet. Supply de 29,979M tokens con mecánica deflacionaria: objetivo reducir el 90% del supply en 7-8 años.",
+              desc: "ERC-20 desplegado en Avalanche Mainnet. Supply de 29,979M tokens con mecánica deflacionaria: objetivo reducir el 70% del supply en 7-8 años.",
             },
             {
               icon: "🖼️",
@@ -420,7 +420,7 @@ function OverviewPanel({ address }: { address?: string }) {
           { label: "OMMY Price",      value: "$0.001",      sub: "Lanzamiento Jun 2026",   icon: <Coins size={15} />, color: "from-purple-500 to-pink-500",   glow: "shadow-purple-500/20" },
           { label: "Mis NFTs",        value: String(nftCount), sub: nftSub,                 icon: <Image size={15} />, color: "from-cyan-500 to-blue-500",     glow: "shadow-cyan-500/20" },
           { label: "OMMY Acumulados", value: address ? "5,320" : "—", sub: address ? "≈ $5.32" : "Conecta wallet", icon: <Coins size={15} />, color: "from-yellow-400 to-amber-500", glow: "shadow-yellow-500/20" },
-          { label: "Supply Quemado",  value: "0.001%",      sub: "objetivo 90%",           icon: <Flame size={15} />, color: "from-orange-500 to-red-500",    glow: "shadow-orange-500/20" },
+          { label: "Supply Quemado",  value: "0.001%",      sub: "objetivo 70%",           icon: <Flame size={15} />, color: "from-orange-500 to-red-500",    glow: "shadow-orange-500/20" },
         ].map((s, i) => (
           <motion.div
             key={s.label}
@@ -443,21 +443,21 @@ function OverviewPanel({ address }: { address?: string }) {
       {/* Drop countdown */}
       <motion.div
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-        className="glass rounded-2xl p-4 border border-orange-500/25 bg-gradient-to-r from-orange-900/10 to-red-900/10 flex flex-wrap items-center gap-4"
+        className="glass rounded-2xl p-4 border border-orange-500/25 bg-gradient-to-r from-orange-900/10 to-red-900/10"
       >
-        <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-lg flex-shrink-0">🔥</div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-slate-100">Drop #1 Genesis Hoodie</p>
-            <p className="text-xs text-slate-500">100 unidades · €89 · 10,000 OMMY COIN Bonus</p>
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-lg flex-shrink-0">🔥</div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-slate-100 truncate">Drop #1 Genesis Hoodie</p>
+              <p className="text-xs text-slate-500 truncate">100 uds · €89 · 10,000 OMMY Bonus</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-4 flex-shrink-0">
-          <DropCountdown />
-          <a href="/drops" className="px-3 py-1.5 rounded-xl bg-orange-500/20 border border-orange-500/30 text-xs font-bold text-orange-300 hover:bg-orange-500/30 transition-colors whitespace-nowrap">
+          <a href="/drops" className="px-3 py-1.5 rounded-xl bg-orange-500/20 border border-orange-500/30 text-xs font-bold text-orange-300 hover:bg-orange-500/30 transition-colors whitespace-nowrap flex-shrink-0">
             Ver drop →
           </a>
         </div>
+        <DropCountdown />
       </motion.div>
 
       <OnboardingChecklist walletConnected={!!address} />
@@ -585,7 +585,7 @@ export function Dashboard() {
 
             {/* Logo */}
             <a href="/" className="flex items-center gap-2 flex-shrink-0">
-              <OmmyCoinLogo size={28} />
+              <NextImage src="/logo-blanco.png" alt="Om Domo" width={28} height={28} className="object-contain" />
               <span className="font-black text-sm gradient-text hidden sm:block">Om Domo</span>
             </a>
 

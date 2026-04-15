@@ -3055,8 +3055,8 @@ export function LandingPage() {
   const countdown = useCountdown();
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef });
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const heroY = useTransform(scrollYProgress, [0, 0.6], [0, -80]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
+  const heroY = useTransform(scrollYProgress, [0, 0.85], [0, -60]);
 
   const heroTitleRef = useRef<HTMLHeadingElement>(null);
   const orb1Ref = useRef<HTMLDivElement>(null);
