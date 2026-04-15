@@ -3086,7 +3086,7 @@ export function LandingPage() {
 
           <div className={`hidden md:flex items-center gap-6 text-sm ${darkMode ? "text-slate-400" : "text-slate-600"}`}>
             <a href="#como-funciona" className={`transition-colors ${darkMode ? "hover:text-slate-100" : "hover:text-slate-900"}`}>Cómo funciona</a>
-            <a href="#precompra" className={`transition-colors font-medium ${darkMode ? "hover:text-amber-300 text-amber-400" : "hover:text-amber-600 text-amber-500"}`}>Pre-compra</a>
+            <a href="/precompra" className={`transition-colors font-medium ${darkMode ? "hover:text-amber-300 text-amber-400" : "hover:text-amber-600 text-amber-500"}`}>Pre-compra</a>
             <a href="#token" className={`transition-colors ${darkMode ? "hover:text-slate-100" : "hover:text-slate-900"}`}>Token</a>
             <a href="#comunidad" className={`transition-colors ${darkMode ? "hover:text-slate-100" : "hover:text-slate-900"}`}>Comunidad</a>
             <a href="/drops" className="hover:text-orange-300 text-orange-400 transition-colors font-medium">🔥 Drops</a>
@@ -3166,14 +3166,14 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3, ease: "backOut" }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/30 bg-purple-900/20 text-purple-300 text-xs font-medium mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-900/20 text-amber-300 text-xs font-medium mb-8"
           >
             <motion.span
               animate={{ scale: [1, 1.3, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="w-1.5 h-1.5 rounded-full bg-green-400"
+              className="w-1.5 h-1.5 rounded-full bg-amber-400"
             />
-            Testnet Fuji activa — Prueba gratis ahora
+            Pre-compra abierta · Precio fijo $0.001 por OMMY COIN
           </motion.div>
 
           <motion.p
@@ -3196,6 +3196,13 @@ export function LandingPage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-14"
           >
             <a
+              href="/precompra"
+              className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-amber-900/40 text-white"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Pre-compra OMMY COIN
+            </a>
+            <a
               href="https://www.omdomo.com"
               target="_blank"
               rel="noopener noreferrer"
@@ -3204,16 +3211,10 @@ export function LandingPage() {
               <ShoppingBag size={16} /> Comprar en omdomo.com
             </a>
             <a
-              href="/claim"
-              className="flex items-center gap-2 px-8 py-4 rounded-2xl border border-slate-600 text-slate-300 font-semibold text-sm hover:border-purple-500/60 hover:text-white transition-all"
-            >
-              <Gift size={16} /> Reclamar mi NFT
-            </a>
-            <a
               href="/nft"
               className="flex items-center gap-2 px-6 py-4 rounded-2xl border border-purple-500/40 text-purple-300 font-semibold text-sm hover:border-purple-400/70 hover:text-purple-200 hover:bg-purple-500/10 transition-all"
             >
-              ✨ NFT Zodiacal gratis
+              <Gift size={16} /> NFT Zodiacal gratis
             </a>
           </motion.div>
 
