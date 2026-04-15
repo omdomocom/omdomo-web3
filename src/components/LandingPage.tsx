@@ -3133,7 +3133,7 @@ export function LandingPage() {
       </nav>
 
       {/* ── HERO ──────────────────────────────────────────────────────── */}
-      <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 overflow-hidden" style={{ background: "#060308" }}>
+      <section ref={heroRef} className="relative min-h-[150vh] md:min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-32 md:pb-16 overflow-hidden" style={{ background: "#060308" }}>
         {/* Universe canvas — interactive space-time distortion */}
         <SpaceBackground />
 
