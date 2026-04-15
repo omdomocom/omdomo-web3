@@ -9,8 +9,10 @@ import {
   MessagesSquare, BookOpen, Heart, Info, Moon, Sun,
   PanelLeftClose, PanelLeftOpen, ChevronRight as Chevron,
 } from "lucide-react";
-import { ConnectButton, useActiveAccount } from "thirdweb/react";
+import { ConnectButton, useActiveAccount, useReadContract } from "thirdweb/react";
 import { client } from "@/lib/thirdweb";
+import { getOwnedNFTs } from "thirdweb/extensions/erc1155";
+import { getNFTContract } from "@/lib/nft";
 
 import { SpaceBackground }       from "@/components/SpaceBackground";
 import { CloudsBackground, OceanBackground, LavaBackground, ForestBackground, SolidBackground } from "@/components/AnimatedBackground";
@@ -71,6 +73,39 @@ function DAppPanel() {
   ];
   return (
     <div className="space-y-5">
+
+      {/* ── Pre-compra OMMY COIN banner ── */}
+      <motion.a
+        href="/#precompra"
+        whileHover={{ scale: 1.01, y: -2 }}
+        transition={{ duration: 0.18 }}
+        className="block glass rounded-2xl p-5 border border-amber-500/30 hover:border-amber-400/50 transition-all cursor-pointer relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(124,58,237,0.08) 100%)" }}
+      >
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 rounded-t-2xl" />
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                Pre-lanzamiento
+              </span>
+              <span className="text-[10px] text-slate-500">Cambia a "Comprar" en Junio 2026</span>
+            </div>
+            <h3 className="text-sm font-bold text-amber-300 mb-0.5">Pre-compra OMMY COIN</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Precio fijo $0.001 · 10% del supply reservado · Lock 30 días
+            </p>
+          </div>
+          <div className="flex-shrink-0 flex flex-col items-end gap-1">
+            <span className="text-xl font-black text-amber-300">$0.001</span>
+            <span className="text-[10px] text-slate-500">por OMMY COIN</span>
+            <span className="flex items-center gap-1 text-xs font-semibold text-amber-400 mt-1">
+              Participar <ChevronRight size={12} />
+            </span>
+          </div>
+        </div>
+      </motion.a>
+
       {/* Live tools */}
       <div>
         <p className="text-xs text-slate-500 uppercase tracking-wider mb-3">Disponible ahora</p>
@@ -365,14 +400,26 @@ function DropCountdown() {
 
 // ─── Overview Panel ───────────────────────────────────────────────────────
 function OverviewPanel({ address }: { address?: string }) {
+  const nftContract = getNFTContract();
+  const { data: ownedNFTs } = useReadContract(
+    getOwnedNFTs,
+    address && nftContract
+      ? { contract: nftContract, address }
+      : { contract: nftContract!, address: "" }
+  );
+  const nftCount = address ? (ownedNFTs?.length ?? "…") : "—";
+  const nftSub   = address
+    ? (ownedNFTs && ownedNFTs.length > 0 ? "Genesis · Om Domo" : "Sin NFTs aún")
+    : "Conecta wallet";
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "OMMY Price",      value: "$0.001",            sub: "Lanzamiento Jun 2026",         icon: <Coins size={15} />,       color: "from-purple-500 to-pink-500",   glow: "shadow-purple-500/20" },
-          { label: "Mis NFTs",        value: address ? "1" : "—", sub: address ? "Genesis" : "Conecta wallet", icon: <Image size={15} />, color: "from-cyan-500 to-blue-500",  glow: "shadow-cyan-500/20" },
+          { label: "OMMY Price",      value: "$0.001",      sub: "Lanzamiento Jun 2026",   icon: <Coins size={15} />, color: "from-purple-500 to-pink-500",   glow: "shadow-purple-500/20" },
+          { label: "Mis NFTs",        value: String(nftCount), sub: nftSub,                 icon: <Image size={15} />, color: "from-cyan-500 to-blue-500",     glow: "shadow-cyan-500/20" },
           { label: "OMMY Acumulados", value: address ? "5,320" : "—", sub: address ? "≈ $5.32" : "Conecta wallet", icon: <Coins size={15} />, color: "from-yellow-400 to-amber-500", glow: "shadow-yellow-500/20" },
-          { label: "Supply Quemado",  value: "0.001%",             sub: "objetivo 90%",                icon: <Flame size={15} />,       color: "from-orange-500 to-red-500",    glow: "shadow-orange-500/20" },
+          { label: "Supply Quemado",  value: "0.001%",      sub: "objetivo 90%",           icon: <Flame size={15} />, color: "from-orange-500 to-red-500",    glow: "shadow-orange-500/20" },
         ].map((s, i) => (
           <motion.div
             key={s.label}
