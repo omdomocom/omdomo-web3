@@ -241,7 +241,7 @@ function ZodiacCard({
         {/* CTA en hover */}
         {!isOwned && (
           <a
-            href={nft.claimUrl || "#"}
+            href={isMyZodiac ? (nft.claimUrl || "#") : (nft.claimUrl ? nft.claimUrl + "&buy=1" : "#")}
             onClick={(e) => e.stopPropagation()}
             className={`mt-1.5 w-full py-1 rounded-lg text-[9px] font-bold hidden group-hover:flex items-center justify-center gap-0.5 transition-colors cursor-pointer
               ${isMyZodiac
@@ -249,7 +249,7 @@ function ZodiacCard({
                 : "bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30"
               }`}
           >
-            {isMyZodiac ? <><Sparkles size={8} /> Reclamar</> : <><ShoppingCart size={8} /> Obtener</>}
+            {isMyZodiac ? <><Sparkles size={8} /> Reclamar</> : <><ShoppingCart size={8} /> Comprar</>}
           </a>
         )}
       </div>

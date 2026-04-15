@@ -59,6 +59,7 @@ export default function ClaimZodiacClient() {
   const emailParam  = searchParams.get("email")  ?? "";
   const walletParam = searchParams.get("wallet") ?? "";
   const zodiacParam = searchParams.get("zodiac") ?? "";
+  const buyParam    = searchParams.get("buy")    === "1";
 
   const [step, setStep] = useState<Step>("loading");
   const [zodiacInfo, setZodiacInfo] = useState<ZodiacInfo | null>(null);
@@ -79,8 +80,14 @@ export default function ClaimZodiacClient() {
     if (zodiacParam && ZODIAC_CONFIG[zodiacParam]) {
       const cfg = ZODIAC_CONFIG[zodiacParam];
       setZodiacInfo({ name: zodiacParam, ...cfg });
-      setIsFreeClaimAvailable(true);
-      setStep("preview");
+      if (buyParam) {
+        // Viene del botón "Comprar" — ir directo al flow de pago
+        setIsFreeClaimAvailable(false);
+        setStep("buy");
+      } else {
+        setIsFreeClaimAvailable(true);
+        setStep("preview");
+      }
       return;
     }
 
@@ -106,7 +113,7 @@ export default function ClaimZodiacClient() {
 
     // Sin datos suficientes: mostrar selector de signo
     setStep("claim");
-  }, [zodiacParam, emailParam, walletParam]);
+  }, [zodiacParam, emailParam, walletParam, buyParam]);
 
   useEffect(() => {
     loadZodiac();
