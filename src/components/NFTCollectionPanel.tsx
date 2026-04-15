@@ -29,6 +29,7 @@ interface CatalogNFT {
   tokenId: string;
   category: NFTCategory;
   emoji: string;
+  image: string;        // ruta local /nft-assets/{tokenId}.png
   ommyPrice: number | null;
   lockDate?: string;
   claimUrl?: string;
@@ -87,55 +88,22 @@ const ELEMENT_COLORS: Record<string, { glow: string; from: string; to: string }>
 // ─── Catálogo completo de NFTs ───────────────────────────────────────────────
 const NFT_CATALOG: CatalogNFT[] = [
   // ── Drops ──
-  {
-    id: "genesis-hoodie",
-    name: "Genesis Hoodie",
-    rarity: "Genesis",
-    tokenId: "0",
-    category: "drop",
-    emoji: "✦",
-    ommyPrice: null,
-    claimUrl: "/claim",
-    shopUrl: "https://www.omdomo.com",
-    ommyReward: 5320,
-  },
-  {
-    id: "drop2-solsticio",
-    name: "Drop #2 Solsticio",
-    rarity: "Founder",
-    tokenId: "13",
-    category: "drop",
-    emoji: "🌕",
-    ommyPrice: null,
-    lockDate: "Sep 2026",
-    claimUrl: "/drops",
-    ommyReward: 3000,
-  },
-  {
-    id: "drop3-ommylab",
-    name: "Ommy Lab Vol.1",
-    rarity: "Community",
-    tokenId: "14",
-    category: "drop",
-    emoji: "⚗️",
-    ommyPrice: null,
-    lockDate: "Dic 2026",
-    claimUrl: "/drops",
-    ommyReward: 2000,
-  },
+  { id: "genesis-hoodie",      name: "Genesis Hoodie", rarity: "Genesis",   tokenId: "0",  category: "drop",   emoji: "✦",  image: "/nft-assets/0.gif",  ommyPrice: null, claimUrl: "/claim",  shopUrl: "https://www.omdomo.com", ommyReward: 5320 },
+  { id: "drop2-solsticio",     name: "Drop #2 Solsticio", rarity: "Founder", tokenId: "13", category: "drop",   emoji: "🌕", image: "/nft-assets/0.gif",  ommyPrice: null, lockDate: "Sep 2026", claimUrl: "/drops", ommyReward: 3000 },
+  { id: "drop3-ommylab",       name: "Ommy Lab Vol.1",    rarity: "Community",tokenId: "14", category: "drop",   emoji: "⚗️", image: "/nft-assets/0.gif",  ommyPrice: null, lockDate: "Dic 2026", claimUrl: "/drops", ommyReward: 2000 },
   // ── Zodiacales ──
-  { id: "zodiac-aries",       name: "Aries",       rarity: "Genesis", tokenId: "1",  category: "zodiac", emoji: "♈", element: "Fuego",  ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Aries",       ommyReward: 1000 },
-  { id: "zodiac-tauro",       name: "Tauro",       rarity: "Genesis", tokenId: "2",  category: "zodiac", emoji: "♉", element: "Tierra", ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Tauro",       ommyReward: 1000 },
-  { id: "zodiac-geminis",     name: "Géminis",     rarity: "Genesis", tokenId: "3",  category: "zodiac", emoji: "♊", element: "Aire",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Géminis",     ommyReward: 1000 },
-  { id: "zodiac-cancer",      name: "Cáncer",      rarity: "Genesis", tokenId: "4",  category: "zodiac", emoji: "♋", element: "Agua",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Cáncer",      ommyReward: 1000 },
-  { id: "zodiac-leo",         name: "Leo",         rarity: "Genesis", tokenId: "5",  category: "zodiac", emoji: "♌", element: "Fuego",  ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Leo",         ommyReward: 1000 },
-  { id: "zodiac-virgo",       name: "Virgo",       rarity: "Genesis", tokenId: "6",  category: "zodiac", emoji: "♍", element: "Tierra", ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Virgo",       ommyReward: 1000 },
-  { id: "zodiac-libra",       name: "Libra",       rarity: "Genesis", tokenId: "7",  category: "zodiac", emoji: "♎", element: "Aire",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Libra",       ommyReward: 1000 },
-  { id: "zodiac-escorpio",    name: "Escorpio",    rarity: "Genesis", tokenId: "8",  category: "zodiac", emoji: "♏", element: "Agua",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Escorpio",    ommyReward: 1000 },
-  { id: "zodiac-sagitario",   name: "Sagitario",   rarity: "Genesis", tokenId: "9",  category: "zodiac", emoji: "♐", element: "Fuego",  ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Sagitario",   ommyReward: 1000 },
-  { id: "zodiac-capricornio", name: "Capricornio", rarity: "Genesis", tokenId: "10", category: "zodiac", emoji: "♑", element: "Tierra", ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Capricornio", ommyReward: 1000 },
-  { id: "zodiac-acuario",     name: "Acuario",     rarity: "Genesis", tokenId: "11", category: "zodiac", emoji: "♒", element: "Aire",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Acuario",     ommyReward: 1000 },
-  { id: "zodiac-piscis",      name: "Piscis",      rarity: "Genesis", tokenId: "12", category: "zodiac", emoji: "♓", element: "Agua",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Piscis",      ommyReward: 1000 },
+  { id: "zodiac-aries",       name: "Aries",       rarity: "Genesis", tokenId: "1",  category: "zodiac", emoji: "♈", image: "/nft-assets/1.gif",  element: "Fuego",  ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Aries",       ommyReward: 1000 },
+  { id: "zodiac-tauro",       name: "Tauro",       rarity: "Genesis", tokenId: "2",  category: "zodiac", emoji: "♉", image: "/nft-assets/2.gif",  element: "Tierra", ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Tauro",       ommyReward: 1000 },
+  { id: "zodiac-geminis",     name: "Géminis",     rarity: "Genesis", tokenId: "3",  category: "zodiac", emoji: "♊", image: "/nft-assets/3.gif",  element: "Aire",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Géminis",     ommyReward: 1000 },
+  { id: "zodiac-cancer",      name: "Cáncer",      rarity: "Genesis", tokenId: "4",  category: "zodiac", emoji: "♋", image: "/nft-assets/4.gif",  element: "Agua",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Cáncer",      ommyReward: 1000 },
+  { id: "zodiac-leo",         name: "Leo",         rarity: "Genesis", tokenId: "5",  category: "zodiac", emoji: "♌", image: "/nft-assets/5.gif",  element: "Fuego",  ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Leo",         ommyReward: 1000 },
+  { id: "zodiac-virgo",       name: "Virgo",       rarity: "Genesis", tokenId: "6",  category: "zodiac", emoji: "♍", image: "/nft-assets/6.gif",  element: "Tierra", ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Virgo",       ommyReward: 1000 },
+  { id: "zodiac-libra",       name: "Libra",       rarity: "Genesis", tokenId: "7",  category: "zodiac", emoji: "♎", image: "/nft-assets/7.gif",  element: "Aire",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Libra",       ommyReward: 1000 },
+  { id: "zodiac-escorpio",    name: "Escorpio",    rarity: "Genesis", tokenId: "8",  category: "zodiac", emoji: "♏", image: "/nft-assets/8.gif",  element: "Agua",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Escorpio",    ommyReward: 1000 },
+  { id: "zodiac-sagitario",   name: "Sagitario",   rarity: "Genesis", tokenId: "9",  category: "zodiac", emoji: "♐", image: "/nft-assets/9.gif",  element: "Fuego",  ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Sagitario",   ommyReward: 1000 },
+  { id: "zodiac-capricornio", name: "Capricornio", rarity: "Genesis", tokenId: "10", category: "zodiac", emoji: "♑", image: "/nft-assets/10.gif", element: "Tierra", ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Capricornio", ommyReward: 1000 },
+  { id: "zodiac-acuario",     name: "Acuario",     rarity: "Genesis", tokenId: "11", category: "zodiac", emoji: "♒", image: "/nft-assets/11.gif", element: "Aire",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Acuario",     ommyReward: 1000 },
+  { id: "zodiac-piscis",      name: "Piscis",      rarity: "Genesis", tokenId: "12", category: "zodiac", emoji: "♓", image: "/nft-assets/12.gif", element: "Agua",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Piscis",      ommyReward: 1000 },
 ];
 
 const ZODIAC_NFTS = NFT_CATALOG.filter((n) => n.category === "zodiac");
@@ -229,12 +197,16 @@ function ZodiacCard({
           />
         )}
 
-        <span className={`relative z-10 text-3xl select-none
-          ${isOwned ? "" : "opacity-30 group-hover:opacity-100"} transition-opacity duration-300`}>
-          {nft.emoji}
-        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={nft.image}
+          alt={nft.name}
+          className={`absolute inset-0 w-full h-full object-cover z-10
+            ${isOwned ? "" : "opacity-40 group-hover:opacity-100"} transition-opacity duration-300`}
+        />
         {nft.element && (
-          <span className={`relative z-10 text-[9px] ${isOwned ? "text-slate-300" : "text-slate-600 group-hover:text-slate-400"} transition-colors duration-300`}>
+          <span className={`absolute bottom-1 left-0 right-0 text-center z-20 text-[9px] drop-shadow-lg
+            ${isOwned ? "text-white/80" : "text-slate-500 group-hover:text-slate-300"} transition-colors duration-300`}>
             {nft.element}
           </span>
         )}
@@ -303,8 +275,14 @@ function DropCard({ nft, isOwned }: { nft: CatalogNFT; isOwned: boolean }) {
         ${isLocked ? "" : isOwned ? "" : "group-hover:grayscale-0 grayscale"} transition-all duration-300`}
       >
         <div className={`absolute inset-0 bg-gradient-to-br ${isOwned ? style.fullBg : "from-slate-800/60 to-slate-900/60"} opacity-80`} />
-        <span className="relative z-10 text-5xl select-none">{nft.emoji}</span>
-        <span className={`relative z-10 text-[10px] mt-1 ${isOwned ? "text-slate-300" : "text-slate-500"}`}>Om Domo</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={nft.image}
+          alt={nft.name}
+          className={`absolute inset-0 w-full h-full object-cover z-10
+            ${isLocked ? "opacity-30" : isOwned ? "" : "opacity-40 group-hover:opacity-100"} transition-opacity duration-300`}
+        />
+        <span className={`absolute bottom-2 left-0 right-0 text-center z-20 text-[10px] drop-shadow-lg ${isOwned ? "text-white/80" : "text-slate-400"}`}>Om Domo</span>
 
         <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-20">
           {isOwned && (
