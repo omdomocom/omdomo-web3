@@ -14,8 +14,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Om Domo | Spiritual Web3 Lifestyle",
-  description: "Compra. Gana NFTs y OMMY Coin. Forma parte de la comunidad Web3 más consciente.",
+  title: "OM DOMO | WEB3 OMMY COIN COMMUNITY",
+  description: "Compra ropa consciente. Gana NFTs y OMMY Coin. La comunidad Web3 de moda, bienestar y vida consciente en Avalanche.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
