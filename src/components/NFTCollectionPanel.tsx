@@ -328,10 +328,19 @@ function DropCard({ nft, isOwned }: { nft: CatalogNFT; isOwned: boolean }) {
   );
 }
 
+// ─── Helper: IPFS → HTTP gateway ─────────────────────────────────────────────
+function ipfsToHttp(url?: string): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith("ipfs://")) {
+    return url.replace("ipfs://", "https://ipfs.io/ipfs/");
+  }
+  return url;
+}
+
 // ─── On-chain NFT Card (Tab 1) ───────────────────────────────────────────────
 function OnChainNFTCard({ nft }: { nft: NFT }) {
   const name = nft.metadata?.name ?? `NFT #${nft.id.toString()}`;
-  const image = nft.metadata?.image;
+  const image = ipfsToHttp(nft.metadata?.image);
 
   return (
     <motion.div
@@ -369,7 +378,7 @@ interface NFTCollectionPanelProps {
 }
 
 export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
-  const [activeTab, setActiveTab] = useState<"wallet" | "ommy" | "omdomo">("wallet");
+  const [activeTab, setActiveTab] = useState<"wallet" | "omdomo">("wallet");
   const [expandedCollection, setExpandedCollection] = useState<string | null>("zodiac");
   const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set());
   const [myZodiacId, setMyZodiacId] = useState<string | null>(null);
@@ -403,10 +412,6 @@ export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
       ? { contract: nftContract!, address: walletAddress! }
       : { contract: nftContract!, address: "" }
   );
-
-  // Stats para tab "MY OMMY"
-  const ommyNftsEarned = profile.zodiacClaimed ? 1 : 0;
-  const ommyEarned = ommyNftsEarned * 1000;
 
   // Colecciones Om Domo
   const COLLECTIONS = [
@@ -449,9 +454,8 @@ export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
   ];
 
   const TABS = [
-    { id: "wallet" as const, label: "NFTs",     icon: Wallet },
-    { id: "ommy"   as const, label: "MY OMMY",  icon: Sparkles },
-    { id: "omdomo" as const, label: "Om Domo",  icon: Layers },
+    { id: "wallet" as const, label: "NFTs",         icon: Wallet },
+    { id: "omdomo" as const, label: "Colecciones",  icon: Layers },
   ];
 
   return (
@@ -546,104 +550,7 @@ export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
         )}
 
         {/* ══════════════════════════════════════════════════════════════════════
-            TAB 2 — MY OMMY (perfil local)
-        ══════════════════════════════════════════════════════════════════════ */}
-        {activeTab === "ommy" && (
-          <motion.div
-            key="ommy"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-4"
-          >
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="glass rounded-xl p-3 text-center border border-slate-700/30">
-                <p className="text-base font-black text-purple-300">{ommyNftsEarned}</p>
-                <p className="text-xs text-slate-500 mt-0.5">NFTs ganados</p>
-              </div>
-              <div className="glass rounded-xl p-3 text-center border border-slate-700/30">
-                <p className="text-base font-black text-amber-300">{ommyEarned.toLocaleString()}</p>
-                <p className="text-xs text-slate-500 mt-0.5">OMMY earned</p>
-              </div>
-            </div>
-
-            {/* NFT zodiacal reclamado */}
-            {profile.zodiacClaimed && myZodiacId && (() => {
-              const nft = NFT_CATALOG.find((n) => n.id === myZodiacId);
-              if (!nft) return null;
-              const elemColor = nft.element ? ELEMENT_COLORS[nft.element] : null;
-              const cardBg = elemColor ? `${elemColor.from} ${elemColor.to}` : "from-purple-900/60 to-blue-900/60";
-              return (
-                <div className={`rounded-2xl border border-yellow-400/40 bg-gradient-to-br ${cardBg} overflow-hidden shadow-lg shadow-yellow-500/10 p-4`}>
-                  <div className="flex items-center gap-4">
-                    <span className="text-5xl select-none">{nft.emoji}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-1">
-                          <Check size={9} /> Reclamado
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-400/20 text-yellow-300 border border-yellow-400/30">Genesis</span>
-                      </div>
-                      <p className="text-sm font-bold text-white">{nft.name}</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">{nft.element} · Token #{nft.tokenId}</p>
-                      <p className="text-[11px] text-purple-300 mt-1">+{nft.ommyReward.toLocaleString()} OMMY reward</p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Pendiente de reclamar */}
-            {profile.profileRewardClaimed && !profile.zodiacClaimed && myZodiacId && (() => {
-              const nft = NFT_CATALOG.find((n) => n.id === myZodiacId);
-              if (!nft) return null;
-              return (
-                <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-900/20 to-slate-900/40 p-4 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-4xl select-none opacity-70">{nft.emoji}</span>
-                    <div className="flex-1 min-w-0">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                        Pendiente de reclamar
-                      </span>
-                      <p className="text-sm font-bold text-slate-200 mt-1">{nft.name}</p>
-                      <p className="text-[11px] text-slate-400">{nft.element} · Gratis para ti</p>
-                    </div>
-                  </div>
-                  <a
-                    href={nft.claimUrl || "/claim-zodiac"}
-                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer"
-                  >
-                    <Sparkles size={12} /> Reclamar gratis
-                  </a>
-                </div>
-              );
-            })()}
-
-            {/* Sin nada todavía */}
-            {!profile.zodiacClaimed && !profile.profileRewardClaimed && (
-              <div className="glass rounded-2xl p-8 border border-slate-700/30 text-center space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-slate-800/60 flex items-center justify-center mx-auto">
-                  <Sparkles size={22} className="text-slate-600" />
-                </div>
-                <div>
-                  <p className="text-slate-300 text-sm font-medium">Completa tu perfil</p>
-                  <p className="text-slate-500 text-xs mt-1">Añade tu email y fecha de nacimiento para ganar tu NFT Zodiacal gratis</p>
-                </div>
-                <button
-                  onClick={() => {}}
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-600 text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer"
-                >
-                  <Sparkles size={12} /> Ir a Mi Perfil
-                </button>
-              </div>
-            )}
-          </motion.div>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════════════════
-            TAB 3 — Om Domo (colecciones)
+            TAB 2 — Colecciones
         ══════════════════════════════════════════════════════════════════════ */}
         {activeTab === "omdomo" && (
           <motion.div
