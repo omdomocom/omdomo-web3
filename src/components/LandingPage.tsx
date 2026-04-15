@@ -260,13 +260,13 @@ function FadeIn({ children, delay = 0, className = "" }: {
   children: React.ReactNode; delay?: number; className?: string;
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, margin: "-20px" });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 24 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
       className={className}
     >
       {children}
@@ -1884,7 +1884,7 @@ function PreCompraSection() {
           {[
             { label: "Supply disponible", value: "2,997,924,580", sub: "OMMY — 10% del total",   borderColor: "rgba(251,146,60,0.4)", glowColor: "rgba(251,146,60,0.08)" },
             { label: "Precio pre-compra",  value: "$0.001",        sub: "Precio de lanzamiento",  borderColor: "rgba(34,197,94,0.4)",  glowColor: "rgba(34,197,94,0.08)" },
-            { label: "Lock post-lanzamiento", value: "30 días",   sub: "Liberación Julio 2026",   borderColor: "rgba(147,51,234,0.4)", glowColor: "rgba(147,51,234,0.08)" },
+            { label: "Lock pre-compra", value: "6 meses",   sub: "Liberación 21 Dic 2026 · Solsticio",   borderColor: "rgba(147,51,234,0.4)", glowColor: "rgba(147,51,234,0.08)" },
           ].map((item, i) => (
             <motion.div
               key={item.label}
@@ -1913,7 +1913,7 @@ function PreCompraSection() {
                 <div className="text-5xl mb-4">✅</div>
                 <h3 className="text-xl font-bold text-white mb-2">¡Pre-compra registrada!</h3>
                 <p className="text-sm" style={{ color: "var(--dark-muted)" }}>
-                  Recibirás {ommyAmount.toLocaleString()} OMMY en tu wallet el día del lanzamiento (Junio 2026) con un lock de 30 días.
+                  Recibirás {ommyAmount.toLocaleString()} OMMY en tu wallet. Lock hasta el Solsticio de Invierno — 21 Diciembre 2026.
                 </p>
               </div>
             ) : !account ? (
@@ -2009,7 +2009,7 @@ function PreCompraSection() {
                 )}
 
                 <p className="text-xs text-center" style={{ color: "var(--dark-muted)" }}>
-                  🔒 Lock 30 días · Liberación Julio 2026 · Token en Avalanche
+                  🔒 Lock 6 meses · Liberación 21 Dic 2026 · Token en Avalanche
                 </p>
               </div>
             )}
@@ -2018,7 +2018,7 @@ function PreCompraSection() {
 
         <FadeIn>
           <div className="rounded-2xl p-6 mt-6" style={{ border: "1px solid rgba(245,158,11,0.15)", background: "rgba(255,255,255,0.03)" }}>
-            <p className="text-xs uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.35)" }}>¿Por qué el lock de 30 días?</p>
+            <p className="text-xs uppercase tracking-widest mb-4" style={{ color: "rgba(255,255,255,0.35)" }}>¿Por qué el lock hasta Diciembre 2026?</p>
             <div className="grid sm:grid-cols-3 gap-4">
               {[
                 { text: "Evita venta masiva que desestabiliza el precio al lanzar" },
@@ -2040,27 +2040,35 @@ function PreCompraSection() {
 
 // ─── Proyectos Sustentables ───────────────────────────────────────────────────
 const PROYECTOS = [
-  { icon: "🌳", title: "Reforestación activa",       desc: "Plantación de especies adaptadas al ecosistema local, trabajando con comunidades y expertos en restauración ambiental.",  tag: "Medioambiente",    topColor: "#22c55e", tagBg: "#f0fdf4", tagText: "#15803d", from: "left" as const },
-  { icon: "👕", title: "Moda con materiales renovables", desc: "Ropa fabricada con algodón orgánico, fibras recicladas y tintes naturales. Cada prenda lleva su huella de carbono certificada.", tag: "Producto",  topColor: "#10b981", tagBg: "#ecfdf5", tagText: "#065f46", from: "right" as const },
-  { icon: "📦", title: "Producción bajo demanda",    desc: "Sin stock masivo. Cada prenda se produce cuando se pide, eliminando el desperdicio textil y reduciendo CO₂ un 60%.",       tag: "CO₂ Reducción",    topColor: "#14b8a6", tagBg: "#f0fdfa", tagText: "#0f766e", from: "left" as const },
-  { icon: "🧘", title: "dApp Bienestar Consciente",  desc: "Meditación, yoga, running, arte y música generan OMMY verificados on-chain. Incentivamos hábitos que mejoran la vida.",   tag: "Fase 3 · dApp",    topColor: "#9333ea", tagBg: "#faf5ff", tagText: "#7e22ce", from: "right" as const },
-  { icon: "🎨", title: "Arte y creatividad",         desc: "Actividades creativas — pintura, música, escritura — también generan recompensas. La expresión artística es bienestar.",   tag: "Comunidad",        topColor: "#ec4899", tagBg: "#fdf2f8", tagText: "#be185d", from: "left" as const },
-  { icon: "⚡", title: "Energía limpia",             desc: "Instalaciones solares para comunidades sin acceso a energía estable, financiadas parcialmente por el DAO Treasury.",       tag: "Infraestructura",  topColor: "#eab308", tagBg: "#fefce8", tagText: "#a16207", from: "right" as const },
+  { icon: "👕", title: "Moda con materiales renovables", desc: "Ropa fabricada con algodón orgánico, fibras recicladas y tintes naturales. Cada prenda lleva su huella de carbono certificada.", tag: "Producto",  topColor: "#10b981", tagBg: "#ecfdf5", tagText: "#065f46", from: "left" as const, comingSoon: false },
+  { icon: "📦", title: "Producción bajo demanda",    desc: "Sin stock masivo. Cada prenda se produce cuando se pide, eliminando el desperdicio textil y reduciendo CO₂ un 60%.",       tag: "CO₂ Reducción",    topColor: "#14b8a6", tagBg: "#f0fdfa", tagText: "#0f766e", from: "right" as const, comingSoon: false },
+  { icon: "🧘", title: "dApp Bienestar Consciente",  desc: "Meditación, yoga, running, arte y música generan OMMY verificados on-chain. Incentivamos hábitos que mejoran la vida.",   tag: "Fase 3 · dApp",    topColor: "#9333ea", tagBg: "#faf5ff", tagText: "#7e22ce", from: "left" as const, comingSoon: false },
+  { icon: "🎨", title: "Arte y creatividad",         desc: "Actividades creativas — pintura, música, escritura — también generan recompensas. La expresión artística es bienestar.",   tag: "Comunidad",        topColor: "#ec4899", tagBg: "#fdf2f8", tagText: "#be185d", from: "right" as const, comingSoon: false },
+  { icon: "🌳", title: "Reforestación activa",       desc: "Plantación de especies adaptadas al ecosistema local, trabajando con comunidades y expertos en restauración ambiental.",  tag: "Próximamente",     topColor: "#22c55e", tagBg: "#f0fdf4", tagText: "#15803d", from: "left" as const, comingSoon: true },
+  { icon: "⚡", title: "Energía limpia",             desc: "Instalaciones solares para comunidades sin acceso a energía estable, financiadas parcialmente por el DAO Treasury.",       tag: "Próximamente",     topColor: "#eab308", tagBg: "#fefce8", tagText: "#a16207", from: "right" as const, comingSoon: true },
 ];
 
 function ProyectoCard({ p, i }: { p: typeof PROYECTOS[0]; i: number }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, margin: "-20px" });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, x: p.from === "left" ? -50 : 50, y: 20 }}
-      animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
+      initial={{ opacity: 0, x: p.from === "left" ? -40 : 40, y: 16 }}
+      animate={inView ? { opacity: p.comingSoon ? 0.5 : 1, x: 0, y: 0 } : {}}
       transition={{ duration: 0.65, delay: (i % 3) * 0.12, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className="card-cream-hover p-6 h-full relative overflow-hidden group cursor-default"
+      whileHover={p.comingSoon ? {} : { y: -6, transition: { duration: 0.2 } }}
+      className={`card-cream-hover p-6 h-full relative overflow-hidden group cursor-default ${p.comingSoon ? "grayscale" : ""}`}
       style={{ borderTop: `3px solid ${p.topColor}` }}
     >
+      {/* Coming soon overlay */}
+      {p.comingSoon && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 backdrop-blur-[1px] rounded-xl">
+          <span className="text-xs font-bold text-stone-500 uppercase tracking-widest border border-stone-300 px-3 py-1 rounded-full bg-white/80">
+            Próximamente
+          </span>
+        </div>
+      )}
       {/* Hover glow */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
@@ -2151,8 +2159,8 @@ const GUIAS = [
     title: "Glosario de términos",
     content: [
       "🔷 Avalanche — Blockchain rápida y de bajo costo donde vive OMMY Coin. Alternativa a Ethereum.",
-      "🧪 Fuji Testnet — Red de pruebas de Avalanche. Permite probar sin dinero real antes del lanzamiento.",
-      "🌐 Mainnet — La red real de producción. Cuando pases de Fuji a Mainnet, los tokens tienen valor real.",
+      "🌐 Mainnet — La red real de Avalanche donde vive OMMY Coin. Todas las transacciones tienen valor real.",
+      "🔷 Avalanche C-Chain — La cadena compatible con Ethereum de Avalanche. Rápida, barata y eficiente.",
       "🎨 NFT — Token no fungible. Un activo digital único. Cada compra en Om Domo genera tu propio NFT.",
       "🏛 DAO — Organización autónoma descentralizada. La comunidad vota decisiones del proyecto con sus NFTs.",
       "💱 DEX — Exchange descentralizado. Intercambia OMMY sin intermediarios, directo en la blockchain.",
@@ -2381,11 +2389,11 @@ function EcosistemaSection() {
       border: "rgba(245,158,11,0.28)",
       tag: "Mainnet · Avalanche",
       title: "Ommy Coin",
-      desc: "El token deflacionario del ecosistema. Cada compra quema OMMY y recompensa a la comunidad. 90% quemado en 7-8 años.",
+      desc: "El token deflacionario del ecosistema. Cada compra quema OMMY y recompensa a la comunidad. 70% quemado en 7-8 años.",
       features: [
         "70 OMMY por cada USD gastado",
-        "Deflación 90% programada",
-        "Pre-compra con lock 30 días",
+        "Deflación 70% programada",
+        "Pre-compra · lock 21 Dic 2026",
         "Liquidez DEX Avalanche",
       ],
       cta: { label: "Conectar wallet", href: "/dashboard", external: false },
@@ -3301,8 +3309,8 @@ export function LandingPage() {
             {[
               { label: "Supply inicial",   value: 29979,  suffix: "M OMMY",  icon: <Coins size={14} /> },
               { label: "Precio lanzamiento",value: 0.001, suffix: "USD",     icon: <TrendingUp size={14} />, isFloat: true },
-              { label: "Burn objetivo",    value: 90,     suffix: "% supply", icon: <Flame size={14} /> },
-              { label: "Mercado Europa",   value: 104,    suffix: "K usuarios",icon: <Users size={14} /> },
+              { label: "Burn objetivo",    value: 70,     suffix: "% supply", icon: <Flame size={14} /> },
+              { label: "Mercado global",   value: 500,    suffix: "K objetivo",icon: <Users size={14} /> },
             ].map((stat) => (
               <div key={stat.label} className="space-y-1">
                 <div className="flex items-center justify-center gap-1.5 text-slate-500 text-xs mb-1">
@@ -3456,65 +3464,6 @@ export function LandingPage() {
 
       {/* ── PROYECTOS SUSTENTABLES ───────────────────────────────────── */}
       <ProyectosSustentables />
-
-      {/* ── TESTNET FUJI ─────────────────────────────────────────────── */}
-      <FadeIn>
-        <section className="py-16 px-6">
-          <div className="max-w-3xl mx-auto">
-            <div className="glass rounded-2xl p-8 border border-green-500/20 relative overflow-hidden">
-              <Orb className="w-64 h-64 bg-green-500 -right-20 -top-20" />
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-4">
-                  <motion.span
-                    animate={{ scale: [1, 1.3, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                    className="w-2 h-2 rounded-full bg-green-400"
-                  />
-                  <span className="text-green-400 text-xs font-bold uppercase tracking-widest">
-                    Testnet Fuji activa — Sin coste
-                  </span>
-                </div>
-                <h2 className="text-2xl font-black mb-3">
-                  Prueba el sistema <span className="text-green-400">antes del lanzamiento</span>
-                </h2>
-                <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-                  La red de prueba Fuji está activa ahora mismo. Compra en omdomo.com,
-                  reclama tu NFT gratis y familiarízate con las wallets crypto antes
-                  del lanzamiento oficial en Junio 2026.
-                </p>
-                <div className="grid sm:grid-cols-3 gap-3 mb-6">
-                  {[
-                    { icon: <Unlock size={14} />, label: "NFT gratis en testnet" },
-                    { icon: <Coins size={14} />,  label: "OMMY de prueba" },
-                    { icon: <Users size={14} />,  label: "Acceso comunidad" },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center gap-2 text-xs text-slate-300">
-                      <span className="text-green-400">{item.icon}</span>
-                      {item.label}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <a
-                    href="https://www.omdomo.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 font-bold text-sm hover:opacity-90 transition-opacity"
-                  >
-                    <ShoppingBag size={15} /> Comprar en omdomo.com
-                  </a>
-                  <a
-                    href="/claim"
-                    className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-green-500/30 text-green-300 font-semibold text-sm hover:bg-green-900/20 transition-all"
-                  >
-                    <Gift size={15} /> Reclamar NFT Fuji
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </FadeIn>
 
       {/* ── COMUNIDAD + RRSS ─────────────────────────────────────────── */}
       <section id="comunidad" className="section-cream-2 py-24 px-6 relative overflow-hidden">
