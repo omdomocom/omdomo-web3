@@ -5,16 +5,13 @@ import { ConnectButton, useActiveAccount, useWalletBalance } from "thirdweb/reac
 import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { client, avalanche, avalancheFuji, OMMY_COIN_ADDRESS } from "@/lib/thirdweb";
+import { OmmyCoinLogo } from "@/components/OmmyCoinLogo";
 
 type NetworkMode = "mainnet" | "fuji";
 
 // ─── OMMY logo ────────────────────────────────────────────────────────────
 function OmmyLogo() {
-  return (
-    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center flex-shrink-0 shadow shadow-purple-500/30">
-      <span className="text-white font-black" style={{ fontSize: "9px", letterSpacing: "-0.5px" }}>OM</span>
-    </div>
-  );
+  return <OmmyCoinLogo size={32} />;
 }
 
 // ─── AVAX official logo (red circle + white A) ────────────────────────────

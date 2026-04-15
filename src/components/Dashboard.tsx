@@ -13,6 +13,7 @@ import { ConnectButton, useActiveAccount, useReadContract } from "thirdweb/react
 import { client } from "@/lib/thirdweb";
 import { getOwnedNFTs } from "thirdweb/extensions/erc1155";
 import { getNFTContract } from "@/lib/nft";
+import { OmmyCoinLogo } from "@/components/OmmyCoinLogo";
 
 import { SpaceBackground }       from "@/components/SpaceBackground";
 import { CloudsBackground, OceanBackground, LavaBackground, ForestBackground, SolidBackground } from "@/components/AnimatedBackground";
@@ -584,7 +585,7 @@ export function Dashboard() {
 
             {/* Logo */}
             <a href="/" className="flex items-center gap-2 flex-shrink-0">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center font-black text-xs text-white">O</div>
+              <OmmyCoinLogo size={28} />
               <span className="font-black text-sm gradient-text hidden sm:block">Om Domo</span>
             </a>
 

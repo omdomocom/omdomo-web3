@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrendingUp, TrendingDown, RefreshCw, ExternalLink } from "lucide-react";
+import Image from "next/image";
 import type { CoinData } from "@/app/api/prices/route";
 
 // ─── SVG Sparkline ─────────────────────────────────────────────────────────
@@ -62,12 +63,18 @@ function CoinCard({ coin, expanded, onToggle }: {
       {/* Main row */}
       <div className="flex items-center gap-3 px-3 py-2.5">
         {/* Icon */}
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
-          style={{ background: `${coin.color}22`, border: `1px solid ${coin.color}44`, color: coin.color }}
-        >
-          {coin.symbol.slice(0, 3)}
-        </div>
+        {coin.symbol === "OMMY" ? (
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-[#0c0906] border border-amber-500/30 overflow-hidden">
+            <Image src="/logo-blanco.png" alt="Om Domo" width={24} height={24} className="object-contain" />
+          </div>
+        ) : (
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
+            style={{ background: `${coin.color}22`, border: `1px solid ${coin.color}44`, color: coin.color }}
+          >
+            {coin.symbol.slice(0, 3)}
+          </div>
+        )}
 
         {/* Name + price */}
         <div className="flex-1 min-w-0">
