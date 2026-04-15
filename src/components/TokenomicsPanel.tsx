@@ -38,7 +38,7 @@ export function TokenomicsPanel() {
   const currentPrice = PRICE.launch;
 
   // Usuarios estimados este año
-  const thisYearSchedule = BURN_SCHEDULE.find((b) => b.year === CURRENT_YEAR);
+  const thisYearSchedule = BURN_SCHEDULE.find((b) => b.date.startsWith(String(CURRENT_YEAR)));
   const estimatedUsers = thisYearSchedule?.users ?? 0;
 
   return (
