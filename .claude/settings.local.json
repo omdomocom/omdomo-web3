@@ -18,7 +18,9 @@
       "Bash(claude mcp:*)",
       "WebFetch(domain:claude.com)",
       "Bash(claude plugin:*)",
-      "Bash(npm list:*)"
+      "Bash(npm list:*)",
+      "Bash(node:*)",
+      "Bash(open:*)"
     ]
   }
 }
