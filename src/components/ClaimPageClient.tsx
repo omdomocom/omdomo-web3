@@ -55,7 +55,10 @@ export function ClaimPageClient() {
   });
   const [shareLoading, setShareLoading] = useState<"twitter" | "instagram" | null>(null);
   const [copiedAddress, setCopiedAddress] = useState(false);
+  const [copiedContract, setCopiedContract] = useState(false);
   const [productTitle, setProductTitle] = useState("");
+  const [claimedAt, setClaimedAt] = useState<Date | null>(null);
+  const [metaMaskAdded, setMetaMaskAdded] = useState(false);
 
   // Step 1 — lookup order
   async function lookupOrder() {
@@ -162,11 +165,47 @@ export function ClaimPageClient() {
         }),
       });
 
+      setClaimedAt(new Date());
       setStep("success");
     } catch (err) {
       setError("Mint fallido: " + String(err));
     }
     setLoading(false);
+  }
+
+  // Agregar NFT a MetaMask con un solo clic (wallet_watchAsset ERC-1155)
+  async function addNFTToMetaMask() {
+    if (!approval) return;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ethereum = (window as any).ethereum;
+      if (!ethereum) {
+        // Fallback: copiar dirección del contrato
+        await navigator.clipboard.writeText(approval.contractAddress);
+        alert("MetaMask no detectado. Dirección del contrato copiada al portapapeles.");
+        return;
+      }
+      await ethereum.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC1155",
+          options: {
+            address: approval.contractAddress,
+            tokenId: String(approval.tokenId),
+          },
+        },
+      });
+      setMetaMaskAdded(true);
+    } catch (err) {
+      console.error("MetaMask add error:", err);
+    }
+  }
+
+  async function copyContract() {
+    if (!approval?.contractAddress) return;
+    await navigator.clipboard.writeText(approval.contractAddress);
+    setCopiedContract(true);
+    setTimeout(() => setCopiedContract(false), 2000);
   }
 
   // Share to earn — registra share y otorga OMMY extra
@@ -438,6 +477,95 @@ export function ClaimPageClient() {
                   )}
                 </div>
               </div>
+
+              {/* NFT Passport — datos completos para añadir a MetaMask */}
+              {approval && (
+                <div className="glass rounded-2xl p-6 border border-purple-500/30 space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      NFT
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-100">Pasaporte de tu NFT</p>
+                      <p className="text-xs text-slate-500">Datos para verificar y guardar tu coleccionable</p>
+                    </div>
+                  </div>
+
+                  {/* Datos */}
+                  <div className="space-y-2 text-xs">
+                    {/* Fecha */}
+                    <div className="flex justify-between items-center py-1.5 border-b border-slate-700/40">
+                      <span className="text-slate-500">📅 Fecha de obtención</span>
+                      <span className="text-slate-200 font-mono">
+                        {claimedAt
+                          ? claimedAt.toLocaleDateString("es-ES", {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "—"}
+                      </span>
+                    </div>
+
+                    {/* Token ID */}
+                    <div className="flex justify-between items-center py-1.5 border-b border-slate-700/40">
+                      <span className="text-slate-500">🪙 Token ID</span>
+                      <span className="text-purple-300 font-mono font-bold">#{approval.tokenId}</span>
+                    </div>
+
+                    {/* Red */}
+                    <div className="flex justify-between items-center py-1.5 border-b border-slate-700/40">
+                      <span className="text-slate-500">🔗 Red</span>
+                      <span className="text-cyan-400">Avalanche (AVAX)</span>
+                    </div>
+
+                    {/* Contrato */}
+                    <div className="flex justify-between items-center py-1.5">
+                      <span className="text-slate-500">📋 Contrato</span>
+                      <button
+                        onClick={copyContract}
+                        className="flex items-center gap-1 text-slate-300 hover:text-slate-100 font-mono transition-colors"
+                      >
+                        {approval.contractAddress.slice(0, 8)}...{approval.contractAddress.slice(-6)}
+                        {copiedContract
+                          ? <Check size={10} className="text-green-400" />
+                          : <Copy size={10} className="text-slate-500" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Botón MetaMask — la forma fácil */}
+                  <button
+                    onClick={addNFTToMetaMask}
+                    disabled={metaMaskAdded}
+                    className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-all ${
+                      metaMaskAdded
+                        ? "bg-green-900/20 border border-green-500/30 text-green-400 cursor-default"
+                        : "bg-[#F6851B]/10 border border-[#F6851B]/40 text-[#F6851B] hover:bg-[#F6851B]/20"
+                    }`}
+                  >
+                    {metaMaskAdded ? (
+                      <><Check size={16} /> NFT agregado a MetaMask</>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 35 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M32.958 1L19.401 10.797l2.532-5.972L32.958 1z" fill="#E17726" stroke="#E17726" strokeWidth=".25" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M2.663 1l13.436 9.891-2.408-5.966L2.663 1z" fill="#E27625" stroke="#E27625" strokeWidth=".25" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M28.229 23.533l-3.609 5.525 7.729 2.128 2.22-7.536-6.34-.117zM1.054 23.65l2.207 7.536 7.717-2.128-3.597-5.525-6.327.117z" fill="#E27625" stroke="#E27625" strokeWidth=".25" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        Agregar a MetaMask con 1 clic
+                      </>
+                    )}
+                  </button>
+
+                  <p className="text-xs text-slate-600 text-center">
+                    MetaMask abrirá un popup para confirmar. Sin copiar nada manualmente.
+                  </p>
+                </div>
+              )}
 
               {/* Share to Earn */}
               <div className="glass rounded-2xl p-6 border border-purple-500/20 space-y-4">

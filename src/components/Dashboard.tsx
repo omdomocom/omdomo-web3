@@ -53,7 +53,7 @@ const SIDEBAR_TABS: { id: TabId; label: string; icon: React.ReactNode; badge?: s
 // Tabs shown in the TOP NAV (minimal, only the main ones)
 const NAV_TABS: { id: TabId; label: string }[] = [
   { id: "overview", label: "Overview" },
-  { id: "nft",      label: "Colección" },
+  { id: "nft",      label: "NFT" },
   { id: "dao",      label: "DAO" },
   { id: "social",   label: "Comunidad" },
   { id: "academy",  label: "Academy" },

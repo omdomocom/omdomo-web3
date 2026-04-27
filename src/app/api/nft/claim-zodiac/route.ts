@@ -2,10 +2,32 @@
 // Requiere: wallet + email + birthday
 // Calcula el signo zodiacal server-side (no confía en el cliente)
 // Anti-doble-claim: Redis key "zodiac-claimed:{wallet}"
-// Usa mintAdditionalSupplyTo → bypasea claim conditions (requiere MINTER_ROLE)
+// Rate limit: 5 intentos / 10 min por IP
 
 import { NextRequest, NextResponse } from "next/server";
 import { getRedis } from "@/lib/redis";
+
+// ─── Rate limiter (5 req / 10 min por IP, Redis + fallback en memoria) ────────
+const ZODIAC_RATE_LIMIT = 5;
+const ZODIAC_RATE_WINDOW_S = 600; // 10 minutos
+const _zodiacMemRL = new Map<string, number>();
+
+async function checkZodiacRateLimit(ip: string): Promise<boolean> {
+  const redis = await getRedis();
+  if (redis) {
+    try {
+      const windowKey = `rate-limit:zodiac-claim:${ip}:${Math.floor(Date.now() / (ZODIAC_RATE_WINDOW_S * 1000))}`;
+      const count = await redis.incr(windowKey);
+      if (count === 1) await redis.expire(windowKey, ZODIAC_RATE_WINDOW_S);
+      return count <= ZODIAC_RATE_LIMIT;
+    } catch { return true; }
+  }
+  // Fallback memoria
+  const windowKey = `${ip}:${Math.floor(Date.now() / (ZODIAC_RATE_WINDOW_S * 1000))}`;
+  const count = (_zodiacMemRL.get(windowKey) ?? 0) + 1;
+  _zodiacMemRL.set(windowKey, count);
+  return count <= ZODIAC_RATE_LIMIT;
+}
 
 // ─── Zodiac calculation (server-side) ────────────────────────────────────────
 
@@ -91,6 +113,15 @@ async function mintZodiacNFT(toAddress: string, tokenId: bigint, contractAddress
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting por IP
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    if (!(await checkZodiacRateLimit(ip))) {
+      return NextResponse.json(
+        { error: "Demasiados intentos. Espera 10 minutos." },
+        { status: 429 }
+      );
+    }
+
     const { wallet, email, birthday } = await req.json() as {
       wallet?: string;
       email?: string;

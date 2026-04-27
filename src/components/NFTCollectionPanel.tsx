@@ -14,7 +14,7 @@ import {
   Check,
   ShoppingCart,
 } from "lucide-react";
-import { getNFTContract } from "@/lib/nft";
+import { getNFTContract, NFT_CONTRACT_ADDRESS_FUJI, NFT_CONTRACT_ADDRESS_MAINNET, isMainnet } from "@/lib/nft";
 import type { NFT } from "thirdweb";
 import { loadProfile } from "./ProfilePanel";
 
@@ -338,9 +338,35 @@ function ipfsToHttp(url?: string): string | undefined {
 }
 
 // ─── On-chain NFT Card (Tab 1) ───────────────────────────────────────────────
-function OnChainNFTCard({ nft }: { nft: NFT }) {
+function OnChainNFTCard({ nft, contractAddress }: { nft: NFT; contractAddress: string }) {
+  const [mmAdded, setMmAdded] = useState(false);
   const name = nft.metadata?.name ?? `NFT #${nft.id.toString()}`;
   const image = ipfsToHttp(nft.metadata?.image);
+
+  async function addToMetaMask() {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ethereum = (window as any).ethereum;
+      if (!ethereum) {
+        await navigator.clipboard.writeText(contractAddress);
+        alert("MetaMask no detectado. Dirección del contrato copiada.");
+        return;
+      }
+      await ethereum.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC1155",
+          options: {
+            address: contractAddress,
+            tokenId: nft.id.toString(),
+          },
+        },
+      });
+      setMmAdded(true);
+    } catch (err) {
+      console.error("MetaMask add error:", err);
+    }
+  }
 
   return (
     <motion.div
@@ -364,9 +390,32 @@ function OnChainNFTCard({ nft }: { nft: NFT }) {
           </span>
         </div>
       </div>
-      <div className="p-2.5">
-        <p className="text-xs font-bold text-purple-200 truncate">{name}</p>
-        <p className="text-[10px] text-slate-500 mt-0.5">ID #{nft.id.toString()} · Om Domo</p>
+      <div className="p-2.5 space-y-2">
+        <div>
+          <p className="text-xs font-bold text-purple-200 truncate">{name}</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">ID #{nft.id.toString()} · Om Domo</p>
+        </div>
+        {/* Botón agregar a MetaMask */}
+        <button
+          onClick={addToMetaMask}
+          disabled={mmAdded}
+          className={`w-full py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-all ${
+            mmAdded
+              ? "bg-green-500/10 text-green-400 border border-green-500/20 cursor-default"
+              : "bg-[#F6851B]/10 border border-[#F6851B]/30 text-[#F6851B] hover:bg-[#F6851B]/20"
+          }`}
+        >
+          {mmAdded ? (
+            <><Check size={9} /> En MetaMask</>
+          ) : (
+            <>
+              <svg width="10" height="10" viewBox="0 0 35 33" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M32.958 1L19.401 10.797l2.532-5.972L32.958 1zM2.663 1l13.436 9.891-2.408-5.966L2.663 1z" />
+              </svg>
+              Agregar a MetaMask
+            </>
+          )}
+        </button>
       </div>
     </motion.div>
   );
@@ -522,7 +571,11 @@ export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   {ownedNFTs.map((nft) => (
-                    <OnChainNFTCard key={nft.id.toString()} nft={nft} />
+                    <OnChainNFTCard
+                      key={nft.id.toString()}
+                      nft={nft}
+                      contractAddress={isMainnet ? NFT_CONTRACT_ADDRESS_MAINNET : NFT_CONTRACT_ADDRESS_FUJI}
+                    />
                   ))}
                 </div>
               </div>

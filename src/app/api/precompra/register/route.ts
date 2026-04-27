@@ -10,14 +10,34 @@ const PRECOMPRA_WALLET = "0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2";
 const UNLOCK_DATE = "21 Diciembre 2026 — Solsticio de Invierno";
 const OMMY_PRICE_USD = 0.001;
 
+// Regex txHash EVM: 0x seguido de 64 hex chars (32 bytes)
+const TX_HASH_RE = /^0x[a-fA-F0-9]{64}$/;
+
+// Obtiene precio de AVAX desde CoinGecko con fallback razonable.
+// NO confiar en el valor que envía el cliente (manipulable para inflar OMMY).
+async function getAvaxPriceUSD(): Promise<number> {
+  try {
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=avalanche-2&vs_currencies=usd",
+      { next: { revalidate: 300 }, signal: AbortSignal.timeout(4000) }
+    );
+    if (!res.ok) throw new Error(`CoinGecko ${res.status}`);
+    const data = await res.json() as { "avalanche-2": { usd: number } };
+    return data["avalanche-2"].usd;
+  } catch {
+    console.warn("[PreCompra] CoinGecko fallback — usando precio conservador 20 USD/AVAX");
+    return 20; // fallback conservador
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { wallet, email, avaxAmount, avaxPriceUSD, txHash } = await req.json() as {
+    const { wallet, email, avaxAmount, txHash } = await req.json() as {
       wallet?: string;
       email?: string;
       avaxAmount?: number;
-      avaxPriceUSD?: number;
       txHash?: string;
+      // avaxPriceUSD se ignora intencionalmente — se obtiene server-side
     };
 
     // Validaciones
@@ -33,8 +53,13 @@ export async function POST(req: NextRequest) {
     if (!txHash) {
       return NextResponse.json({ error: "TX hash requerido" }, { status: 400 });
     }
+    // Validar formato de txHash para evitar datos corruptos
+    if (!TX_HASH_RE.test(txHash)) {
+      return NextResponse.json({ error: "TX hash inválido" }, { status: 400 });
+    }
 
-    const price = avaxPriceUSD ?? 20;
+    // Obtener precio AVAX server-side — no confiar en el cliente
+    const price = await getAvaxPriceUSD();
     const ommyReserved = Math.floor((avaxAmount * price) / OMMY_PRICE_USD);
     const usdValue = avaxAmount * price;
 
@@ -42,7 +67,7 @@ export async function POST(req: NextRequest) {
       wallet: wallet.toLowerCase(),
       email,
       avaxAmount,
-      avaxPriceUSD: price,
+      avaxPriceUSD: price,   // precio obtenido server-side, no del cliente
       ommyReserved,
       usdValue,
       txHash,

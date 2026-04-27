@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getClaimByOrderId, updateClaim } from "@/lib/claims";
 import { buildNFTMetadata } from "@/lib/nft";
+import { getRedis } from "@/lib/redis";
 
 async function claimNFTTo(toAddress: string, tokenId: bigint, contractAddress: string) {
   const { createThirdwebClient, getContract } = await import("thirdweb");
@@ -72,6 +73,20 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "tokenId must be between 1 and 12 for zodiac NFTs" }, { status: 400 });
       }
 
+      // Anti-doble-claim: verificar en Redis que esta wallet no haya minteado ya via este endpoint
+      const redis = await getRedis();
+      if (redis) {
+        const claimKey = `zodiac-claimed:${walletAddress.toLowerCase()}`;
+        const already = await redis.get(claimKey);
+        if (already) {
+          const parsed = JSON.parse(already);
+          return NextResponse.json(
+            { error: "Ya reclamaste tu NFT Zodiacal", zodiac: parsed.zodiac, txHash: parsed.txHash },
+            { status: 409 }
+          );
+        }
+      }
+
       const useMainnet = !!(process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET);
       const contractAddress = useMainnet
         ? (process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET || "")
@@ -120,8 +135,10 @@ export async function POST(req: NextRequest) {
           });
         }
 
+        // No exponer detalles del error en producción
+        const isDev = process.env.NODE_ENV === "development";
         return NextResponse.json(
-          { error: "Mint failed", details: errMsg.slice(0, 200) },
+          { error: "Mint failed", ...(isDev && { details: errMsg.slice(0, 200) }) },
           { status: 500 }
         );
       }
@@ -154,6 +171,13 @@ export async function POST(req: NextRequest) {
         { error: "Already claimed", txHash: claim.txHash },
         { status: 409 }
       );
+    }
+
+    // Verificar que la wallet coincide con la aprobada en approve-claim
+    // Previene que atacantes con orderId ajeno mintéen NFTs a su propia wallet
+    if (claim.walletAddress && claim.walletAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+      console.warn(`[NFT Mint] Wallet mismatch — orderId=${orderId} claim.wallet=${claim.walletAddress} request.wallet=${walletAddress}`);
+      return NextResponse.json({ error: "Wallet address does not match approved claim" }, { status: 403 });
     }
 
     const useMainnet = !!(process.env.NEXT_PUBLIC_NFT_CONTRACT_MAINNET);

@@ -199,7 +199,10 @@ Claro:     Luz ☀️
 
 ### Medidas implementadas ✅
 - **Shopify webhook**: HMAC-SHA256 verificado con `timingSafeEqual` (previene timing attacks)
-- **Rate limiting** en `/api/agent`: 10 req/min por IP (in-memory Map)
+- **Rate limiting** en `/api/agent`: 10 req/min por IP (Redis persistente + fallback memoria)
+- **Rate limiting** en `/api/nft/claim-zodiac`: 5 req/10 min por IP
+- **Rate limiting** en `/api/precompra/checkout`: 10 req/10 min por IP (previene spam Stripe sessions)
+- **Rate limiting** en `/api/profile` POST: 5 req/10 min por IP (previene spam de perfiles)
 - **Límite mensaje AI**: máx. 2000 caracteres (previene ataques de coste)
 - **Wallet validation**: regex `^0x[a-fA-F0-9]{40}$` en todos los endpoints
 - **Error leak**: `details` de error solo en `NODE_ENV=development`, nunca en producción
@@ -212,13 +215,20 @@ Claro:     Luz ☀️
   - `Referrer-Policy: strict-origin-when-cross-origin`
 - **Dependencias**: 0 vulnerabilidades (npm audit fix aplicado 2026-04-04)
 - **Double-claim prevention**: Redis key `share:{wallet}:{orderId}:{platform}` previene re-claim
+- **NFT mint wallet verification**: `/api/nft/mint` verifica que `walletAddress` coincide con la aprobada en `approve-claim` (previene robo de NFT con orderId ajeno)
+- **NFT mint zodiac anti-double-claim**: `/api/nft/mint?type=zodiac` consulta Redis antes de mintear (segunda línea de defensa además de `/api/nft/claim-zodiac`)
+- **confirm-claimed txHash validation**: regex `^0x[a-fA-F0-9]{64}$` + verificación wallet antes de marcar claim como completado
+- **avaxPriceUSD server-side**: `/api/precompra/register` obtiene el precio de AVAX desde CoinGecko en el servidor — el cliente ya no puede manipular el precio para inflar OMMY reservados
+- **txHash format validation**: `/api/precompra/register` valida formato `^0x[a-fA-F0-9]{64}$` antes de guardar en Redis
+- **ommyAmount max cap en checkout**: `/api/precompra/checkout` limita a 50M OMMY por sesión ($50,000)
+- **Redis singleton unificado**: `/api/profile` ahora usa `getRedis()` de `@/lib/redis` en lugar de su propio cliente duplicado
 
 ### Pendiente reforzar ⚠️
 - `SHOPIFY_WEBHOOK_SECRET` debe estar configurado en Vercel (sin él el webhook acepta sin verificar)
-- `/api/agent` no requiere auth — considerar API key en Fase 2 para proteger coste Anthropic
 - `/api/share` sin verificación de que el post existe realmente (honesty system por ahora)
 - Rotar `THIRDWEB_SECRET_KEY` antes del lanzamiento mainnet
 - `MINTER_PRIVATE_KEY` — asegurar que solo tiene AVAX suficiente para gas (wallet mínima)
+- `/api/nft/approve-claim` sin auth — cualquiera puede pre-aprobar un claim si sabe el orderId (mitigado: mint verifica wallet; considerar añadir verificación por email en Fase 2)
 
 ## Claims — Redis Schema
 

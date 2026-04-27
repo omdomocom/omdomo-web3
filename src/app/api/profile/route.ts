@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getResend } from "@/lib/email";
+import { getRedis } from "@/lib/redis"; // ← singleton centralizado (no duplicar cliente)
 
 // ─── Profile type ─────────────────────────────────────────────────────────────
 export interface ZodiacProfile {
@@ -12,18 +13,25 @@ export interface ZodiacProfile {
   nftClaimed?: boolean;
 }
 
-// ─── Redis client (singleton, lazy) ──────────────────────────────────────────
+// ─── Rate limiting — POST: 5 creaciones / 10 min por IP ──────────────────────
+const PROFILE_RATE_LIMIT = 5;
+const PROFILE_RATE_WINDOW_S = 600;
+const _profileMemRL = new Map<string, number>();
 
-let _redis: import("ioredis").Redis | null = null;
-
-async function getRedis(): Promise<import("ioredis").Redis | null> {
-  const url = process.env.REDIS_URL || process.env.KV_REDIS_URL;
-  if (!url) return null;
-  if (!_redis) {
-    const { default: Redis } = await import("ioredis");
-    _redis = new Redis(url, { lazyConnect: false, maxRetriesPerRequest: 3 });
+async function checkProfileRateLimit(ip: string): Promise<boolean> {
+  const redis = await getRedis();
+  if (redis) {
+    try {
+      const windowKey = `rate-limit:profile:${ip}:${Math.floor(Date.now() / (PROFILE_RATE_WINDOW_S * 1000))}`;
+      const count = await redis.incr(windowKey);
+      if (count === 1) await redis.expire(windowKey, PROFILE_RATE_WINDOW_S);
+      return count <= PROFILE_RATE_LIMIT;
+    } catch { return true; }
   }
-  return _redis;
+  const windowKey = `${ip}:${Math.floor(Date.now() / (PROFILE_RATE_WINDOW_S * 1000))}`;
+  const count = (_profileMemRL.get(windowKey) ?? 0) + 1;
+  _profileMemRL.set(windowKey, count);
+  return count <= PROFILE_RATE_LIMIT;
 }
 
 // ─── Dev fallback ─────────────────────────────────────────────────────────────
@@ -92,10 +100,24 @@ function getZodiacSign(birthday: string): string {
 // ─── POST — crear o actualizar perfil ────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  // Rate limiting por IP — prevenir spam de creación de perfiles
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (!(await checkProfileRateLimit(ip))) {
+    return NextResponse.json(
+      { error: "Demasiados intentos. Espera 10 minutos." },
+      { status: 429 }
+    );
+  }
+
   const { wallet, email, birthday } = await req.json();
 
   if (!email || !birthday) {
     return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
+  }
+
+  // Validar wallet si se proporciona
+  if (wallet && !/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
+    return NextResponse.json({ error: "Wallet inválida" }, { status: 400 });
   }
 
   const zodiac = getZodiacSign(birthday);
