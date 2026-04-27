@@ -7,7 +7,7 @@ import {
   Users, ShoppingBag, Flame, Coins,
   ChevronRight, ExternalLink, Menu, X, UserCircle,
   MessagesSquare, BookOpen, Heart, Info, Moon, Sun,
-  PanelLeftClose, PanelLeftOpen, ChevronRight as Chevron,
+  PanelLeftClose, PanelLeftOpen, ChevronRight as Chevron, Share2,
 } from "lucide-react";
 import { ConnectButton, useActiveAccount, useReadContract } from "thirdweb/react";
 import { client } from "@/lib/thirdweb";
@@ -33,8 +33,9 @@ import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { OnboardingChecklist }   from "@/components/OnboardingChecklist";
 import { ActivityTimeline }      from "@/components/ActivityTimeline";
 import { Web3AcademyPanel }      from "@/components/Web3AcademyPanel";
+import { ShareToEarnPanel }      from "@/components/ShareToEarnPanel";
 
-type TabId = "overview" | "nosotros" | "nft" | "dapp" | "finanzas" | "dao" | "perfil" | "social" | "academy";
+type TabId = "overview" | "nosotros" | "nft" | "dapp" | "finanzas" | "dao" | "perfil" | "social" | "academy" | "share";
 
 // Tabs shown in the LEFT SIDEBAR (full list, ordered by relevance)
 const SIDEBAR_TABS: { id: TabId; label: string; icon: React.ReactNode; badge?: string; secondary?: boolean }[] = [
@@ -43,6 +44,7 @@ const SIDEBAR_TABS: { id: TabId; label: string; icon: React.ReactNode; badge?: s
   { id: "nft",       label: "NFTs",            icon: <Image size={15} /> },
   { id: "dao",       label: "DAO",             icon: <Vote size={15} />, badge: "1" },
   { id: "social",    label: "Comunidad",       icon: <MessagesSquare size={15} /> },
+  { id: "share",     label: "Share & Earn 🪙", icon: <Share2 size={15} />,    badge: "+" },
   { id: "academy",   label: "Web3 Academy ✦", icon: <BookOpen size={15} />, badge: "🎓" },
   { id: "perfil",    label: "Mi Perfil",       icon: <UserCircle size={15} /> },
   // Secondary — lower priority, only in sidebar
@@ -56,6 +58,7 @@ const NAV_TABS: { id: TabId; label: string }[] = [
   { id: "nft",      label: "NFT" },
   { id: "dao",      label: "DAO" },
   { id: "social",   label: "Comunidad" },
+  { id: "share",    label: "Share & Earn" },
   { id: "academy",  label: "Academy" },
 ];
 
@@ -549,13 +552,14 @@ export function Dashboard() {
     finanzas:  <FinanzasPanel address={address} />,
     dao:       <DAOPanel />,
     academy:   <Web3AcademyPanel />,
+    share:     <ShareToEarnPanel />,
   };
 
   // Label map for tab header
   const TAB_LABELS: Record<TabId, string> = {
     overview: "Overview", nosotros: "Sobre Nosotros", nft: "NFTs",
     dapp: "dApp", finanzas: "Finanzas", dao: "DAO", perfil: "Mi Perfil",
-    social: "Comunidad", academy: "Web3 Academy",
+    social: "Comunidad", academy: "Web3 Academy", share: "Share & Earn",
   };
 
   return (
