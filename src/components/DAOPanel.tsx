@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Vote, Users, Clock, CheckCircle, Lock, TrendingUp } from "lucide-react";
+import { Vote, Users, Clock, CheckCircle, Lock, TrendingUp, Palette } from "lucide-react";
+import { NFTStudioVoting } from "./NFTStudioVoting";
 
 interface Proposal {
   id: string;
@@ -181,36 +182,57 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
 }
 
 export function DAOPanel() {
+  const [daoTab, setDaoTab] = useState<"proposals" | "nft-studio">("proposals");
+
   return (
     <div className="space-y-4">
-      {/* Header stats */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Propuestas",   value: PROPOSALS.length,                                               icon: <Vote size={14} />,       color: "text-purple-300" },
-          { label: "Participantes",value: "1,247",                                                         icon: <Users size={14} />,      color: "text-cyan-300"   },
-          { label: "OMMY en DAO",  value: "1.5B",                                                          icon: <TrendingUp size={14} />, color: "text-green-400"  },
-        ].map((s) => (
-          <div key={s.label} className="glass rounded-xl p-3 border border-slate-700/30 text-center">
-            <div className={`flex justify-center mb-1 ${s.color}`}>{s.icon}</div>
-            <p className={`text-base font-black ${s.color}`}>{s.value}</p>
-            <p className="text-xs text-slate-500">{s.label}</p>
+
+      {/* Sub-tabs: Propuestas | NFT Studio */}
+      <div className="flex gap-1 bg-slate-900/50 rounded-xl p-1 border border-slate-700/30">
+        <button onClick={() => setDaoTab("proposals")}
+          className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${daoTab === "proposals" ? "bg-purple-600 text-white" : "text-slate-500 hover:text-slate-300"}`}>
+          <Vote size={11} /> Propuestas
+        </button>
+        <button onClick={() => setDaoTab("nft-studio")}
+          className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${daoTab === "nft-studio" ? "bg-purple-600 text-white" : "text-slate-500 hover:text-slate-300"}`}>
+          <Palette size={11} /> NFT Studio
+        </button>
+      </div>
+
+      {daoTab === "nft-studio" && <NFTStudioVoting />}
+
+      {daoTab === "proposals" && (
+        <>
+          {/* Header stats */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Propuestas",   value: PROPOSALS.length,  icon: <Vote size={14} />,       color: "text-purple-300" },
+              { label: "Participantes",value: "1,247",            icon: <Users size={14} />,      color: "text-cyan-300"   },
+              { label: "OMMY en DAO",  value: "1.5B",             icon: <TrendingUp size={14} />, color: "text-green-400"  },
+            ].map((s) => (
+              <div key={s.label} className="glass rounded-xl p-3 border border-slate-700/30 text-center">
+                <div className={`flex justify-center mb-1 ${s.color}`}>{s.icon}</div>
+                <p className={`text-base font-black ${s.color}`}>{s.value}</p>
+                <p className="text-xs text-slate-500">{s.label}</p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Info banner */}
-      <div className="glass rounded-xl p-3 border border-purple-500/20 text-xs text-slate-400 flex items-start gap-2">
-        <Vote size={14} className="text-purple-400 flex-shrink-0 mt-0.5" />
-        <span>
-          Para votar necesitas al menos <strong className="text-purple-300">1 NFT Om Domo</strong> o{" "}
-          <strong className="text-purple-300">10,000 OMMY</strong> en tu wallet. Cada voto gana +200 OMMY.
-        </span>
-      </div>
+          {/* Info banner */}
+          <div className="glass rounded-xl p-3 border border-purple-500/20 text-xs text-slate-400 flex items-start gap-2">
+            <Vote size={14} className="text-purple-400 flex-shrink-0 mt-0.5" />
+            <span>
+              Para votar necesitas al menos <strong className="text-purple-300">1 NFT Om Domo</strong> o{" "}
+              <strong className="text-purple-300">10,000 OMMY</strong> en tu wallet. Cada voto gana +200 OMMY.
+            </span>
+          </div>
 
-      {/* Proposals */}
-      <div className="space-y-3">
-        {PROPOSALS.map((p) => <ProposalCard key={p.id} proposal={p} />)}
-      </div>
+          {/* Proposals */}
+          <div className="space-y-3">
+            {PROPOSALS.map((p) => <ProposalCard key={p.id} proposal={p} />)}
+          </div>
+        </>
+      )}
     </div>
   );
 }
