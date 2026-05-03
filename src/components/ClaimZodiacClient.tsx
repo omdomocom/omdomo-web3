@@ -40,7 +40,7 @@ const ELEMENT_COLORS: Record<string, { glow: string; gradient: string; badge: st
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
-type Step = "loading" | "preview" | "claim" | "buy" | "done" | "error";
+type Step = "loading" | "preview" | "claim" | "buy" | "done" | "error" | "already-claimed";
 
 interface ZodiacInfo {
   name: string;
@@ -131,6 +131,22 @@ export default function ClaimZodiacClient() {
 
   // ─── Claim gratuito (perfil completo → servidor mintea gratis) ──────────────
 
+  function handleError(err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    // DropClaimExceedLimit: wallet ya reclamó este NFT antes (contrato lo registra aunque el frontend falle)
+    if (
+      msg.includes("DropClaimExceedLimit") ||
+      msg.includes("ExceedLimit") ||
+      msg.includes("ALREADY_CLAIMED") ||
+      msg.includes("Ya reclamaste")
+    ) {
+      setStep("already-claimed");
+      return;
+    }
+    setErrorMsg(msg);
+    setStep("error");
+  }
+
   async function handleFreeClaim() {
     if (!account || !zodiacInfo) return;
     // Necesitamos email y birthday del perfil — están en los searchParams o localStorage
@@ -147,6 +163,8 @@ export default function ClaimZodiacClient() {
         }),
       });
       const data = await res.json();
+      // 409 = ya reclamado
+      if (res.status === 409) { setStep("already-claimed"); return; }
       if (!res.ok) throw new Error(data.error + (data.raw ? `\n\n${data.raw}` : ""));
 
       // Marcar zodiacClaimed en el perfil local
@@ -156,8 +174,7 @@ export default function ClaimZodiacClient() {
       setTxHash(data.devMode ? "" : (data.txHash || ""));
       setStep("done");
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Error desconocido");
-      setStep("error");
+      handleError(err);
     } finally {
       setMinting(false);
     }
@@ -189,8 +206,7 @@ export default function ClaimZodiacClient() {
       setTxHash(receipt.transactionHash);
       setStep("done");
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Error desconocido");
-      setStep("error");
+      handleError(err);
     } finally {
       setMinting(false);
     }
@@ -513,6 +529,44 @@ export default function ClaimZodiacClient() {
             </motion.div>
           )}
 
+          {/* ── YA RECLAMADO ─────────────────────────────────────────────────── */}
+          {step === "already-claimed" && zodiacInfo && (
+            <motion.div
+              key="already-claimed"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              className="text-center glass border border-cyan-500/30 rounded-3xl p-8"
+            >
+              <div className="text-6xl mb-4">{zodiacInfo.emoji}</div>
+              <h2 className="text-xl font-bold text-white mb-2">
+                ¡Ya tienes tu NFT {zodiacInfo.name}!
+              </h2>
+              <p className="text-slate-400 text-sm mb-2">
+                Este NFT zodiacal ya fue reclamado por esta wallet. Cada signo solo se puede reclamar una vez.
+              </p>
+              <p className="text-slate-500 text-xs mb-6">
+                Si no lo ves en tu dashboard, puede tardar unos minutos en sincronizar con la blockchain.
+              </p>
+              <div className="flex flex-col gap-3">
+                <a
+                  href="/dashboard"
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-600 text-white font-bold text-sm text-center hover:opacity-90 transition-opacity"
+                >
+                  Ver mi colección en el Dashboard →
+                </a>
+                <a
+                  href={`https://snowtrace.io/address/${account?.address}#tokentxnsErc1155`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 rounded-2xl border border-slate-700/50 text-cyan-400 font-medium text-sm text-center hover:border-cyan-500/50 hover:text-cyan-300 transition-all"
+                >
+                  Ver NFTs en Snowtrace →
+                </a>
+              </div>
+            </motion.div>
+          )}
+
           {/* ── ERROR ────────────────────────────────────────────────────────── */}
           {step === "error" && (
             <motion.div
@@ -523,13 +577,21 @@ export default function ClaimZodiacClient() {
             >
               <div className="text-5xl mb-4">⚠️</div>
               <h2 className="text-xl font-bold text-white mb-2">Ha ocurrido un error</h2>
-              <p className="text-slate-400 text-sm mb-6">{errorMsg}</p>
-              <button
-                onClick={() => { setStep("preview"); setErrorMsg(""); }}
-                className="px-6 py-3 rounded-xl bg-slate-800 border border-slate-600 text-slate-300 font-medium text-sm hover:bg-slate-700 transition-colors"
-              >
-                Reintentar →
-              </button>
+              <p className="text-slate-400 text-sm mb-6 break-words">{errorMsg}</p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => { setStep("preview"); setErrorMsg(""); }}
+                  className="px-6 py-3 rounded-xl bg-slate-800 border border-slate-600 text-slate-300 font-medium text-sm hover:bg-slate-700 transition-colors"
+                >
+                  Reintentar →
+                </button>
+                <a
+                  href="mailto:hola@omdomo.com"
+                  className="text-xs text-slate-600 hover:text-slate-500 transition-colors"
+                >
+                  ¿Necesitas ayuda? Escríbenos a hola@omdomo.com
+                </a>
+              </div>
             </motion.div>
           )}
 

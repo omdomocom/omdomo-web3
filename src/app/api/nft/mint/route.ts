@@ -117,6 +117,18 @@ export async function POST(req: NextRequest) {
         const errMsg = String(mintError);
         console.error(`[NFT Zodiac Mint] tokenId=${parsedTokenId} wallet=${walletAddress} error:`, errMsg);
 
+        // DropClaimExceedLimit: ya reclamaste este NFT o el contrato tiene límite de 1 por wallet
+        if (errMsg.includes("DropClaimExceedLimit") || errMsg.includes("ExceedLimit")) {
+          return NextResponse.json(
+            {
+              error: "Ya reclamaste tu NFT Zodiacal",
+              code: "ALREADY_CLAIMED",
+              message: "Este NFT ya fue reclamado por esta wallet. Solo se permite 1 por signo zodiacal.",
+            },
+            { status: 409 }
+          );
+        }
+
         // Si el error es de claim conditions no configuradas, devolver devMode
         const isNotConfigured =
           errMsg.includes("ClaimConditions") ||

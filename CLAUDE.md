@@ -117,6 +117,29 @@ public/
 ├── logo-negro.png                    # Logo Om Domo original (negro sobre blanco)
 └── logo-blanco.png                   # Logo invertido para uso sobre fondos oscuros
 
+nft-studio/                           # ← NUEVO: pipeline de generación de NFTs con IA
+├── NFT_STUDIO_STRATEGY.md            # Estrategia completa: 13 colecciones, calendario, DAO economics
+├── collections/
+│   ├── index.ts                      # Registro maestro: tipos + ALL_COLLECTIONS + helpers
+│   ├── chakras.ts                    # 7 NFTs, 1 temporada, Jul 2026  [tokenIds 20-26]
+│   ├── yoga.ts                       # 21 NFTs, 3 temporadas, Ago 2026-Mar 2027 [27-47]
+│   ├── reiki.ts                      # 28 NFTs, 4 temporadas, Sep 2026-Ago 2027 [48-75]
+│   ├── lunar-phases.ts               # 8 NFTs, 1 temporada, Oct 2026 [76-83]
+│   ├── elements.ts                   # 5 NFTs, 1 temporada, Nov 2026 [84-88]
+│   ├── mudras.ts                     # 21 NFTs, 3 temporadas, Feb 2027-Feb 2028 [89-109]
+│   ├── pranayama.ts                  # 14 NFTs, 2 temporadas, Jun 2027-Nov 2027 [110-123]
+│   ├── kundalini.ts                  # 7 NFTs, 1 temporada, Abr 2027 [124-130]
+│   ├── sacred-geometry.ts            # 9 NFTs, 2 temporadas, Jul 2027-Ene 2028 [131-139]
+│   ├── mantras.ts                    # 9 NFTs, 2 temporadas, Oct 2027-Mar 2028 [140-148]
+│   └── sacred-plants.ts              # 13 NFTs, 2 temporadas, Dic 2027-Abr 2028 [149-161]
+│                                     # (guardians + zodiac pendientes: [162+])
+├── generator/
+│   └── replicate-client.ts           # Cliente Replicate: generateNFTVariants, generateSeasonBatch
+├── seasons/
+│   └── calendar.ts                   # Calendario 2026-2027: SEASON_CALENDAR, getSeasonPhase()
+└── voting/
+    └── feedback-filter.ts            # Claude Haiku: classifyFeedback → ACEPTADO/NEUTRAL/DESCARTADO
+
 src/
 ├── app/
 │   ├── page.tsx                      # Root: LandingPage pública
@@ -131,7 +154,7 @@ src/
 │       ├── shopify/webhook/route.ts  # Webhook Shopify → claim + email (HMAC timingSafeEqual)
 │       ├── nft/
 │       │   ├── approve-claim/route.ts
-│       │   ├── mint/route.ts         # Error details solo en dev (no leak en prod)
+│       │   ├── mint/route.ts         # DropClaimExceedLimit → 409. Error details solo en dev.
 │       │   ├── confirm-claimed/route.ts
 │       │   └── check-claim/route.ts
 │       ├── share/route.ts            # Share-to-earn (+500 OMMY Twitter/IG)
@@ -154,10 +177,12 @@ src/
 │   ├── NFTCollectionPanel.tsx        # Colección NFT con flip cards + rareza
 │   ├── GamificationPanel.tsx         # Niveles XP + badges + misiones diarias
 │   ├── PurchasesPanel.tsx            # Compras + funnel conversión
-│   ├── DAOPanel.tsx                  # Propuestas + votación (+200 OMMY)
+│   ├── DAOPanel.tsx                  # Sub-tabs: Propuestas | NFT Studio
+│   ├── NFTStudioVoting.tsx           # ← NUEVO: DAO voting para NFT Studio (ver detalle abajo)
 │   ├── InviteFriendPanel.tsx         # Referral link + tiers de recompensa
 │   ├── SocialCarousel.tsx            # Carrusel infinito RRSS (Framer Motion)
 │   ├── ClaimPageClient.tsx           # Flow 4 pasos: lookup→connect→mint→share
+│   ├── ClaimZodiacClient.tsx         # Claim zodiacal — nuevo estado "already-claimed"
 │   ├── SpaceBackground.tsx           # Canvas: estrellas interactivas + gravedad cursor
 │   └── TestPurchasePanel.tsx         # Dev-only: simula compra Shopify
 │   └── ui/                           # shadcn/ui: badge, button, card, progress,
@@ -165,9 +190,9 @@ src/
 ├── lib/
 │   ├── thirdweb.ts                   # Clientes Thirdweb + getOmmyContract()
 │   ├── nft.ts                        # getNFTContract() + rarity system
-│   ├── claims.ts                     # Redis (ioredis) + fallback in-memory
+│   ├── claims.ts                     # Redis (ioredis) + fallback in-memory + campo store
 │   ├── tokenomics.ts                 # Fuente única de verdad tokenomics
-│   ├── email.ts                      # Resend email (lazy init)
+│   ├── email.ts                      # Resend email — store-aware (EU/CL)
 │   └── agents/definitions.ts        # System prompts de todos los agentes
 └── types/
     └── agents.ts                     # AgentResponse, CoordinatorResult
@@ -191,7 +216,7 @@ src/
 | Mi Colección | NFTs con flip cards + rareza + slots bloqueados |
 | dApp | Herramientas: Claim, Drops, Staking, Tienda, Links rápidos |
 | Finanzas | Precios live crypto + tokenomics OMMY |
-| DAO | Propuestas activas + votación + +200 OMMY |
+| DAO | Sub-tab Propuestas (votación +200 OMMY) + Sub-tab NFT Studio |
 | Comunidad | Feed público + mensajes privados 1:1 |
 | Mi Perfil | Avatar, bio, 12 temas de fondo |
 | AI Coordinator | Chat multi-agente Claude |
@@ -353,6 +378,60 @@ Flow: `POST /api/agent` → rate limit check → selectAgents() → callAgent() 
 | #2 Solsticio | 50 | TBD | TBD | 5M OMMY | Sep 2026 |
 | #3 Ommy Lab Vol.1 | 200 | TBD | TBD | 5M OMMY | Dic 2026 |
 
+## NFT Studio — Sistema de Generación IA
+
+Pipeline completo para crear NFTs con Replicate AI + votación DAO.
+
+### 13 Colecciones (2026–2028)
+
+| Colección | NFTs | Seasons | Primer lanzamiento | TokenIds |
+|-----------|------|---------|-------------------|----------|
+| Chakras | 7 | 1 | Jul 2026 | 20-26 |
+| Yoga Asanas | 21 | 3 | Ago 2026 | 27-47 |
+| Reiki | 28 | 4 | Sep 2026 | 48-75 |
+| Fases Lunares | 8 | 1 | Oct 2026 | 76-83 |
+| Elementos | 5 | 1 | Nov 2026 | 84-88 |
+| Mudras | 21 | 3 | Feb 2027 | 89-109 |
+| Pranayama | 14 | 2 | Jun 2027 | 110-123 |
+| Kundalini | 7 | 1 | Abr 2027 | 124-130 |
+| Geometría Sagrada | 9 | 2 | Jul 2027 | 131-139 |
+| Mantras & Frecuencias | 9 | 2 | Oct 2027 | 140-148 |
+| Plantas Maestras | 13 | 2 | Dic 2027 | 149-161 |
+| Guardianes | TBD | TBD | 2028 | 162+ |
+| Zodíaco (Studio) | TBD | TBD | 2028 | TBD |
+
+### Ciclo Mensual con Doble Feedback
+
+```
+Semana 1:   Generación IA (Replicate SDXL / Flux 1.1 Pro)
+Semana 2a:  Primer feedback comunidad (Lun–Mié)
+Jueves:     IA refina diseños con el feedback
+Semana 2b:  Segundo feedback complementario (Jue–Dom) — comparativa original vs. refinado
+Semana 3:   Votación final DAO (necesita NFT o 10,000 OMMY)
+Semana 4:   Lanzamiento mint (5€ regular, 2.5€ DAO voters, gratis para compradores Shopify)
+```
+
+### Rewards NFT Studio
+- Feedback válido: +100 OMMY por NFT por ronda (feedback1 + feedback2)
+- Votación final: +200 OMMY por NFT
+- Top 3 feedback más útil: +500 OMMY
+- Colección completa: +5,000 OMMY bonus
+- DAO voter mint: 50% descuento (5€ → 2.5€)
+
+### Rareza por unidades
+- `standard` = 111 unidades
+- `rare` = 33 unidades
+- `legendary` = 11 unidades (animados)
+
+### NFTStudioVoting — Componente DAO
+
+`src/components/NFTStudioVoting.tsx` — 3 tabs:
+1. **NFTs**: grid de propuestas con feedback/voto según fase activa
+2. **Stats**: ranking community score + distribución rareza + tabla OMMY rewards
+3. **Calendario**: ciclo mensual visual + próximas temporadas
+
+Fases detectadas automáticamente según fecha actual via `getSeasonPhase()` en `calendar.ts`.
+
 ## Implementado ✅
 
 - Landing pública con 12 secciones (dark/cream dual theme, Framer Motion)
@@ -371,7 +450,8 @@ Flow: `POST /api/agent` → rate limit check → selectAgents() → callAgent() 
 - `CryptoPanel`: BTC/ETH/AVAX/XRP/OMMY con sparklines SVG, refresh 60s
 - `GamificationPanel`: 6 niveles XP, 8 badges, 5 misiones diarias
 - `NFTCollectionPanel`: grid con flip cards 3D, rarity badges, locked slots
-- `DAOPanel`: 4 propuestas, votación, +200 OMMY reward
+- `DAOPanel`: sub-tabs Propuestas + NFT Studio; 4 propuestas, votación, +200 OMMY reward
+- `NFTStudioVoting`: panel DAO votación NFTs con doble feedback y comparativa
 - `InviteFriendPanel`: referral link, límite 3 invitados, barra progreso, compartir Twitter/WhatsApp
 - `SocialCarousel`: carrusel infinito 8 redes sociales (Framer Motion)
 - DAppPanel: sección "Disponible ahora" + "Próximamente" con badges (yoga, actividad, meditación, arte)
@@ -380,16 +460,19 @@ Flow: `POST /api/agent` → rate limit check → selectAgents() → callAgent() 
 - shadcn/ui instalado: badge, button, card, progress, scroll-area, separator, tabs, tooltip
 - `next.config.ts` con security headers completos (CSP, HSTS, X-Frame-Options, etc.)
 - Shopify webhook HMAC con `timingSafeEqual` (anti timing-attack)
+- **Multi-tienda Shopify EU + CL**: un endpoint, HMAC por tienda, prefijo claim ID, conversión CLP→USD
 - Rate limiting `/api/agent`: 10 req/min/IP
 - 0 vulnerabilidades npm (audit fix 2026-04-04)
 - Redis Cloud (ioredis) — claims persistentes con fallback in-memory
-- Email automático via Resend al cliente tras cada compra
+- Supabase: campo `store` añadido a tabla `claims` (`ALTER TABLE claims ADD COLUMN store TEXT DEFAULT 'eu'`)
+- Email automático via Resend al cliente tras cada compra (store-aware: EU/CL)
 - Share-to-earn `/api/share` (+500 OMMY, anti double-claim)
 - NFT rarity system (Genesis/Founder/Community/Standard)
 - `src/lib/tokenomics.ts` — fuente única de verdad tokenomics
 - TestPurchasePanel dev-only (NODE_ENV=development)
 - GitHub → Vercel auto-deploy en push a main
 - Discord: https://discord.gg/xXezFXnpaX
+- **Fix `DropClaimExceedLimit`**: `/api/nft/mint` detecta el error y responde 409; `ClaimZodiacClient` muestra estado `already-claimed` en lugar de pantalla de error genérica
 
 ## Nuevas variables de entorno requeridas
 
@@ -397,18 +480,44 @@ Flow: `POST /api/agent` → rate limit check → selectAgents() → callAgent() 
 STRIPE_SECRET_KEY=sk_live_...     # Stripe para pago pre-compra con tarjeta
 ```
 
+## ⚠️ Acción inmediata requerida
+
+```bash
+# Ejecutar en tu terminal (el sandbox no puede hacer push):
+cd ~/Desktop/web3
+git push origin main
+```
+Esto despliega en Vercel: NFT Studio completo + fix DropClaimExceedLimit + NFTStudioVoting en DAO.
+
 ## Pendiente para Lanzamiento ⏳
 
-- Migrar NFT contract Fuji → Avalanche Mainnet
-- `NEXT_PUBLIC_NFT_CONTRACT_MAINNET` + `NEXT_PUBLIC_USE_MAINNET=true`
-- Crear producto Drop #1 Genesis en Shopify (100 hoodies, €89)
-- Probar flujo completo end-to-end con compra real
-- Configurar `SHOPIFY_WEBHOOK_SECRET` en Vercel (actualmente sin verificar en prod)
-- Rotar `THIRDWEB_SECRET_KEY` antes de mainnet
-- Pre-compra: implementar mecanismo de pago real (actualmente informacional)
-- Referral system on-chain (Fase 2)
-- Staking NFT 50 OMMY/día (Fase 2)
-- Rate limiting `/api/agent` mejorado con Redis (persistente entre instancias)
+### Crítico antes de Jun 2026
+- [ ] `git push origin main` — subir los 2 commits pendientes (ver arriba)
+- [ ] Configurar Thirdweb Dashboard: claim conditions para token IDs zodiacales (1-12)
+  - `maxClaimablePerWallet` = 1 (ya está, es correcto)
+  - Verificar que la wallet que tuvo `DropClaimExceedLimit` ya tiene el NFT on-chain
+  - Si el NFT no llegó: resetear claim counter en Thirdweb para esa wallet
+- [ ] Crear producto Drop #1 Genesis en Shopify (100 hoodies, €89)
+- [ ] Probar flujo completo end-to-end con compra real
+- [ ] Configurar `SHOPIFY_WEBHOOK_SECRET` en Vercel (actualmente sin verificar en prod)
+- [ ] Configurar webhook Shopify Chile: `?store=cl` + `SHOPIFY_WEBHOOK_SECRET_CL` en Vercel
+
+### Antes de mainnet
+- [ ] Rotar `THIRDWEB_SECRET_KEY`
+- [ ] `MINTER_PRIVATE_KEY` — verificar que solo tiene AVAX para gas
+
+### Fase 2 (Sep 2026)
+- [ ] Referral system on-chain
+- [ ] Staking NFT 50 OMMY/día
+- [ ] Rate limiting `/api/agent` con Redis persistente entre instancias
+- [ ] Pre-compra: mecanismo de pago real (actualmente informacional)
+
+### NFT Studio — Próximo
+- [ ] Crear colecciones `guardians.ts` y `zodiac.ts` (studio, distinto al zodiacal actual) — tokenIds 162+
+- [ ] Integrar Replicate API real para generación de imágenes
+- [ ] Conectar `NFTStudioVoting` a datos reales (actualmente usa mock `MOCK_SEASON`)
+- [ ] API routes para guardar/leer feedback de la comunidad en Redis/Supabase
+- [ ] Activar `NFTStudioVoting` con datos reales al lanzar primera temporada (Jul 2026)
 
 ## Convenciones de Código
 
