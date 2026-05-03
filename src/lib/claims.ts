@@ -13,11 +13,11 @@ import { getRedis } from "@/lib/redis";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
 
 export interface Claim {
-  id: string;             // `${shopifyOrderId}-${product_id}`
+  id: string;             // EU: `${orderId}-${product_id}` | CL: `cl_${orderId}-${product_id}`
   email: string;
   productTitle: string;
   productImage: string;
-  orderTotal: number;     // USD
+  orderTotal: number;     // siempre en USD (convertido en el webhook)
   ommyReward: number;
   walletAddress?: string;
   status: "pending" | "claimed" | "failed";
@@ -25,6 +25,7 @@ export interface Claim {
   claimedAt?: string;
   txHash?: string;
   tokenId?: string;
+  store?: "eu" | "cl";   // tienda de origen (eu = omdomo.com, cl = omdomo.cl)
 }
 
 // ─── Mapeo Supabase ↔ TypeScript ─────────────────────────────────────────────
@@ -44,6 +45,7 @@ function fromSupabase(row: Record<string, any>): Claim {
     claimedAt:     row.claimed_at ?? undefined,
     txHash:        row.tx_hash ?? undefined,
     tokenId:       row.token_id ?? undefined,
+    store:         (row.store as "eu" | "cl") ?? "eu",
   };
 }
 
@@ -62,6 +64,7 @@ function toSupabase(claim: Claim) {
     tx_hash:          claim.txHash ?? null,
     token_id:         claim.tokenId ?? null,
     shopify_order_id: extractOrderId(claim.id),
+    store:            claim.store ?? "eu",
   };
 }
 

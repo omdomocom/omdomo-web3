@@ -16,10 +16,29 @@ export interface ClaimEmailData {
   orderId: string;
   productTitles: string[];   // one per line item
   totalOmmyReward: number;
+  store?: "eu" | "cl";       // tienda de origen para localización del email
 }
 
+// ─── Textos localizados por tienda ────────────────────────────────────────────
+
+const STORE_INFO: Record<"eu" | "cl", { storeName: string; storeUrl: string; footerNote: string }> = {
+  eu: {
+    storeName: "Om Domo",
+    storeUrl: "omdomo.com",
+    footerNote: "Recibes este email porque realizaste una compra en omdomo.com",
+  },
+  cl: {
+    storeName: "Om Domo Chile",
+    storeUrl: "omdomo.cl",
+    footerNote: "Recibes este email porque realizaste una compra en omdomo.cl",
+  },
+};
+
+// ─── sendClaimEmail ───────────────────────────────────────────────────────────
+
 export async function sendClaimEmail(data: ClaimEmailData): Promise<void> {
-  const { toEmail, orderId, productTitles, totalOmmyReward } = data;
+  const { toEmail, orderId, productTitles, totalOmmyReward, store = "eu" } = data;
+  const storeInfo = STORE_INFO[store];
 
   const resend = getResend();
   if (!resend) {
@@ -27,21 +46,24 @@ export async function sendClaimEmail(data: ClaimEmailData): Promise<void> {
     return;
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://omdomo-web3.vercel.app";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://web3.omdomo.com";
   const claimUrl = `${baseUrl}/claim?email=${encodeURIComponent(toEmail)}`;
   const productList = productTitles.map((t) => `• ${t}`).join("\n");
 
+  const subject =
+    store === "cl"
+      ? "🎁 Tu NFT Genesis Om Domo Chile te está esperando"
+      : "🎁 Tu NFT Genesis Om Domo te está esperando";
+
   await resend.emails.send({
-    // Use verified Resend domain until omdomo.com is verified in Resend dashboard
-    // Once verified, change to: "Om Domo <noreply@omdomo.com>"
     from: process.env.EMAIL_FROM || "Om Domo <onboarding@resend.dev>",
     to: toEmail,
-    subject: "🎁 Tu NFT Genesis Om Domo te está esperando",
-    html: buildEmailHTML({ claimUrl, productList, totalOmmyReward, orderId }),
-    text: buildEmailText({ claimUrl, productList, totalOmmyReward, orderId }),
+    subject,
+    html: buildEmailHTML({ claimUrl, productList, totalOmmyReward, orderId, storeInfo }),
+    text: buildEmailText({ claimUrl, productList, totalOmmyReward, orderId, storeInfo }),
   });
 
-  console.log(`[Email] Claim email sent to ${toEmail} for order ${orderId}`);
+  console.log(`[Email][${storeInfo.storeName}] Claim email enviado a ${toEmail} — pedido ${orderId}`);
 }
 
 // ─── HTML Template ────────────────────────────────────────────────────────────
@@ -51,15 +73,16 @@ interface TemplateData {
   productList: string;
   totalOmmyReward: number;
   orderId: string;
+  storeInfo: { storeName: string; storeUrl: string; footerNote: string };
 }
 
-function buildEmailHTML({ claimUrl, productList, totalOmmyReward, orderId }: TemplateData): string {
+function buildEmailHTML({ claimUrl, productList, totalOmmyReward, orderId, storeInfo }: TemplateData): string {
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tu NFT Genesis Om Domo te está esperando</title>
+  <title>Tu NFT Genesis ${storeInfo.storeName} te está esperando</title>
 </head>
 <body style="margin:0;padding:0;background:#0a0a0f;font-family:'Segoe UI',Arial,sans-serif;color:#e2e8f0;">
   <div style="max-width:520px;margin:0 auto;padding:40px 20px;">
@@ -67,7 +90,7 @@ function buildEmailHTML({ claimUrl, productList, totalOmmyReward, orderId }: Tem
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px;">
       <div style="display:inline-block;width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#9333ea,#06b6d4);line-height:48px;font-size:22px;font-weight:bold;color:#fff;">O</div>
-      <p style="margin:8px 0 0;font-size:14px;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;">Om Domo</p>
+      <p style="margin:8px 0 0;font-size:14px;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;">${storeInfo.storeName}</p>
     </div>
 
     <!-- Genesis badge -->
@@ -99,7 +122,7 @@ function buildEmailHTML({ claimUrl, productList, totalOmmyReward, orderId }: Tem
       <!-- What are OMMY Coins -->
       <div style="background:#0f172a;border-radius:12px;padding:16px;margin-bottom:24px;">
         <p style="margin:0 0 10px;font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;">¿Qué puedes hacer con tus OMMY Coins?</p>
-        <p style="margin:0 0 6px;font-size:13px;color:#cbd5e1;">🛍️ Descuentos en futuras compras Om Domo</p>
+        <p style="margin:0 0 6px;font-size:13px;color:#cbd5e1;">🛍️ Descuentos en futuras compras ${storeInfo.storeName}</p>
         <p style="margin:0 0 6px;font-size:13px;color:#cbd5e1;">⚡ Acceso prioritario a drops exclusivos</p>
         <p style="margin:0 0 6px;font-size:13px;color:#cbd5e1;">🗳️ Vota en las decisiones de la marca (DAO)</p>
         <p style="margin:0;font-size:13px;color:#cbd5e1;">🌐 Acceso a la comunidad gateada Om Domo</p>
@@ -125,15 +148,15 @@ function buildEmailHTML({ claimUrl, productList, totalOmmyReward, orderId }: Tem
     <!-- Footer -->
     <div style="text-align:center;font-size:11px;color:#334155;">
       <p style="margin:0;">Pedido ${orderId} · Om Domo Ecosystem · web3.omdomo.com</p>
-      <p style="margin:6px 0 0;color:#1e293b;">Recibes este email porque realizaste una compra en omdomo.com</p>
+      <p style="margin:6px 0 0;color:#475569;">${storeInfo.footerNote}</p>
     </div>
   </div>
 </body>
 </html>`;
 }
 
-function buildEmailText({ claimUrl, productList, totalOmmyReward, orderId }: TemplateData): string {
-  return `Om Domo — Tu NFT Genesis está listo para reclamar
+function buildEmailText({ claimUrl, productList, totalOmmyReward, orderId, storeInfo }: TemplateData): string {
+  return `${storeInfo.storeName} — Tu NFT Genesis está listo para reclamar
 
 Compraste antes del lanzamiento oficial. Tu NFT tiene rareza Genesis — la más alta del ecosistema Om Domo.
 
@@ -149,7 +172,7 @@ ${claimUrl}
 O entra en web3.omdomo.com/claim con tu email.
 
 ¿Qué puedes hacer con tus OMMY Coins?
-- Descuentos en futuras compras Om Domo
+- Descuentos en futuras compras ${storeInfo.storeName}
 - Acceso prioritario a drops exclusivos
 - Votar en decisiones de la marca (DAO)
 - Acceso a la comunidad gateada
@@ -157,5 +180,6 @@ O entra en web3.omdomo.com/claim con tu email.
 Únete al Discord: https://discord.gg/xXezFXnpaX
 
 Pedido: ${orderId} · web3.omdomo.com
+${storeInfo.footerNote}
 `;
 }

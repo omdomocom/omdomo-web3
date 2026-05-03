@@ -60,7 +60,9 @@ NEXT_PUBLIC_OWNER_WALLET=             # 0x15Eb18b12979AD8a85041423df4C92de6EF186
 NEXT_PUBLIC_NFT_CONTRACT_FUJI=        # 0xd51de87FbC012b694922036C30E5C82e16594958
 NEXT_PUBLIC_NFT_CONTRACT_MAINNET=     # ⏳ Pendiente
 MINTER_PRIVATE_KEY=                   # Private key del minter wallet (0x648FD67...)
-SHOPIFY_WEBHOOK_SECRET=               # HMAC secret del webhook Shopify (OBLIGATORIO en prod)
+SHOPIFY_WEBHOOK_SECRET_EU=            # HMAC secret webhook tienda EU omdomo.com (reemplaza SHOPIFY_WEBHOOK_SECRET)
+SHOPIFY_WEBHOOK_SECRET_CL=            # HMAC secret webhook tienda CL omdomo.cl
+SHOPIFY_WEBHOOK_SECRET=               # Legacy — fallback si SHOPIFY_WEBHOOK_SECRET_EU no está
 RESEND_API_KEY=                       # Resend para emails transaccionales
 EMAIL_FROM=                           # "Om Domo <noreply@omdomo.com>"
 NEXT_PUBLIC_APP_URL=                  # https://web3.omdomo.com
@@ -75,8 +77,29 @@ REDIS_URL=                            # redis://... — Redis Cloud (claims pers
 | Vercel | ✅ Live | web3.omdomo.com |
 | Redis Cloud | ✅ Conectado | redis-18598.c59.eu-west-1-2.ec2.cloud.redislabs.com |
 | Resend | ✅ Verificado | omdomo.com verificado, envía desde noreply@omdomo.com |
-| Shopify Webhook | ✅ Configurado | Pago de pedido → web3.omdomo.com/api/shopify/webhook |
+| Shopify Webhook EU | ✅ Implementado | Pedido pagado → web3.omdomo.com/api/shopify/webhook?store=eu |
+| Shopify Webhook CL | ⏳ Pendiente config | Pedido pagado → web3.omdomo.com/api/shopify/webhook?store=cl |
 | GitHub | ✅ Conectado | github.com/omdomocom/omdomo-web3 (auto-deploy en push a main) |
+
+## Multi-tienda Shopify
+
+El webhook soporta dos tiendas con un único endpoint. La detección de tienda se hace por:
+1. Query param `?store=eu` o `?store=cl` en la URL del webhook (recomendado, configurar en Shopify)
+2. Header `X-Shopify-Shop-Domain` como fallback automático
+
+**Prefijos de claim ID para evitar colisiones:**
+- EU (`omdomo.com`): `${orderId}-${product_id}` — sin prefijo (backward compatible)
+- CL (`omdomo.cl`): `cl_${orderId}-${product_id}` — prefijo `cl_`
+
+**Conversión de moneda:**
+- Los OMMY se calculan siempre en USD (70 OMMY/USD)
+- EUR y CLP se convierten via CoinGecko API con cache de 1 hora
+- Fallback hardcodeado: EUR=1.08 USD, CLP=0.00105 USD (~950 CLP/USD)
+
+**Para activar omdomo.cl:**
+1. Crear webhook en Shopify Chile Admin → Settings → Notifications → Webhooks
+2. Event: Order payment | URL: `https://web3.omdomo.com/api/shopify/webhook?store=cl`
+3. Copiar el secret generado → añadir como `SHOPIFY_WEBHOOK_SECRET_CL` en Vercel
 
 ## Comunidad
 
