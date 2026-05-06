@@ -550,7 +550,7 @@ export function Dashboard() {
     perfil:    <ProfilePanel walletAddress={address} onThemeChange={setBgTheme} />,
     social:    <CommunityPanel />,
     finanzas:  <FinanzasPanel address={address} />,
-    dao:       <DAOPanel />,
+    dao:       <DAOPanel wallet={address} />,
     academy:   <Web3AcademyPanel />,
     share:     <ShareToEarnPanel />,
   };

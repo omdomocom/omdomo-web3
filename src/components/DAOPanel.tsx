@@ -181,7 +181,7 @@ function ProposalCard({ proposal }: { proposal: Proposal }) {
   );
 }
 
-export function DAOPanel() {
+export function DAOPanel({ wallet }: { wallet?: string }) {
   const [daoTab, setDaoTab] = useState<"proposals" | "nft-studio">("proposals");
 
   return (
@@ -199,7 +199,7 @@ export function DAOPanel() {
         </button>
       </div>
 
-      {daoTab === "nft-studio" && <NFTStudioVoting />}
+      {daoTab === "nft-studio" && <NFTStudioVoting wallet={wallet} />}
 
       {daoTab === "proposals" && (
         <>
