@@ -31,8 +31,8 @@ export const MANTRAS_COLLECTION: Collection = {
     {
       seasonNumber: 2, totalSeasons: 2, scheduledMonth: "2028-03", status: "upcoming",
       nfts: [
-        { id: "freq-528", name: "528 Hz — Love Frequency", nameEs: "528 Hz — Frecuencia del Amor", description: "The miracle tone — repairs DNA, associated with love and miracles.",                    emoji: "💚", rarityTier: "rare",    attributes: { hz: 528,  solfeggio: true, effect: "Reparación ADN" }, promptHints: ["528 hz frequency wave visualization", "love frequency solfeggio green", "DNA repair sound wave art", "miracle tone green cymatics"] },
-        { id: "freq-432", name: "432 Hz — Universal Harmony", nameEs: "432 Hz — Armonía Universal", description: "Natural tuning — mathematically resonates with the universe, Schumann resonance.",     emoji: "🌍", rarityTier: "rare",    attributes: { hz: 432,  natural: true,   effect: "Armonía natural" }, promptHints: ["432 hz natural frequency harmony", "universal tuning sound waves", "schumann resonance earth frequency", "nature harmony sound art"] },
+        { id: "freq-528", name: "528 Hz — Love Frequency", nameEs: "528 Hz — Frecuencia del Amor", description: "The miracle tone — repairs DNA, associated with love and miracles.",                    emoji: "💚", rarityTier: "rare",    attributes: { hz: 528,  solfeggio: "sí", effect: "Reparación ADN" }, promptHints: ["528 hz frequency wave visualization", "love frequency solfeggio green", "DNA repair sound wave art", "miracle tone green cymatics"] },
+        { id: "freq-432", name: "432 Hz — Universal Harmony", nameEs: "432 Hz — Armonía Universal", description: "Natural tuning — mathematically resonates with the universe, Schumann resonance.",     emoji: "🌍", rarityTier: "rare",    attributes: { hz: 432,  natural: "sí",   effect: "Armonía natural" }, promptHints: ["432 hz natural frequency harmony", "universal tuning sound waves", "schumann resonance earth frequency", "nature harmony sound art"] },
       ],
     },
   ],
