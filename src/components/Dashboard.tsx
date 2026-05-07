@@ -23,7 +23,6 @@ import { GamificationPanel }     from "@/components/GamificationPanel";
 import { PurchasesPanel }        from "@/components/PurchasesPanel";
 import { DAOPanel }              from "@/components/DAOPanel";
 import { InviteFriendPanel }     from "@/components/InviteFriendPanel";
-import { SocialCarousel }        from "@/components/SocialCarousel";
 import { RoadmapPanel }          from "@/components/RoadmapPanel";
 import { TokenomicsPanel }       from "@/components/TokenomicsPanel";
 import { WalletPanel }           from "@/components/WalletPanel";
@@ -840,8 +839,61 @@ export function Dashboard() {
                 </>
               )}
 
+              {/* ── RRSS — Síguenos ─────────────────────────────────── */}
+              <div className={`mt-auto ${sidebarCollapsed ? "px-1.5" : "px-2"}`}>
+                <div className="border-t border-white/[0.05] pt-3 pb-1">
+                  {!sidebarCollapsed ? (
+                    <>
+                      <p className="text-xs text-slate-700 uppercase tracking-widest font-semibold px-3 mb-2">Síguenos</p>
+                      <div className="grid grid-cols-5 gap-1 px-1">
+                        {[
+                          { label: "Discord",   href: "https://discord.gg/xXezFXnpaX",           icon: "💬", title: "Discord" },
+                          { label: "Instagram", href: "https://www.instagram.com/om.domo/",       icon: "📸", title: "Instagram" },
+                          { label: "TikTok",    href: "https://www.tiktok.com/@omdomo.com",       icon: "🎵", title: "TikTok" },
+                          { label: "Twitter",   href: "https://twitter.com/omdomocom",            icon: "𝕏",  title: "X / Twitter" },
+                          { label: "YouTube",   href: "https://www.youtube.com/@omdomocom",       icon: "▶️", title: "YouTube" },
+                        ].map((s) => (
+                          <a
+                            key={s.label}
+                            href={s.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={s.title}
+                            className="flex items-center justify-center w-full aspect-square rounded-lg text-base hover:bg-white/[0.07] transition-colors"
+                          >
+                            {s.icon}
+                          </a>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    /* Collapsed: icono Discord centrado como acceso rápido */
+                    <div className="flex flex-col items-center gap-1">
+                      {[
+                        { href: "https://discord.gg/xXezFXnpaX",     icon: "💬", title: "Discord" },
+                        { href: "https://www.instagram.com/om.domo/", icon: "📸", title: "Instagram" },
+                        { href: "https://www.tiktok.com/@omdomo.com", icon: "🎵", title: "TikTok" },
+                        { href: "https://twitter.com/omdomocom",      icon: "𝕏",  title: "Twitter" },
+                        { href: "https://www.youtube.com/@omdomocom", icon: "▶️", title: "YouTube" },
+                      ].map((s) => (
+                        <a
+                          key={s.title}
+                          href={s.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={s.title}
+                          className="flex items-center justify-center w-9 h-9 rounded-lg text-sm hover:bg-white/[0.07] transition-colors"
+                        >
+                          {s.icon}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Collapse toggle — pinned at bottom */}
-              <div className="mt-auto pt-3 pb-1">
+              <div className="pt-2 pb-1">
                 <div className={`${sidebarCollapsed ? "px-1.5" : "px-2"}`}>
                   <button
                     onClick={toggleSidebar}
@@ -967,10 +1019,6 @@ export function Dashboard() {
           </aside>
         </div>
 
-        {/* Social carousel */}
-        <div className="flex-shrink-0">
-          <SocialCarousel />
-        </div>
       </div>
     </div>
   );
