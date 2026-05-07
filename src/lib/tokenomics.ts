@@ -1,10 +1,10 @@
 // ─── OMMY Coin — Tokenomics Central ──────────────────────────────────────────
 // Fuente única de verdad para toda la tokenomics del ecosistema Om Domo.
-// Actualizado: Abril 2026 · Lanzamiento oficial: Solsticio Verano 21 Jun 2026
+// Actualizado: Abril 2026 · Lanzamiento oficial: 21 Ago 2026
 //
 // Cambios v2:
 //   · Burn objetivo: 90% → 70% (supply final ~9B, más sostenible para rewards)
-//   · Pre-compra lock: 30 días → Solsticio Invierno 21 Dic 2026 (6 meses post-launch)
+//   · Pre-compra lock: 30 días → 21 Feb 2027 (6 meses post-launch)
 //   · Burn schedule ligado a eventos cósmicos verificables
 //   · Ecosystem release schedule con hitos trimestrales
 //   · WALLET_DISTRIBUTION corregida: incluye Pre-compra 10% separado
@@ -27,7 +27,7 @@ export const SUPPLY = {
 // ─── Precio ───────────────────────────────────────────────────────────────────
 
 export const PRICE = {
-  launch:   0.001,  // USD por OMMY · Solsticio Verano 21 Jun 2026
+  launch:   0.001,  // USD por OMMY · 21 Ago 2026
   marketCapAtLaunch: 4_496_886_870 * 0.001,   // ~$4.5M (solo circulante real día 1)
   fdvAtLaunch: 29_979_245_800 * 0.001,         // ~$30M FDV total
 } as const;
@@ -66,13 +66,13 @@ export const COSMIC_CALENDAR = [
     desc:     "El día en que la luz y la oscuridad se equilibran. Quema comunitaria + reward a early believers.",
   },
   {
-    date:     "2026-06-21",
-    label:    "Solsticio de Verano ☀️",
+    date:     "2026-08-21",
+    label:    "Agosto ☀️",
     event:    "LANZAMIENTO OFICIAL Om Domo Web3",
     type:     "launch",
     burn:     5_000_000,       // 5M OMMY — Drop #1 Genesis Hoodie
     release:  0,
-    desc:     "El día más largo del año. Lanzamiento oficial, Drop #1 Genesis Hoodie, liquidity DEX activada.",
+    desc:     "Lanzamiento oficial, Drop #1 Genesis Hoodie, liquidity DEX activada.",
   },
   {
     date:     "2026-08-12",
@@ -93,13 +93,13 @@ export const COSMIC_CALENDAR = [
     desc:     "Equilibrio y cosecha. Drop #2 Solsticio + reward a comunidad fiel.",
   },
   {
-    date:     "2026-12-21",
-    label:    "Solsticio de Invierno 🌙",
+    date:     "2027-02-21",
+    label:    "Invierno 2027 🌙",
     event:    "Pre-compra UNLOCK + Drop #3 Ommy Lab",
     type:     "unlock",
     burn:     5_000_000,
     release:  2_997_924_580,   // 10% pre-compra desbloqueado
-    desc:     "La noche más larga. Los early believers ven sus tokens liberados. Drop #3 Ommy Lab Vol.1.",
+    desc:     "Los early believers ven sus tokens liberados. Drop #3 Ommy Lab Vol.1.",
   },
   {
     date:     "2027-03-20",
@@ -128,11 +128,11 @@ export const PRECOMPRA = {
   totalOmmy:      2_997_924_580,        // 10% del supply total
   wallet:         "0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2",
   openDate:       "2026-02-14",         // San Valentín — apertura
-  lockUntil:      "2026-12-21",         // Solsticio Invierno — unlock
-  lockDays:       183,                  // ~6 meses post-launch
-  cliff:          "2026-06-21",         // Solsticio Verano — launch date (cliff)
+  lockUntil:      "2027-02-21",         // 6 meses post-launch — unlock
+  lockDays:       184,                  // ~6 meses post-launch
+  cliff:          "2026-08-21",         // launch date (cliff)
   vestingType:    "cliff + linear",     // 1 cliff en launch, luego 6 meses lineal
-  desc:           "Precio fijo $0.001. Tokens bloqueados hasta el Solsticio de Invierno (21 Dic 2026). Ideal para creyentes del proyecto desde el inicio.",
+  desc:           "Precio fijo $0.001. Tokens bloqueados hasta el 21 Feb 2027 (6 meses post-launch). Ideal para creyentes del proyecto desde el inicio.",
 } as const;
 
 // ─── Ecosystem Release Schedule — para inversores ────────────────────────────
@@ -147,7 +147,7 @@ export const ECOSYSTEM_SCHEDULE = [
     reason:   "Reward a compradores pre-launch y beta testers",
   },
   {
-    date:     "2026-06-21",
+    date:     "2026-08-21",
     event:    "Launch — Drop #1 Genesis",
     ommy:     1_000_000_000,
     reason:   "Rewards de lanzamiento + compras Genesis Hoodie",
@@ -159,8 +159,8 @@ export const ECOSYSTEM_SCHEDULE = [
     reason:   "Drop #2 Solsticio rewards + staking Q3 2026",
   },
   {
-    date:     "2026-12-21",
-    event:    "Solsticio Invierno — Drop #3 + Comunidad",
+    date:     "2027-02-21",
+    event:    "Invierno 2027 — Drop #3 + Comunidad",
     ommy:     1_000_000_000,
     reason:   "Drop #3 Ommy Lab + rewards Q4 2026",
   },
@@ -214,7 +214,7 @@ export const WALLET_DISTRIBUTION = [
   { label: "Ecosistema & Recompensas", percent: 25, ommy:  7_494_811_450, color: "from-purple-500 to-pink-500",    wallet: "0xF49FBE7764932c5Ca95f0Da80F54C3C65C6ec294" },
   { label: "Quema permanente",         percent: 25, ommy:  7_494_811_450, color: "from-orange-500 to-red-500",     wallet: "0x000000000000000000000000000000000000dEaD" },
   { label: "Liquidez DEX",             percent: 15, ommy:  4_496_886_870, color: "from-cyan-500 to-blue-500",      wallet: "0x9EE85AE6D167bb5737aB85407088E766237Ed38a" },
-  { label: "Pre-compra (lock→21Dic)",  percent: 10, ommy:  2_997_924_580, color: "from-amber-500 to-yellow-500",   wallet: "0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2" },
+  { label: "Pre-compra (lock→21Feb)",  percent: 10, ommy:  2_997_924_580, color: "from-amber-500 to-yellow-500",   wallet: "0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2" },
   { label: "Equipo (vesting 4 años)",  percent: 10, ommy:  2_997_924_580, color: "from-green-500 to-emerald-500",  wallet: "0xF8099E1cFc08FE7845188e5d77d70fedCd40802c" },
   { label: "Marketing & Partnerships", percent:  7, ommy:  2_098_547_206, color: "from-yellow-500 to-orange-500",  wallet: "0x1f1a22351F1CD24f5aaF70AA72F130Ec52Fa7c06" },
   { label: "DAO Treasury",             percent:  5, ommy:  1_498_962_290, color: "from-indigo-500 to-purple-500",  wallet: "0x6d7d88dBC7266Cfd9F5BF6B2324372eA9Cb70867" },
@@ -227,10 +227,10 @@ export const WALLET_DISTRIBUTION = [
 
 export const BURN_SCHEDULE = [
   { date: "2026-03-20", event: "Equinoccio Primavera",        burned:    500_000_000, supplyEnd: 29_479_245_800, users:    500, burnPctAccum:  1.7, cosmicLabel: "🌸 Renacimiento" },
-  { date: "2026-06-21", event: "Solsticio Verano — Launch",   burned:  5_000_000,     supplyEnd: 29_474_245_800, users:  2_000, burnPctAccum:  1.7, cosmicLabel: "☀️ Lanzamiento" },
+  { date: "2026-08-21", event: "Agosto — Launch",             burned:  5_000_000,     supplyEnd: 29_474_245_800, users:  2_000, burnPctAccum:  1.7, cosmicLabel: "☀️ Lanzamiento" },
   { date: "2026-08-12", event: "Eclipse Solar",               burned:  5_000_000,     supplyEnd: 29_469_245_800, users:  3_000, burnPctAccum:  1.7, cosmicLabel: "🌑 Eclipse" },
   { date: "2026-09-22", event: "Equinoccio Otoño",            burned:  5_000_000,     supplyEnd: 29_464_245_800, users:  4_000, burnPctAccum:  1.8, cosmicLabel: "🍂 Cosecha" },
-  { date: "2026-12-21", event: "Solsticio Invierno",          burned:  5_000_000,     supplyEnd: 29_459_245_800, users:  5_000, burnPctAccum:  1.8, cosmicLabel: "🌙 Unlock" },
+  { date: "2027-02-21", event: "Invierno 2027 — Unlock",      burned:  5_000_000,     supplyEnd: 29_459_245_800, users:  5_000, burnPctAccum:  1.8, cosmicLabel: "🌙 Unlock" },
   { date: "2027-03-20", event: "Equinoccio Primavera",        burned:  2_000_000_000, supplyEnd: 27_459_245_800, users: 12_000, burnPctAccum:  8.5, cosmicLabel: "🌸 App Launch" },
   { date: "2027-06-21", event: "Solsticio Verano Aniversario",burned:  1_000_000_000, supplyEnd: 26_459_245_800, users: 18_000, burnPctAccum: 11.8, cosmicLabel: "☀️ 1 Año" },
   { date: "2027-09-22", event: "Equinoccio Otoño",            burned:  1_500_000_000, supplyEnd: 24_959_245_800, users: 30_000, burnPctAccum: 16.8, cosmicLabel: "🍂 Expansión" },

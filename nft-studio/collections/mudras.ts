@@ -17,7 +17,7 @@ export const MUDRAS_COLLECTION: Collection = {
   contractTokenIdRange: [89, 109],
   seasons: [
     {
-      seasonNumber: 1, totalSeasons: 3, scheduledMonth: "2027-02", status: "upcoming",
+      seasonNumber: 1, totalSeasons: 3, scheduledMonth: "2027-04", status: "upcoming",
       nfts: [
         { id: "mudra-gyan",    name: "Gyan Mudra",    nameEs: "Mudra del Conocimiento", description: "Knowledge — index finger to thumb. Increases wisdom and concentration.", emoji: "🤏", rarityTier: "standard", attributes: { element: "Aire", benefit: "Sabiduría", fingers: "Índice + Pulgar" }, promptHints: ["gyan mudra index thumb touching", "knowledge mudra meditation hand", "consciousness mudra gesture", "ok sign spiritual mudra"] },
         { id: "mudra-chin",    name: "Chin Mudra",    nameEs: "Mudra de la Conciencia", description: "Consciousness — palms up, thumb to index. Receptivity to universal energy.", emoji: "☝️", rarityTier: "standard", attributes: { element: "Éter", benefit: "Receptividad", fingers: "Índice + Pulgar palma arriba" }, promptHints: ["chin mudra palms up meditation", "consciousness gesture hands open", "receptive mudra upward palms", "chin mudra energy receiving"] },
@@ -29,7 +29,7 @@ export const MUDRAS_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 2, totalSeasons: 3, scheduledMonth: "2027-09", status: "upcoming",
+      seasonNumber: 2, totalSeasons: 3, scheduledMonth: "2027-11", status: "upcoming",
       nfts: [
         { id: "mudra-surya",   name: "Surya Mudra",   nameEs: "Mudra del Sol",   description: "Sun — ring finger to thumb. Increases solar energy, metabolism, vitality.", emoji: "☀️", rarityTier: "standard", attributes: { element: "Fuego", benefit: "Vitalidad Solar" }, promptHints: ["surya mudra ring finger thumb", "sun energy vitality hand", "solar fire mudra gesture", "surya sun mudra"] },
         { id: "mudra-buddhi",  name: "Buddhi Mudra",  nameEs: "Mudra de la Intuición", description: "Intuition — little finger to thumb. Enhances communication and intuition.", emoji: "💫", rarityTier: "standard", attributes: { element: "Agua", benefit: "Intuición" }, promptHints: ["buddhi mudra pinky thumb touching", "intuition communication hand", "mercury mudra gesture", "water element buddhi"] },
@@ -41,7 +41,7 @@ export const MUDRAS_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 3, totalSeasons: 3, scheduledMonth: "2028-02", status: "upcoming",
+      seasonNumber: 3, totalSeasons: 3, scheduledMonth: "2028-04", status: "upcoming",
       nfts: [
         { id: "mudra-lotus",   name: "Padma Mudra",   nameEs: "Mudra del Loto",   description: "Lotus — hands open like a lotus flower. Purity, beauty emerging from mud.", emoji: "🪷", rarityTier: "rare",    attributes: { element: "Agua", benefit: "Pureza y Apertura" }, promptHints: ["padma lotus mudra hands open flower", "lotus blossom hand gesture", "open heart lotus hands", "flower opening mudra"] },
         { id: "mudra-garuda",  name: "Garuda Mudra",  nameEs: "Mudra del Águila", description: "Eagle — thumbs interlaced, hands spreading like wings. Freedom and vision.", emoji: "🦅", rarityTier: "standard", attributes: { element: "Aire", benefit: "Libertad y Visión" }, promptHints: ["garuda mudra thumbs interlaced wings", "eagle bird hand gesture", "wing spread mudra vision", "garuda eagle sacred"] },

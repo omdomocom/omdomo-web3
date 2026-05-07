@@ -17,7 +17,7 @@ export const SACRED_GEOMETRY_COLLECTION: Collection = {
   contractTokenIdRange: [131, 139],
   seasons: [
     {
-      seasonNumber: 1, totalSeasons: 2, scheduledMonth: "2027-07", status: "upcoming",
+      seasonNumber: 1, totalSeasons: 2, scheduledMonth: "2027-09", status: "upcoming",
       nfts: [
         { id: "geo-flor-de-la-vida", name: "Flower of Life", nameEs: "Flor de la Vida", description: "The most ancient symbol — 19 overlapping circles containing all patterns of existence.", emoji: "🌸", rarityTier: "rare", attributes: { circles: 19, origin: "Egipto 10,000 AC", contains: "Todos los patrones" }, promptHints: ["flower of life overlapping circles gold", "19 circles sacred geometry pattern", "ancient egypt sacred symbol", "flower life golden blueprint"] },
         { id: "geo-arbol-de-la-vida", name: "Tree of Life", nameEs: "Árbol de la Vida", description: "Kabbalah's map — 10 sefirot connected by 22 paths, mapping creation itself.", emoji: "🌳", rarityTier: "rare", attributes: { sefirot: 10, paths: 22, tradition: "Kabbalah" }, promptHints: ["tree of life kabbalah sefirot gold", "10 nodes 22 paths sacred geometry", "kabbalah tree diagram gold", "sephirot cosmic tree"] },
@@ -29,7 +29,7 @@ export const SACRED_GEOMETRY_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 2, totalSeasons: 2, scheduledMonth: "2028-01", status: "upcoming",
+      seasonNumber: 2, totalSeasons: 2, scheduledMonth: "2028-03", status: "upcoming",
       nfts: [
         { id: "geo-fibonacci", name: "Fibonacci Spiral", nameEs: "Espiral de Fibonacci", description: "The golden ratio in motion — 1,1,2,3,5,8,13... the pattern of life itself.", emoji: "🐚", rarityTier: "rare", attributes: { ratio: "φ = 1.618033...", found_in: "Conchas, galaxias, flores, ADN" }, promptHints: ["fibonacci spiral golden ratio sacred", "nautilus shell spiral pattern gold", "phi golden ratio geometry spiral", "fibonacci nature spiral art"] },
         { id: "geo-vesica-piscis", name: "Vesica Piscis", nameEs: "Vesica Piscis", description: "Two circles intersecting — the womb of creation, source of all sacred geometry.", emoji: "👁️", rarityTier: "rare", attributes: { tradition: "Universal", ratio: "√3 : 1", origin: "Origen de toda geometría" }, promptHints: ["vesica piscis two circles sacred", "almond shape intersection gold", "womb creation geometry circles", "vesica piscis sacred origin"] },

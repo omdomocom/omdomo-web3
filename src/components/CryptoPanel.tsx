@@ -123,7 +123,7 @@ function CoinCard({ coin, expanded, onToggle }: {
             </div>
             {coin.isOmmy && (
               <div className="col-span-2 text-xs text-purple-400 mt-1">
-                Precio estimado al lanzamiento · Jun 2026
+                Precio estimado al lanzamiento · Ago 2026
               </div>
             )}
             {!coin.isOmmy && (

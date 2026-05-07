@@ -17,7 +17,7 @@ export const YOGA_COLLECTION: Collection = {
   contractTokenIdRange: [27, 47],
   seasons: [
     {
-      seasonNumber: 1, totalSeasons: 3, scheduledMonth: "2026-08", status: "upcoming",
+      seasonNumber: 1, totalSeasons: 3, scheduledMonth: "2026-10", status: "upcoming",
       nfts: [
         { id: "yoga-sukhasana",    name: "Sukhasana",    nameEs: "Postura Fácil",       description: "The easy seat — foundation of stillness and inner peace.",          emoji: "🪷", rarityTier: "standard", attributes: { level: "Básico", element: "Tierra",   chakra: "Muladhara",   sanskrit: "सुखासन" }, promptHints: ["cross-legged sitting pose", "serene meditation", "lotus position", "peaceful stillness"] },
         { id: "yoga-tadasana",     name: "Tadasana",     nameEs: "Postura de Montaña",  description: "Mountain pose — stillness with the power of a mountain.",           emoji: "⛰️", rarityTier: "standard", attributes: { level: "Básico", element: "Tierra",   chakra: "Muladhara",   sanskrit: "ताड़ासन"  }, promptHints: ["standing tall mountain pose", "feet together arms at sides", "grounded strength", "vertical power"] },
@@ -29,7 +29,7 @@ export const YOGA_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 2, totalSeasons: 3, scheduledMonth: "2026-12", status: "upcoming",
+      seasonNumber: 2, totalSeasons: 3, scheduledMonth: "2027-02", status: "upcoming",
       nfts: [
         { id: "yoga-warrior2",     name: "Virabhadrasana II", nameEs: "Guerrero II",   description: "Warrior II — focus, expansion, presence in battle.",               emoji: "🛡️", rarityTier: "standard", attributes: { level: "Intermedio", element: "Fuego", chakra: "Manipura",  sanskrit: "वीरभद्रासन" }, promptHints: ["warrior two pose arms extended", "wide stance lateral arms", "focused gaze warrior"] },
         { id: "yoga-vrikshasana",  name: "Vrikshasana",  nameEs: "Postura del Árbol",  description: "Tree pose — rootedness and upward growth simultaneously.",          emoji: "🌳", rarityTier: "standard", attributes: { level: "Intermedio", element: "Tierra", chakra: "Muladhara", sanskrit: "वृक्षासन" }, promptHints: ["tree pose one leg balance", "foot on inner thigh", "arms raised above head", "rooted balance"] },
@@ -41,7 +41,7 @@ export const YOGA_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 3, totalSeasons: 3, scheduledMonth: "2027-03", status: "upcoming",
+      seasonNumber: 3, totalSeasons: 3, scheduledMonth: "2027-05", status: "upcoming",
       nfts: [
         { id: "yoga-sirsasana",    name: "Sirsasana",    nameEs: "Parada de Cabeza",   description: "Headstand — the king of asanas, world turned upside down.",         emoji: "👑", rarityTier: "legendary", attributes: { level: "Avanzado", element: "Éter",   chakra: "Sahasrara", sanskrit: "शीर्षासन" }, promptHints: ["headstand yoga king asana", "inverted upside down", "crown on floor legs up", "royal inversion"] },
         { id: "yoga-adho-vrksasana", name: "Adho Vrksasana", nameEs: "Parada de Manos","description": "Handstand — perfect balance of strength and surrender.",          emoji: "🤸", rarityTier: "rare",    attributes: { level: "Avanzado", element: "Aire",   chakra: "Vishuddha", sanskrit: "अधोवृक्षासन"}, promptHints: ["handstand yoga balance", "hands on floor legs straight up", "inverted handstand", "aerial balance"] },

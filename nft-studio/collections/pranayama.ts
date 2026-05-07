@@ -17,7 +17,7 @@ export const PRANAYAMA_COLLECTION: Collection = {
   contractTokenIdRange: [110, 123],
   seasons: [
     {
-      seasonNumber: 1, totalSeasons: 2, scheduledMonth: "2027-06", status: "upcoming",
+      seasonNumber: 1, totalSeasons: 2, scheduledMonth: "2027-08", status: "upcoming",
       nfts: [
         { id: "prana-nadi-shodhana", name: "Nadi Shodhana", nameEs: "Respiración Alternada", description: "Alternate nostril breathing — purifies 72,000 nadis. Perfect balance of masculine and feminine.", emoji: "☯️", rarityTier: "rare", attributes: { rhythm: "4-4-4-4", type: "Equilibrio", effect: "Purificación nadis", tradition: "Hatha Yoga" }, promptHints: ["alternate nostril breathing visualization", "left right energy channels nadi", "dual spiral breath channels", "balanced yin yang breath waves"] },
         { id: "prana-kapalabhati", name: "Kapalabhati", nameEs: "Respiración del Cráneo", description: "Skull shining breath — rapid forceful exhales, passive inhales. Cleanses the mind.", emoji: "💨", rarityTier: "standard", attributes: { rhythm: "Explosivo", type: "Limpieza", effect: "Claridad mental", tradition: "Hatha Yoga" }, promptHints: ["kapalabhati forceful exhale visualization", "rapid burst breath waves", "skull cleansing energy pulses", "staccato breath energy"] },
@@ -29,7 +29,7 @@ export const PRANAYAMA_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 2, totalSeasons: 2, scheduledMonth: "2027-11", status: "upcoming",
+      seasonNumber: 2, totalSeasons: 2, scheduledMonth: "2028-01", status: "upcoming",
       nfts: [
         { id: "prana-box", name: "Box Breathing", nameEs: "Respiración Cuadrada", description: "4-4-4-4 — equal parts inhale, hold, exhale, hold. Navy SEALs technique.", emoji: "⬛", rarityTier: "standard", attributes: { rhythm: "4-4-4-4", type: "Equilibrio", effect: "Control del estrés", tradition: "Moderno" }, promptHints: ["box breathing square visualization", "4 sides equal breath cycle", "geometric square breath pattern", "box breath calm waves"] },
         { id: "prana-478", name: "4-7-8 Breathing", nameEs: "Respiración 4-7-8", description: "Dr. Weil's technique — natural tranquilizer, activates parasympathetic response.", emoji: "😴", rarityTier: "standard", attributes: { rhythm: "4-7-8", type: "Relajación", effect: "Sueño profundo", tradition: "Moderno" }, promptHints: ["4-7-8 breathing wave cycles", "sleep relaxation breath visualization", "parasympathetic wave pattern", "calming breath pattern art"] },

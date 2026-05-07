@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
             <p style="font-size: 11px; color: rgba(245,240,232,0.4); line-height: 1.6;">
               Los tokens quedan bloqueados hasta el <strong style="color: rgba(245,240,232,0.6);">Solsticio de Invierno, 21 Diciembre 2026</strong>.
               En esa fecha podrás reclamarlos en web3.omdomo.com con esta misma wallet.
-              El lanzamiento oficial es el <strong style="color: rgba(245,240,232,0.6);">Solsticio de Verano, 21 Junio 2026</strong>.
+              El lanzamiento oficial es el <strong style="color: rgba(245,240,232,0.6);">Solsticio de Verano, 21 Agosto 2026</strong>.
             </p>
 
             <hr style="border: none; border-top: 1px solid rgba(245,240,232,0.1); margin: 20px 0;" />

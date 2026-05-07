@@ -165,7 +165,7 @@ El Treasury DAO tiene 1,498,962,290 OMMY para financiar el ecosistema y está pr
 • Core Wallet: wallet oficial de Avalanche
 • Fuji Testnet: red de prueba gratuita (donde probamos ahora)
 
-**Testnet Fuji:** Actualmente en fase de pruebas. Los NFTs y OMMY que ves son "de prueba". En Junio 2026 migramos a Mainnet y recibirás los tokens reales.`,
+**Testnet Fuji:** Actualmente en fase de pruebas. Los NFTs y OMMY que ves son "de prueba". En Agosto 2026 migramos a Mainnet y recibirás los tokens reales.`,
     quiz: {
       question: "¿Cuántas transacciones por segundo procesa Avalanche?",
       options: ["15 tx/seg", "1,000 tx/seg", "4,500 tx/seg", "10,000 tx/seg"],

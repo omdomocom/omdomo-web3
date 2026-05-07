@@ -41,7 +41,7 @@ interface ShareRecord {
 
 const BASE_TEXT =
   "Descubrí @omdomocom — moda sostenible + NFTs en Avalanche + comunidad Web3 🌱🔥 " +
-  "Gana OMMY COIN solo por ser parte. Únete antes del lanzamiento de Junio 2026. " +
+  "Gana OMMY COIN solo por ser parte. Únete antes del lanzamiento de Agosto 2026. " +
   "#OmDomo #OMMY #Avalanche #Web3 #Sostenible";
 
 const PLATFORMS: PlatformConfig[] = [
@@ -476,7 +476,7 @@ export function ShareToEarnPanel() {
       {/* ── Nota informativa ── */}
       <p className="text-[11px] text-slate-600 text-center leading-relaxed">
         Un share por plataforma por wallet. Los OMMY se registran off-chain y se acreditan
-        en el lanzamiento de Junio 2026. Cada share quema {BURN.perSocialShare} OMMY del supply.
+        en el lanzamiento de Agosto 2026. Cada share quema {BURN.perSocialShare} OMMY del supply.
       </p>
     </div>
   );

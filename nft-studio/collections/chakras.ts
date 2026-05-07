@@ -22,7 +22,7 @@ export const CHAKRAS_COLLECTION: Collection = {
     {
       seasonNumber: 1,
       totalSeasons: 1,
-      scheduledMonth: "2026-07",
+      scheduledMonth: "2026-09",
       status: "upcoming",
       nfts: [
         {

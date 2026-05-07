@@ -9,7 +9,7 @@ Contexto completo del proyecto para sesiones de Claude Code.
 - Website: omdomo.com (Shopify activo)
 - Web3 app: web3.omdomo.com (Vercel — Next.js)
 - Token: Ommy Coin en Avalanche Mainnet
-- **Lanzamiento oficial: Junio 2026**
+- **Lanzamiento oficial: Agosto 2026**
 - Stack: Next.js 15.3.9 (App Router) + Thirdweb v5 + Claude API + Tailwind CSS + shadcn/ui
 
 ## Wallets
@@ -28,7 +28,7 @@ Contexto completo del proyecto para sesiones de Claude Code.
 | 🔥 Burn permanente | 25% | 7,494,811,450 | `0x000000000000000000000000000000000000dEaD` |
 | 🌱 Ecosistema & Rewards | 25% | 7,494,811,450 | `0xF49FBE7764932c5Ca95f0Da80F54C3C65C6ec294` |
 | 💧 Liquidez DEX | 15% | 4,496,886,870 | `0x9EE85AE6D167bb5737aB85407088E766237Ed38a` |
-| 🔒 Pre-compra (lock→21 Dic 2026) | 10% | 2,997,924,580 | `0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2` |
+| 🔒 Pre-compra (lock→21 Feb 2027) | 10% | 2,997,924,580 | `0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2` |
 | 👥 Equipo (4yr vesting) | 10% | 2,997,924,580 | `0xF8099E1cFc08FE7845188e5d77d70fedCd40802c` ✅ Safe 2/2 |
 | 📣 Marketing | 7% | 2,098,547,206 | `0x1f1a22351F1CD24f5aaF70AA72F130Ec52Fa7c06` ✅ Safe 2/2 |
 | 🏛️ DAO Treasury | 5% | 1,498,962,290 | `0x6d7d88dBC7266Cfd9F5BF6B2324372eA9Cb70867` ✅ Safe 2/2 |
@@ -121,17 +121,17 @@ nft-studio/                           # ← NUEVO: pipeline de generación de NF
 ├── NFT_STUDIO_STRATEGY.md            # Estrategia completa: 13 colecciones, calendario, DAO economics
 ├── collections/
 │   ├── index.ts                      # Registro maestro: tipos + ALL_COLLECTIONS + helpers
-│   ├── chakras.ts                    # 7 NFTs, 1 temporada, Jul 2026  [tokenIds 20-26]
-│   ├── yoga.ts                       # 21 NFTs, 3 temporadas, Ago 2026-Mar 2027 [27-47]
-│   ├── reiki.ts                      # 28 NFTs, 4 temporadas, Sep 2026-Ago 2027 [48-75]
+│   ├── chakras.ts                    # 7 NFTs, 1 temporada, Sep 2026  [tokenIds 20-26]
+│   ├── yoga.ts                       # 21 NFTs, 3 temporadas, Oct 2026-May 2027 [27-47]
+│   ├── reiki.ts                      # 28 NFTs, 4 temporadas, Nov 2026-Oct 2027 [48-75]
 │   ├── lunar-phases.ts               # 8 NFTs, 1 temporada, Oct 2026 [76-83]
 │   ├── elements.ts                   # 5 NFTs, 1 temporada, Nov 2026 [84-88]
-│   ├── mudras.ts                     # 21 NFTs, 3 temporadas, Feb 2027-Feb 2028 [89-109]
-│   ├── pranayama.ts                  # 14 NFTs, 2 temporadas, Jun 2027-Nov 2027 [110-123]
+│   ├── mudras.ts                     # 21 NFTs, 3 temporadas, Abr 2027-Abr 2028 [89-109]
+│   ├── pranayama.ts                  # 14 NFTs, 2 temporadas, Ago 2027-Ene 2028 [110-123]
 │   ├── kundalini.ts                  # 7 NFTs, 1 temporada, Abr 2027 [124-130]
-│   ├── sacred-geometry.ts            # 9 NFTs, 2 temporadas, Jul 2027-Ene 2028 [131-139]
-│   ├── mantras.ts                    # 9 NFTs, 2 temporadas, Oct 2027-Mar 2028 [140-148]
-│   └── sacred-plants.ts              # 13 NFTs, 2 temporadas, Dic 2027-Abr 2028 [149-161]
+│   ├── sacred-geometry.ts            # 9 NFTs, 2 temporadas, Sep 2027-Mar 2028 [131-139]
+│   ├── mantras.ts                    # 9 NFTs, 2 temporadas, Dic 2027-May 2028 [140-148]
+│   └── sacred-plants.ts              # 13 NFTs, 2 temporadas, Feb 2028-Jun 2028 [149-161]
 │                                     # (guardians + zodiac pendientes: [162+])
 ├── generator/
 │   └── replicate-client.ts           # Cliente Replicate: generateNFTVariants, generateSeasonBatch
@@ -205,7 +205,7 @@ src/
 | `/` | Landing pública + Hero animado |
 | `/nft` | Colección NFT completa — rareza, 4 tipos (carrusel), Guardianes (carrusel), countdown |
 | `/claim` | Claim NFT tras compra — lookup por Order ID o email |
-| `/drops` | Drops limitados con countdown a Junio 2026 |
+| `/drops` | Drops limitados con countdown a Agosto 2026 |
 | `/dashboard` | Dashboard completo: Wallet + 8 tabs + Chat AI + Comunidad + Perfil |
 
 ## Dashboard — Tabs
@@ -305,7 +305,7 @@ Fallback: si `REDIS_URL` no está configurado → usa Map en memoria con warning
 | Segmento | % | OMMY aprox |
 |----------|---|-----------|
 | Ecosistema & Rewards | 25% | ~7.49M |
-| Pre-compra (lock→21 Dic 2026) | 10% | ~3.00M |
+| Pre-compra (lock→21 Feb 2027) | 10% | ~3.00M |
 | Quema programada | 25% | ~7.49M |
 | Liquidez DEX | 15% | ~4.50M |
 | Equipo (4yr vesting) | 10% | ~3.00M |
@@ -339,7 +339,7 @@ $0.003 (2026) → $0.01 (2027) → $0.035 (2028) → $0.10 (2029) → $0.25 (203
 
 | Rarity | Ventana |
 |--------|---------|
-| Genesis | Antes del lanzamiento oficial (Jun 2026) — máxima rareza |
+| Genesis | Antes del lanzamiento oficial (Ago 2026) — máxima rareza |
 | Founder | Primer mes post-lanzamiento |
 | Community | Primeros 3 meses |
 | Standard | Después |
@@ -364,7 +364,7 @@ Flow: `POST /api/agent` → rate limit check → selectAgents() → callAgent() 
 
 | Fase | Nombre | Fecha | Estado |
 |------|--------|-------|--------|
-| 1 | Motor de Ventas | Jun 2026 | **ACTIVA** |
+| 1 | Motor de Ventas | Ago 2026 | **ACTIVA** |
 | 2 | Economía Ommy Coin | Sep 2026 | Pendiente |
 | 3 | App Proof of Conscious Activity | Ene 2027 | Pendiente |
 | 4 | Comunidad DAO | Jun 2027 | Pendiente |
@@ -374,7 +374,7 @@ Flow: `POST /api/agent` → rate limit check → selectAgents() → callAgent() 
 
 | Drop | Unidades | Precio | OMMY Bonus | Burn | Fecha |
 |------|----------|--------|------------|------|-------|
-| #1 Genesis Hoodie | 100 | €89 | 10,000 OMMY | 5M OMMY | Jun 2026 |
+| #1 Genesis Hoodie | 100 | €89 | 10,000 OMMY | 5M OMMY | Ago 2026 |
 | #2 Solsticio | 50 | TBD | TBD | 5M OMMY | Sep 2026 |
 | #3 Ommy Lab Vol.1 | 200 | TBD | TBD | 5M OMMY | Dic 2026 |
 
@@ -386,17 +386,17 @@ Pipeline completo para crear NFTs con Replicate AI + votación DAO.
 
 | Colección | NFTs | Seasons | Primer lanzamiento | TokenIds |
 |-----------|------|---------|-------------------|----------|
-| Chakras | 7 | 1 | Jul 2026 | 20-26 |
-| Yoga Asanas | 21 | 3 | Ago 2026 | 27-47 |
-| Reiki | 28 | 4 | Sep 2026 | 48-75 |
-| Fases Lunares | 8 | 1 | Oct 2026 | 76-83 |
-| Elementos | 5 | 1 | Nov 2026 | 84-88 |
-| Mudras | 21 | 3 | Feb 2027 | 89-109 |
-| Pranayama | 14 | 2 | Jun 2027 | 110-123 |
-| Kundalini | 7 | 1 | Abr 2027 | 124-130 |
-| Geometría Sagrada | 9 | 2 | Jul 2027 | 131-139 |
-| Mantras & Frecuencias | 9 | 2 | Oct 2027 | 140-148 |
-| Plantas Maestras | 13 | 2 | Dic 2027 | 149-161 |
+| Chakras | 7 | 1 | Sep 2026 | 20-26 |
+| Yoga Asanas | 21 | 3 | Oct 2026 | 27-47 |
+| Reiki | 28 | 4 | Nov 2026 | 48-75 |
+| Fases Lunares | 8 | 1 | Dic 2026 | 76-83 |
+| Elementos | 5 | 1 | Ene 2027 | 84-88 |
+| Mudras | 21 | 3 | Abr 2027 | 89-109 |
+| Pranayama | 14 | 2 | Ago 2027 | 110-123 |
+| Kundalini | 7 | 1 | Jun 2027 | 124-130 |
+| Geometría Sagrada | 9 | 2 | Sep 2027 | 131-139 |
+| Mantras & Frecuencias | 9 | 2 | Dic 2027 | 140-148 |
+| Plantas Maestras | 13 | 2 | Feb 2028 | 149-161 |
 | Guardianes | TBD | TBD | 2028 | 162+ |
 | Zodíaco (Studio) | TBD | TBD | 2028 | TBD |
 
@@ -491,7 +491,7 @@ Esto despliega en Vercel: NFT Studio completo + fix DropClaimExceedLimit + NFTSt
 
 ## Pendiente para Lanzamiento ⏳
 
-### Crítico antes de Jun 2026
+### Crítico antes de Ago 2026
 - [ ] `git push origin main` — subir los 2 commits pendientes (ver arriba)
 - [ ] Configurar Thirdweb Dashboard: claim conditions para token IDs zodiacales (1-12)
   - `maxClaimablePerWallet` = 1 (ya está, es correcto)
@@ -517,7 +517,7 @@ Esto despliega en Vercel: NFT Studio completo + fix DropClaimExceedLimit + NFTSt
 - [ ] Integrar Replicate API real para generación de imágenes
 - [ ] Conectar `NFTStudioVoting` a datos reales (actualmente usa mock `MOCK_SEASON`)
 - [ ] API routes para guardar/leer feedback de la comunidad en Redis/Supabase
-- [ ] Activar `NFTStudioVoting` con datos reales al lanzar primera temporada (Jul 2026)
+- [ ] Activar `NFTStudioVoting` con datos reales al lanzar primera temporada (Sep 2026)
 
 ## Convenciones de Código
 

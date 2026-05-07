@@ -93,7 +93,7 @@ function DAppPanel() {
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 Pre-lanzamiento
               </span>
-              <span className="text-[10px] text-slate-500">Cambia a "Comprar" en Junio 2026</span>
+              <span className="text-[10px] text-slate-500">Cambia a "Comprar" en Agosto 2026</span>
             </div>
             <h3 className="text-sm font-bold text-amber-300 mb-0.5">Pre-compra OMMY COIN</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
@@ -289,7 +289,7 @@ function SobreNosotrosPanel() {
         <h3 className="text-sm font-bold text-slate-100 mb-4">Roadmap</h3>
         <div className="space-y-3">
           {[
-            { fase: "1", nombre: "Motor de Ventas",              fecha: "Jun 2026", estado: "ACTIVA",    color: "border-green-500/50 text-green-400" },
+            { fase: "1", nombre: "Motor de Ventas",              fecha: "Ago 2026", estado: "ACTIVA",    color: "border-green-500/50 text-green-400" },
             { fase: "2", nombre: "Economía Ommy Coin",           fecha: "Sep 2026", estado: "Pendiente", color: "border-slate-700/40 text-slate-500" },
             { fase: "3", nombre: "App Proof of Conscious Activity", fecha: "Ene 2027", estado: "Pendiente", color: "border-slate-700/40 text-slate-500" },
             { fase: "4", nombre: "Comunidad DAO",                fecha: "Jun 2027", estado: "Pendiente", color: "border-slate-700/40 text-slate-500" },
@@ -380,7 +380,7 @@ function AnimatedNumber({ value }: { value: string }) {
 function DropCountdown() {
   const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 });
   useEffect(() => {
-    const DROP = new Date("2026-06-15T10:00:00Z").getTime();
+    const DROP = new Date("2026-08-15T10:00:00Z").getTime();
     function update() {
       const diff = DROP - Date.now();
       if (diff <= 0) { setTime({ d: 0, h: 0, m: 0, s: 0 }); return; }
@@ -420,7 +420,7 @@ function OverviewPanel({ address }: { address?: string }) {
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "OMMY Price",      value: "$0.001",      sub: "Lanzamiento Jun 2026",   icon: <Coins size={15} />, color: "from-purple-500 to-pink-500",   glow: "shadow-purple-500/20" },
+          { label: "OMMY Price",      value: "$0.001",      sub: "Lanzamiento Ago 2026",   icon: <Coins size={15} />, color: "from-purple-500 to-pink-500",   glow: "shadow-purple-500/20" },
           { label: "Mis NFTs",        value: String(nftCount), sub: nftSub,                 icon: <Image size={15} />, color: "from-cyan-500 to-blue-500",     glow: "shadow-cyan-500/20" },
           { label: "OMMY Acumulados", value: address ? "5,320" : "—", sub: address ? "≈ $5.32" : "Conecta wallet", icon: <Coins size={15} />, color: "from-yellow-400 to-amber-500", glow: "shadow-yellow-500/20" },
           { label: "Supply Quemado",  value: "0.001%",      sub: "objetivo 70%",           icon: <Flame size={15} />, color: "from-orange-500 to-red-500",    glow: "shadow-orange-500/20" },
@@ -490,7 +490,7 @@ function OverviewPanel({ address }: { address?: string }) {
 function NavDropPill() {
   const [t, setT] = useState({ d: 0, h: 0, m: 0 });
   useEffect(() => {
-    const DROP = new Date("2026-06-15T10:00:00Z").getTime();
+    const DROP = new Date("2026-08-15T10:00:00Z").getTime();
     function update() {
       const diff = DROP - Date.now();
       if (diff <= 0) return;
@@ -944,7 +944,7 @@ export function Dashboard() {
             {/* Pre-compra CTA */}
             <div className="glass rounded-xl p-4 border border-purple-500/20 text-center space-y-2">
               <p className="text-xs font-bold text-slate-100">Pre-compra OMMY COIN</p>
-              <p className="text-xs text-slate-500">Precio: <strong className="text-purple-300">$0.001</strong> · Jun 2026</p>
+              <p className="text-xs text-slate-500">Precio: <strong className="text-purple-300">$0.001</strong> · Ago 2026</p>
               <a href="/#precompra" className="block w-full py-2 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-600 text-xs font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5">
                 <ShoppingBag size={12} /> Reservar OMMY
               </a>

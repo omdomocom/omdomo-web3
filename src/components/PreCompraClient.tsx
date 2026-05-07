@@ -13,9 +13,9 @@ import {
 const PRECOMPRA_WALLET   = "0x7c7cd287e3901888d29218b4fDe00C9c6Bc0F1e2" as `0x${string}`;
 const OMMY_PRICE_USD     = 0.001;
 const TOTAL_OMMY         = 2_997_924_580;
-const UNLOCK_DATE        = "21 Dic 2026";
+const UNLOCK_DATE        = "21 Feb 2027";
 const UNLOCK_LABEL       = "Solsticio de Invierno 🌙";
-const LAUNCH_DATE        = "21 Jun 2026";
+const LAUNCH_DATE        = "21 Ago 2026";
 const MIN_AVAX           = 0.05;
 
 // ─── Countdown ───────────────────────────────────────────────────────────────
@@ -69,8 +69,8 @@ export default function PreCompraClient() {
   const usdValue  = avaxNum * avaxPrice;
   const pctSold   = Math.min(100, (stats.totalOmmyReserved / TOTAL_OMMY) * 100);
 
-  const launchCountdown = useCountdown("2026-06-21T00:00:00Z");
-  const unlockCountdown = useCountdown("2026-12-21T00:00:00Z");
+  const launchCountdown = useCountdown("2026-08-21T00:00:00Z");
+  const unlockCountdown = useCountdown("2027-02-21T00:00:00Z");
 
   // Cargar precio AVAX y stats
   const loadData = useCallback(async () => {
@@ -216,7 +216,7 @@ export default function PreCompraClient() {
         <div className="grid grid-cols-3 gap-3">
           {[
             { label: "Precio OMMY", value: "$0.001", sub: "Precio de lanzamiento" },
-            { label: "Lock hasta", value: "21 Dic", sub: "Solsticio Invierno 2026" },
+            { label: "Lock hasta", value: "21 Feb", sub: "Invierno 2027" },
             { label: "AVAX precio", value: `$${avaxPrice.toFixed(0)}`, sub: "Precio actual" },
           ].map((s) => (
             <div key={s.label} className="glass rounded-xl p-3 text-center border border-slate-700/30">
@@ -463,8 +463,8 @@ export default function PreCompraClient() {
           {[
             { n: "01", title: "Conecta tu wallet", desc: "Avalanche Mainnet — MetaMask, Coinbase Wallet o cualquier wallet compatible." },
             { n: "02", title: "Envías AVAX", desc: `Precio fijo: 1 AVAX = ${Math.floor(avaxPrice / OMMY_PRICE_USD).toLocaleString()} OMMY (≈ $${avaxPrice.toFixed(0)} USD).` },
-            { n: "03", title: "Tokens reservados", desc: "Quedan bloqueados en el contrato hasta el Solsticio de Invierno, 21 Dic 2026." },
-            { n: "04", title: "Unlock y lanzamiento", desc: "El 21 Jun 2026 es el lanzamiento oficial. El 21 Dic 2026 puedes reclamar tus OMMY." },
+            { n: "03", title: "Tokens reservados", desc: "Quedan bloqueados en el contrato hasta el 21 Feb 2027." },
+            { n: "04", title: "Unlock y lanzamiento", desc: "El 21 Ago 2026 es el lanzamiento oficial. El 21 Feb 2027 puedes reclamar tus OMMY." },
           ].map((s) => (
             <div key={s.n} className="flex gap-3">
               <span className="text-[10px] font-black text-amber-500/60 w-5 flex-shrink-0 mt-0.5">{s.n}</span>

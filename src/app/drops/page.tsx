@@ -9,7 +9,7 @@ const NEXT_DROP = {
   subtitle: "La colección que inicia todo",
   description:
     "100 hoodies numeradas. Cada una incluye un NFT Genesis Edition con rarity exclusiva, 10.000 OMMY de recompensa y acceso permanente a la comunidad DAO de Om Domo.",
-  date: new Date("2026-06-15T18:00:00Z"), // Lanzamiento Junio 2026
+  date: new Date("2026-08-15T18:00:00Z"), // Lanzamiento Agosto 2026
   totalUnits: 100,
   unitsSold: 0,    // Se actualiza en tiempo real
   priceEUR: 89,

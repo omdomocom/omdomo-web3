@@ -17,7 +17,7 @@ export const LUNAR_PHASES_COLLECTION: Collection = {
   contractTokenIdRange: [76, 83],
   seasons: [
     {
-      seasonNumber: 1, totalSeasons: 1, scheduledMonth: "2026-10", status: "upcoming",
+      seasonNumber: 1, totalSeasons: 1, scheduledMonth: "2026-12", status: "upcoming",
       nfts: [
         { id: "luna-nueva",       name: "New Moon",           nameEs: "Luna Nueva",          description: "New beginnings — the invisible moon, infinite potential in darkness.", emoji: "🌑", rarityTier: "rare",    attributes: { illumination: "0%",   energy: "Intención",  cycle: "Inicio",     day: 0  }, promptHints: ["new moon invisible dark sky", "total darkness night sky", "zero illumination moon", "new beginning potential"] },
         { id: "luna-creciente",   name: "Waxing Crescent",    nameEs: "Luna Creciente",      description: "Setting intentions — the first sliver of light returns.",             emoji: "🌒", rarityTier: "standard", attributes: { illumination: "25%",  energy: "Deseo",      cycle: "Creciente",  day: 3  }, promptHints: ["waxing crescent moon slim sliver", "thin crescent dark sky", "moon growing light", "intention crescent moon"] },

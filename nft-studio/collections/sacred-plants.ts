@@ -19,7 +19,7 @@ export const SACRED_PLANTS_COLLECTION: Collection = {
   contractTokenIdRange: [149, 161],
   seasons: [
     {
-      seasonNumber: 1, totalSeasons: 2, scheduledMonth: "2027-12", status: "upcoming",
+      seasonNumber: 1, totalSeasons: 2, scheduledMonth: "2028-02", status: "upcoming",
       nfts: [
         {
           id: "plant-ayahuasca",
@@ -94,7 +94,7 @@ export const SACRED_PLANTS_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 2, totalSeasons: 2, scheduledMonth: "2028-04", status: "upcoming",
+      seasonNumber: 2, totalSeasons: 2, scheduledMonth: "2028-06", status: "upcoming",
       nfts: [
         {
           id: "plant-ashwagandha",

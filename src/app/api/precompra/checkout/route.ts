@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     mode: "payment",
     payment_method_types: ["card"],
     payment_intent_data: {
-      description: `Pre-compra OMMY — Om Domo Ecosystem · ${ommyAmount.toLocaleString()} tokens · Lanzamiento Jun 2026`,
+      description: `Pre-compra OMMY — Om Domo Ecosystem · ${ommyAmount.toLocaleString()} tokens · Lanzamiento Ago 2026`,
     },
     line_items: [
       {
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
           unit_amount: usdAmount,
           product_data: {
             name: `${ommyAmount.toLocaleString()} OMMY — Acceso Anticipado Om Domo`,
-            description: `Adquieres ${ommyAmount.toLocaleString()} Ommy Coin (OMMY) al precio de lanzamiento de $0.001 por token, reservado exclusivamente para early adopters. Los tokens se entregan en Avalanche el día del lanzamiento oficial (Junio 2026) con un período de lock de 30 días para garantizar la estabilidad del ecosistema. Formas parte de la comunidad fundadora del primer Spiritual Web3 Lifestyle de Europa.`,
+            description: `Adquieres ${ommyAmount.toLocaleString()} Ommy Coin (OMMY) al precio de lanzamiento de $0.001 por token, reservado exclusivamente para early adopters. Los tokens se entregan en Avalanche el día del lanzamiento oficial (Agosto 2026) con un período de lock de 30 días para garantizar la estabilidad del ecosistema. Formas parte de la comunidad fundadora del primer Spiritual Web3 Lifestyle de Europa.`,
             images: [`${appUrl}/logo-blanco.png`],
           },
         },

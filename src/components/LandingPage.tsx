@@ -133,7 +133,7 @@ function SmartJoinCTA({ className }: { className?: string }) {
 }
 
 // ─── Countdown hook ───────────────────────────────────────────────────────────
-const LAUNCH_DATE = new Date("2026-06-15T18:00:00Z");
+const LAUNCH_DATE = new Date("2026-08-15T18:00:00Z");
 
 function useCountdown() {
   const [t, setT] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -606,7 +606,7 @@ function HeroLogo() {
 
 // ─── NFT Genesis Section ──────────────────────────────────────────────────────
 const RARITY_TIERS = [
-  { name: "Genesis", color: "#f59e0b", glow: "rgba(245,158,11,0.4)", desc: "Antes de Jun 2026 — rareza máxima", supply: "~200 NFTs" },
+  { name: "Genesis", color: "#f59e0b", glow: "rgba(245,158,11,0.4)", desc: "Antes de Ago 2026 — rareza máxima", supply: "~200 NFTs" },
   { name: "Founder", color: "#9333ea", glow: "rgba(147,51,234,0.4)", desc: "Primer mes post-lanzamiento", supply: "~500 NFTs" },
   { name: "Community", color: "#0891b2", glow: "rgba(8,145,178,0.4)", desc: "Primeros 3 meses", supply: "~2.000 NFTs" },
   { name: "Standard", color: "#64748b", glow: "rgba(100,116,139,0.3)", desc: "Resto de la colección", supply: "Ilimitado" },
@@ -1246,7 +1246,7 @@ function NFTTypesSection() {
               }}
             >
               {[
-                { label: "Genesis", window: "Antes Jun 2026", color: "#FFD700" },
+                { label: "Genesis", window: "Antes Ago 2026", color: "#FFD700" },
                 { label: "Founder", window: "Primer mes", color: "#C0C0C0" },
                 { label: "Community", window: "Primeros 3 meses", color: "#4FC3F7" },
                 { label: "Standard", window: "Siempre", color: "#81C784" },
@@ -1433,7 +1433,7 @@ function GuardianCard({ g, index }: { g: typeof GUARDIANS[0]; index: number }) {
       >
         <div style={{ fontSize: 28, opacity: 0.5 }}>🔒</div>
         <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-          Jun 2026
+          Ago 2026
         </p>
       </motion.div>
 
@@ -1513,7 +1513,7 @@ function GuardiansCountdown() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    const target = new Date("2026-06-01T00:00:00Z").getTime();
+    const target = new Date("2026-08-01T00:00:00Z").getTime();
     function update() {
       const now = Date.now();
       const diff = Math.max(0, target - now);
@@ -1609,7 +1609,7 @@ function GuardiansSection() {
                 marginBottom: 12,
               }}
             >
-              Colección Artística · Junio 2026
+              Colección Artística · Agosto 2026
             </span>
             <h2
               className="gradient-text"
@@ -1874,7 +1874,7 @@ function PreCompraSection() {
             style={{ color: "rgba(255,255,255,0.6)" }}
           >
             El 10% del supply está reservado exclusivamente para early adopters al precio de lanzamiento.
-            Entra ahora y asegura tu posición antes de Junio 2026.
+            Entra ahora y asegura tu posición antes de Agosto 2026.
           </motion.p>
         </motion.div>
 
@@ -3231,7 +3231,7 @@ export function LandingPage() {
             transition={{ duration: 0.9, delay: 0.55 }}
           >
             <p className="text-xs text-slate-500 mb-4 uppercase tracking-widest">
-              Lanzamiento oficial Ommy Coin · Junio 2026
+              Lanzamiento oficial Ommy Coin · Agosto 2026
             </p>
             <div className="flex items-center justify-center gap-3 mb-6">
               {[

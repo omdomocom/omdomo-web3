@@ -17,7 +17,7 @@ export const ELEMENTS_COLLECTION: Collection = {
   contractTokenIdRange: [84, 88],
   seasons: [
     {
-      seasonNumber: 1, totalSeasons: 1, scheduledMonth: "2026-11", status: "upcoming",
+      seasonNumber: 1, totalSeasons: 1, scheduledMonth: "2027-01", status: "upcoming",
       nfts: [
         {
           id: "elemento-tierra", name: "Earth", nameEs: "Tierra",

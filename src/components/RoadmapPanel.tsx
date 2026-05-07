@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const PHASES = [
-  { n: 1, name: "Motor de Ventas",   date: "Jun 2026", emoji: "🚀", active: true,
+  { n: 1, name: "Motor de Ventas",   date: "Ago 2026", emoji: "🚀", active: true,
     items: ["NFT por compra", "Wallet connect", "OMMY rewards", "Share-to-earn", "Drops limitados"] },
   { n: 2, name: "Economía OMMY",     date: "Sep 2026", emoji: "🪙", active: false, items: [] },
   { n: 3, name: "App Recompensas",   date: "Ene 2027", emoji: "📱", active: false, items: [] },

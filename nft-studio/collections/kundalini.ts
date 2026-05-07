@@ -17,7 +17,7 @@ export const KUNDALINI_COLLECTION: Collection = {
   contractTokenIdRange: [124, 130],
   seasons: [
     {
-      seasonNumber: 1, totalSeasons: 1, scheduledMonth: "2027-04", status: "upcoming",
+      seasonNumber: 1, totalSeasons: 1, scheduledMonth: "2027-06", status: "upcoming",
       nfts: [
         {
           id: "kundalini-tierra", name: "Earth Awakening", nameEs: "Despertar Tierra",

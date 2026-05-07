@@ -17,7 +17,7 @@ export const MANTRAS_COLLECTION: Collection = {
   contractTokenIdRange: [140, 148],
   seasons: [
     {
-      seasonNumber: 1, totalSeasons: 2, scheduledMonth: "2027-10", status: "upcoming",
+      seasonNumber: 1, totalSeasons: 2, scheduledMonth: "2027-12", status: "upcoming",
       nfts: [
         { id: "mantra-om",         name: "OM",                    nameEs: "OM",                    description: "The primordial sound — the vibration of the universe before creation. 136.1 Hz.",         emoji: "🕉️", rarityTier: "legendary", attributes: { hz: 136.1,  tradition: "Universal",    language: "Sánscrito" }, promptHints: ["om aum sacred sound waves", "primordial vibration cymatics", "om symbol golden glow", "universe creation sound"] },
         { id: "mantra-so-hum",     name: "So Hum",                nameEs: "So Hum",                description: "'I am that' — the breath mantra, identity with universal consciousness.",                  emoji: "💫", rarityTier: "standard", attributes: { hz: 528,    tradition: "Vedanta",      language: "Sánscrito" }, promptHints: ["so hum breath mantra wave", "i am that consciousness cymatics", "inhale exhale sound visualization", "identity consciousness waves"] },
@@ -29,7 +29,7 @@ export const MANTRAS_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 2, totalSeasons: 2, scheduledMonth: "2028-03", status: "upcoming",
+      seasonNumber: 2, totalSeasons: 2, scheduledMonth: "2028-05", status: "upcoming",
       nfts: [
         { id: "freq-528", name: "528 Hz — Love Frequency", nameEs: "528 Hz — Frecuencia del Amor", description: "The miracle tone — repairs DNA, associated with love and miracles.",                    emoji: "💚", rarityTier: "rare",    attributes: { hz: 528,  solfeggio: "sí", effect: "Reparación ADN" }, promptHints: ["528 hz frequency wave visualization", "love frequency solfeggio green", "DNA repair sound wave art", "miracle tone green cymatics"] },
         { id: "freq-432", name: "432 Hz — Universal Harmony", nameEs: "432 Hz — Armonía Universal", description: "Natural tuning — mathematically resonates with the universe, Schumann resonance.",     emoji: "🌍", rarityTier: "rare",    attributes: { hz: 432,  natural: "sí",   effect: "Armonía natural" }, promptHints: ["432 hz natural frequency harmony", "universal tuning sound waves", "schumann resonance earth frequency", "nature harmony sound art"] },

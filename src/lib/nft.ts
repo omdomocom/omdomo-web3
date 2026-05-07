@@ -61,7 +61,7 @@ export type NFTRarity = "Genesis" | "Founder" | "Community" | "Standard";
 
 export function getNFTRarity(purchaseDate: string): NFTRarity {
   const date = new Date(purchaseDate);
-  const launch = new Date("2026-06-01");
+  const launch = new Date("2026-08-01");
   const msDiff = date.getTime() - launch.getTime();
   const daysDiff = msDiff / (1000 * 60 * 60 * 24);
 

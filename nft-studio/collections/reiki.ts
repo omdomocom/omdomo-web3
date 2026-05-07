@@ -17,7 +17,7 @@ export const REIKI_COLLECTION: Collection = {
   contractTokenIdRange: [48, 75],
   seasons: [
     {
-      seasonNumber: 1, totalSeasons: 4, scheduledMonth: "2026-09", status: "upcoming",
+      seasonNumber: 1, totalSeasons: 4, scheduledMonth: "2026-11", status: "upcoming",
       nfts: [
         { id: "reiki-cho-ku-rei",    name: "Cho Ku Rei",    nameEs: "Cho Ku Rei",    description: "Power symbol — amplifies energy, activates all other symbols. 'Place the power of the universe here'.", emoji: "⚡", rarityTier: "rare",    attributes: { tradition: "Usui", type: "Poder",      level: "Primero"  }, promptHints: ["cho ku rei reiki power symbol", "spiral coil clockwise", "energy amplifier glyph", "universal power symbol"] },
         { id: "reiki-sei-he-ki",     name: "Sei He Ki",     nameEs: "Sei He Ki",     description: "Mental/emotional symbol — harmonizes mind and emotions, releases trauma.",                            emoji: "🧠", rarityTier: "standard", attributes: { tradition: "Usui", type: "Mental",     level: "Segundo"  }, promptHints: ["sei he ki reiki mental symbol", "wave mountain glyph", "emotional healing symbol", "mental harmony reiki"] },
@@ -29,7 +29,7 @@ export const REIKI_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 2, totalSeasons: 4, scheduledMonth: "2027-01", status: "upcoming",
+      seasonNumber: 2, totalSeasons: 4, scheduledMonth: "2027-03", status: "upcoming",
       nfts: [
         { id: "reiki-harth",   name: "Harth",   nameEs: "Harth",   description: "Heart of the universe — opens the heart, compassion and unconditional love.", emoji: "💜", rarityTier: "rare",    attributes: { tradition: "Karuna", type: "Corazón", level: "Karuna I"  }, promptHints: ["harth karuna reiki heart symbol", "heart cross glyph", "unconditional love symbol", "heart universe reiki"] },
         { id: "reiki-rama",    name: "Rama",    nameEs: "Rama",    description: "Earth energy — grounds divine energy, clears negativity from the physical plane.", emoji: "🌍", rarityTier: "standard", attributes: { tradition: "Karuna", type: "Tierra",  level: "Karuna I"  }, promptHints: ["rama karuna reiki earth symbol", "grounding earth glyph", "physical plane clearing", "earth divine reiki"] },
@@ -41,7 +41,7 @@ export const REIKI_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 3, totalSeasons: 4, scheduledMonth: "2027-05", status: "upcoming",
+      seasonNumber: 3, totalSeasons: 4, scheduledMonth: "2027-07", status: "upcoming",
       nfts: [
         { id: "reiki-iava",    name: "Iava",    nameEs: "Iava",    description: "Nature healing — connects to Earth's healing forces and nature spirits.", emoji: "🌿", rarityTier: "standard", attributes: { tradition: "Tibetano", type: "Naturaleza", level: "Tibetano" }, promptHints: ["iava tibetan reiki nature symbol", "earth spirit glyph", "nature healing symbol", "earth spirits reiki"] },
         { id: "reiki-shanti",  name: "Shanti",  nameEs: "Shanti",  description: "Peace — instills deep peace in body, mind and soul. Sanskrit: peace.", emoji: "☮️", rarityTier: "rare",    attributes: { tradition: "Tibetano", type: "Paz",       level: "Tibetano" }, promptHints: ["shanti peace reiki symbol", "peace sign sacred glyph", "inner peace symbol", "shanti sanskrit peace"] },
@@ -53,7 +53,7 @@ export const REIKI_COLLECTION: Collection = {
       ],
     },
     {
-      seasonNumber: 4, totalSeasons: 4, scheduledMonth: "2027-08", status: "upcoming",
+      seasonNumber: 4, totalSeasons: 4, scheduledMonth: "2027-10", status: "upcoming",
       nfts: [
         { id: "reiki-fire-serpent", name: "Fire Serpent", nameEs: "Serpiente de Fuego", description: "Kundalini activation — awakens the sleeping serpent fire at the base.", emoji: "🐍", rarityTier: "rare",    attributes: { tradition: "Tibetano", type: "Kundalini", level: "Avanzado" }, promptHints: ["fire serpent reiki symbol", "snake spiral upward glyph", "kundalini fire awakening", "serpent energy symbol"] },
         { id: "reiki-dumo",    name: "Dumo",    nameEs: "Dumo",    description: "Tibetan master symbol — heat of transformation, the inner fire.", emoji: "🔥", rarityTier: "legendary", attributes: { tradition: "Tibetano", type: "Maestro", level: "Maestro Tibetano" }, promptHints: ["dumo tibetan master reiki symbol", "inner fire master glyph", "tibetan heat transformation", "dumo fire symbol"] },

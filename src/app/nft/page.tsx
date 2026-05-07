@@ -290,7 +290,7 @@ function ScrollCarousel({
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const RARITY_TIERS = [
-  { name: "Genesis",   color: "#FFD700", desc: "Antes de Jun 2026 — rareza máxima", supply: "~200 NFTs",   window: "Ahora mismo" },
+  { name: "Genesis",   color: "#FFD700", desc: "Antes de Ago 2026 — rareza máxima", supply: "~200 NFTs",   window: "Ahora mismo" },
   { name: "Founder",   color: "#C0C0C0", desc: "Primer mes post-lanzamiento",        supply: "~500 NFTs",   window: "Jul 2026" },
   { name: "Community", color: "#4FC3F7", desc: "Primeros 3 meses",                   supply: "~2.000 NFTs", window: "Ago–Sep 2026" },
   { name: "Standard",  color: "#81C784", desc: "Resto de la colección",               supply: "Ilimitado",   window: "Siempre" },
@@ -552,7 +552,7 @@ function GuardianCard({ g, index, lightTheme = false }: { g: typeof GUARDIANS[0]
 
         <motion.div animate={{ opacity: hovered ? 0 : 1 }} transition={{ duration: 0.3 }}
           style={{ position: "absolute", bottom: 16, textAlign: "center" }}>
-          <p style={{ fontSize: 10, color: lightTheme ? "rgba(0,0,0,0.32)" : "rgba(255,255,255,0.3)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Jun 2026</p>
+          <p style={{ fontSize: 10, color: lightTheme ? "rgba(0,0,0,0.32)" : "rgba(255,255,255,0.3)", letterSpacing: "0.12em", textTransform: "uppercase" }}>Ago 2026</p>
         </motion.div>
       </div>
 
@@ -847,7 +847,7 @@ function LegendaryCard({ item, index }: { item: LegendaryItem; index: number }) 
       {/* Status bottom */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: 10 }}>
         <span style={{ fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.18)", padding: "2px 8px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.07)" }}>
-          {isMythic ? "✦ Drop exclusivo" : "Jun 2026"}
+          {isMythic ? "✦ Drop exclusivo" : "Ago 2026"}
         </span>
       </div>
     </motion.div>
@@ -859,7 +859,7 @@ function LegendaryCard({ item, index }: { item: LegendaryItem; index: number }) 
 function Countdown() {
   const [t, setT] = useState({ d: 0, h: 0, m: 0, s: 0 });
   useEffect(() => {
-    const target = new Date("2026-06-01T00:00:00Z").getTime();
+    const target = new Date("2026-08-01T00:00:00Z").getTime();
     const tick = () => {
       const diff = Math.max(0, target - Date.now());
       setT({ d: Math.floor(diff / 86400000), h: Math.floor((diff % 86400000) / 3600000), m: Math.floor((diff % 3600000) / 60000), s: Math.floor((diff % 60000) / 1000) });
@@ -1305,7 +1305,7 @@ export default function NFTPage() {
       <section className="section-cream py-20 px-6 relative overflow-hidden">
         <div className="relative z-10 max-w-5xl mx-auto">
           <FadeIn className="text-center mb-6">
-            <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8B7355", marginBottom: 12 }}>Colección Artística · Junio 2026</span>
+            <span style={{ display: "inline-block", fontSize: 11, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8B7355", marginBottom: 12 }}>Colección Artística · Agosto 2026</span>
             <h2 className="gradient-text-gold" style={{ fontSize: "clamp(28px,5vw,44px)", fontWeight: 700, lineHeight: 1.2, marginBottom: 16 }}>
               Guardians of Consciousness
             </h2>
@@ -1382,7 +1382,7 @@ export default function NFTPage() {
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 8 }}>Acceso exclusivo</p>
               <h3 style={{ fontSize: 22, fontWeight: 700, color: "#f5f0e8", marginBottom: 10 }}>¿Cuál es tu símbolo?</h3>
               <p style={{ fontSize: 14, color: "var(--dark-muted)", marginBottom: 20, lineHeight: 1.6 }}>
-                Los holders Genesis tienen acceso prioritario a la Colección Legendaria. Compra antes de Junio 2026.
+                Los holders Genesis tienen acceso prioritario a la Colección Legendaria. Compra antes de Agosto 2026.
               </p>
               <a href="https://omdomo.com" target="_blank" rel="noopener noreferrer"
                 style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "13px 28px", borderRadius: 14, background: "linear-gradient(135deg,#FFD700,#d97706)", color: "#000", fontWeight: 700, fontSize: 15, textDecoration: "none", boxShadow: "0 4px 20px rgba(255,215,0,0.35)" }}>

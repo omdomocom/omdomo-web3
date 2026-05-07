@@ -54,7 +54,7 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
     id: "c1", userId: "u1", unread: 2,
     messages: [
       { id: "m1", fromMe: false, content: "¡Hola! ¿Cuándo sale exactamente el Drop #1?", time: "10:32", timestamp: Date.now() - 600000 },
-      { id: "m2", fromMe: true,  content: "¡Hola SolGuardian! El Drop #1 Genesis Hoodie es el 15 de Junio 2026 🔥", time: "10:35", timestamp: Date.now() - 300000 },
+      { id: "m2", fromMe: true,  content: "¡Hola SolGuardian! El Drop #1 Genesis Hoodie es el 15 de Agosto 2026 🔥", time: "10:35", timestamp: Date.now() - 300000 },
       { id: "m3", fromMe: false, content: "¡Perfecto! ¿Tienes código de referido?", time: "10:40", timestamp: Date.now() - 60000 },
     ],
   },
