@@ -177,31 +177,176 @@ function DAppPanel() {
 function SobreNosotrosPanel() {
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Hero */}
-      <div className="glass rounded-3xl p-8 border border-purple-500/20 relative overflow-hidden">
+
+      {/* ── Hero ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="glass rounded-3xl p-8 border border-purple-500/20 relative overflow-hidden"
+      >
+        {/* barra superior degradada */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-cyan-400 to-purple-500 rounded-t-3xl" />
-        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-purple-600/10 blur-3xl pointer-events-none" />
+        {/* globo de luz fondo */}
+        <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-purple-600/10 blur-3xl pointer-events-none" />
+        <div className="absolute -left-10 -bottom-10 w-48 h-48 rounded-full bg-cyan-500/08 blur-2xl pointer-events-none" />
+
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center text-2xl">
+          <div className="flex items-center gap-3 mb-5">
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center text-2xl shadow-lg shadow-purple-600/30"
+            >
               ☯️
-            </div>
+            </motion.div>
             <div>
               <h1 className="text-xl font-black text-slate-100">Om Domo</h1>
               <p className="text-xs text-slate-500">Spiritual Web3 Lifestyle · Avalanche</p>
             </div>
           </div>
-          <p className="text-sm text-slate-300 leading-relaxed">
-            Om Domo es el primer ecosistema <strong className="text-purple-300">Spiritual Web3 Lifestyle</strong> de Europa.
-            Unimos ropa consciente, tecnología blockchain y comunidad para crear un nuevo modelo donde
-            cada compra tiene significado y recompensa.
-          </p>
-        </div>
-      </div>
 
-      {/* Misión + Visión */}
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div className="glass rounded-2xl p-6 border border-purple-500/15">
+          <p className="text-sm text-slate-300 leading-relaxed mb-4">
+            Om Domo es el primer ecosistema en el que unimos{" "}
+            <span className="text-purple-300 font-semibold">ropa consciente</span>,{" "}
+            <span className="text-cyan-300 font-semibold">tecnología blockchain</span> y{" "}
+            <span className="text-amber-300 font-semibold">comunidad</span> para crear
+            un nuevo modelo donde cada compra tiene significado y recompensas por cada acción.
+          </p>
+
+          {/* Estadísticas rápidas */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Países actuales", value: "2", icon: "📍" },
+              { label: "Comunidad 2028",  value: "55K+", icon: "🌍" },
+              { label: "Token",           value: "OMMY",  icon: "🪙" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl bg-white/[0.04] border border-white/[0.06] px-3 py-2 text-center">
+                <p className="text-lg">{s.icon}</p>
+                <p className="text-sm font-black text-slate-100">{s.value}</p>
+                <p className="text-[10px] text-slate-600">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── Ubicaciones actuales ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="glass rounded-2xl p-6 border border-cyan-500/15 relative overflow-hidden"
+      >
+        <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-cyan-500/06 blur-2xl pointer-events-none" />
+        <h3 className="text-sm font-bold text-slate-100 mb-1 flex items-center gap-2">
+          <span>📍</span> Dónde estamos
+        </h3>
+        <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+          Actualmente entregamos productos de alta calidad de forma consciente y sostenible
+          en dos ciudades, con la mirada puesta en el mundo entero.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[
+            {
+              flag: "🇪🇸",
+              city: "Barcelona",
+              country: "España",
+              desc: "Hub principal. Centro de diseño, logística y operaciones de Om Domo en Europa.",
+              color: "border-yellow-500/20 bg-yellow-500/04",
+              accent: "text-yellow-300",
+            },
+            {
+              flag: "🇨🇱",
+              city: "Iquique",
+              country: "Chile",
+              desc: "Nuestras raíces en Sudamérica. Comunidad local consciente y distribución regional.",
+              color: "border-red-500/20 bg-red-500/04",
+              accent: "text-red-300",
+            },
+          ].map((loc) => (
+            <motion.div
+              key={loc.city}
+              whileHover={{ y: -3, scale: 1.01 }}
+              transition={{ duration: 0.2 }}
+              className={`rounded-2xl p-4 border ${loc.color} relative overflow-hidden`}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-3xl">{loc.flag}</span>
+                <div>
+                  <p className="text-sm font-black text-slate-100">{loc.city}</p>
+                  <p className={`text-xs font-semibold ${loc.accent}`}>{loc.country}</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">{loc.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* ── Expansión Web3 global ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="glass rounded-2xl p-6 border border-purple-500/15 relative overflow-hidden"
+      >
+        <div className="absolute -left-10 -top-10 w-52 h-52 rounded-full bg-purple-600/08 blur-3xl pointer-events-none" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <motion.span
+              animate={{ scale: [1, 1.12, 1] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="text-3xl"
+            >
+              🌐
+            </motion.span>
+            <div>
+              <h3 className="text-sm font-bold text-slate-100">Expansión global vía Web3</h3>
+              <p className="text-xs text-slate-500">Sin fronteras — en todas partes del mundo</p>
+            </div>
+          </div>
+          <p className="text-xs text-slate-400 leading-relaxed mb-4">
+            La tecnología Web3 nos permite llegar a todas partes del mundo, expandiéndonos
+            e integrando a todas las personas comprometidas con el propósito. Estamos
+            construyendo una comunidad que <span className="text-purple-300 font-semibold">retribuye a sus participantes</span> con{" "}
+            <span className="text-amber-300 font-semibold">Ommy Coin</span> por cada acción consciente.
+          </p>
+          {/* Progresión numérica */}
+          <div className="space-y-2">
+            {[
+              { label: "Beta Comunidad", pct: 8,  val: "200",    date: "2025", color: "bg-green-400" },
+              { label: "Lanzamiento",    pct: 20,  val: "2,000",  date: "Ago 2026", color: "bg-purple-400" },
+              { label: "Crecimiento",    pct: 45,  val: "12,000", date: "2027", color: "bg-cyan-400" },
+              { label: "Escala global",  pct: 100, val: "55,000", date: "2028", color: "bg-amber-400" },
+            ].map((row) => (
+              <div key={row.label} className="flex items-center gap-3">
+                <p className="text-[10px] text-slate-500 w-24 flex-shrink-0">{row.label}</p>
+                <div className="flex-1 h-1.5 rounded-full bg-slate-800/60 overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${row.pct}%` }}
+                    transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+                    className={`h-full rounded-full ${row.color}`}
+                  />
+                </div>
+                <p className="text-[10px] font-bold text-slate-400 w-14 text-right flex-shrink-0">{row.val}</p>
+                <p className="text-[10px] text-slate-600 w-16 flex-shrink-0">{row.date}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── Misión + Visión ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="grid sm:grid-cols-2 gap-4"
+      >
+        <div className="glass rounded-2xl p-6 border border-purple-500/15 relative overflow-hidden">
+          <div className="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-purple-600/06 blur-2xl pointer-events-none" />
           <div className="text-3xl mb-3">🎯</div>
           <h3 className="text-sm font-bold text-slate-100 mb-2">Nuestra Misión</h3>
           <p className="text-xs text-slate-400 leading-relaxed">
@@ -210,67 +355,69 @@ function SobreNosotrosPanel() {
             a una comunidad que comparte valores de bienestar, sostenibilidad y crecimiento personal.
           </p>
         </div>
-        <div className="glass rounded-2xl p-6 border border-cyan-500/15">
+        <div className="glass rounded-2xl p-6 border border-cyan-500/15 relative overflow-hidden">
+          <div className="absolute -left-6 -bottom-6 w-32 h-32 rounded-full bg-cyan-500/06 blur-2xl pointer-events-none" />
           <div className="text-3xl mb-3">🌍</div>
           <h3 className="text-sm font-bold text-slate-100 mb-2">Nuestra Visión</h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Ser la comunidad de referencia en Europa donde el estilo de vida consciente
+            Ser la comunidad de referencia donde el estilo de vida consciente
             y la tecnología blockchain se fusionan. Para 2028, una comunidad de más de
             55,000 personas en 4 países con su propio ecosistema económico autónomo.
           </p>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Valores */}
-      <div className="glass rounded-2xl p-6 border border-slate-700/30">
+      {/* ── Valores ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.35 }}
+        className="glass rounded-2xl p-6 border border-slate-700/30"
+      >
         <h3 className="text-sm font-bold text-slate-100 mb-4 flex items-center gap-2">
           <Heart size={15} className="text-pink-400" /> Nuestros valores
         </h3>
         <div className="grid sm:grid-cols-3 gap-3">
           {[
-            { icon: "🧘", title: "Conciencia",      desc: "Cada decisión empresarial parte de la intención y el impacto positivo." },
-            { icon: "🌱", title: "Sostenibilidad",  desc: "Materiales responsables, quema de tokens programada, comunidad sostenible." },
-            { icon: "🤝", title: "Comunidad",       desc: "El 60% del supply está dedicado a la comunidad y al ecosistema." },
+            { icon: "🧘", title: "Conciencia",      desc: "Cada decisión parte de la intención y el impacto positivo." },
+            { icon: "🌱", title: "Sostenibilidad",  desc: "Materiales responsables, quema de tokens programada." },
+            { icon: "🤝", title: "Comunidad",       desc: "El 60% del supply dedicado a la comunidad y el ecosistema." },
             { icon: "🔓", title: "Transparencia",   desc: "Tokenomics públicas, wallets verificables, roadmap abierto." },
-            { icon: "⚡", title: "Innovación",      desc: "Lululemon + STEPN + DAO espiritual: un modelo nuevo en Europa." },
+            { icon: "⚡", title: "Innovación",      desc: "Lululemon + STEPN + DAO espiritual: un modelo nuevo en el mundo." },
             { icon: "🏆", title: "Recompensa",      desc: "Cada acción consciente —comprar, meditar, correr— tiene recompensa real." },
-          ].map((v) => (
-            <div key={v.title} className="flex gap-3 items-start p-3 rounded-xl bg-slate-900/30">
+          ].map((v, i) => (
+            <motion.div
+              key={v.title}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.4 + i * 0.07 }}
+              whileHover={{ y: -2, scale: 1.02 }}
+              className="flex gap-3 items-start p-3 rounded-xl bg-slate-900/30 hover:bg-slate-800/30 transition-colors cursor-default"
+            >
               <span className="text-xl flex-shrink-0">{v.icon}</span>
               <div>
                 <p className="text-xs font-bold text-slate-200">{v.title}</p>
                 <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{v.desc}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      {/* El proyecto */}
-      <div className="glass rounded-2xl p-6 border border-slate-700/30 space-y-4">
-        <h3 className="text-sm font-bold text-slate-100">El proyecto</h3>
+      {/* ── El proyecto ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="glass rounded-2xl p-6 border border-slate-700/30 space-y-4"
+      >
+        <h3 className="text-sm font-bold text-slate-100">El ecosistema</h3>
         <div className="space-y-3">
           {[
-            {
-              icon: "🛍️",
-              title: "omdomo.com — Tienda física + online",
-              desc: "Colecciones de ropa que combinan estética minimalista con materiales sostenibles. Cada prenda incluye un código QR que activa tu recompensa Web3.",
-            },
-            {
-              icon: "🪙",
-              title: "OMMY Coin — Token en Avalanche",
-              desc: "ERC-20 desplegado en Avalanche Mainnet. Supply de 29,979M tokens con mecánica deflacionaria: objetivo reducir el 70% del supply en 7-8 años.",
-            },
-            {
-              icon: "🖼️",
-              title: "NFTs — Certificados de pertenencia",
-              desc: "Cada compra genera un NFT único en Avalanche. La rareza depende de cuándo compras: Genesis (antes del lanzamiento) es la máxima rareza.",
-            },
-            {
-              icon: "🏛️",
-              title: "DAO — Gobernanza comunitaria",
-              desc: "La comunidad vota sobre nuevos diseños, drops y uso del Treasury. Tus NFTs y OMMY COIN en staking son tu poder de voto.",
-            },
+            { icon: "🛍️", title: "omdomo.com — Tienda física + online", desc: "Ropa que combina estética minimalista con materiales sostenibles. Cada prenda activa tu recompensa Web3." },
+            { icon: "🪙", title: "OMMY Coin — Token en Avalanche",       desc: "ERC-20 en Avalanche Mainnet. 29,979M tokens con mecánica deflacionaria: objetivo quemar el 70% en 7-8 años." },
+            { icon: "🖼️", title: "NFTs — Certificados de pertenencia",   desc: "Cada compra genera un NFT único. La rareza depende de cuándo compras: Genesis es la máxima rareza." },
+            { icon: "🏛️", title: "DAO — Gobernanza comunitaria",          desc: "La comunidad vota sobre diseños, drops y el Treasury. Tus NFTs y OMMY COIN son tu poder de voto." },
           ].map((item) => (
             <div key={item.title} className="flex gap-3 items-start">
               <span className="text-xl flex-shrink-0 mt-0.5">{item.icon}</span>
@@ -281,18 +428,23 @@ function SobreNosotrosPanel() {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      {/* Roadmap resumen */}
-      <div className="glass rounded-2xl p-6 border border-slate-700/30">
+      {/* ── Roadmap ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.45 }}
+        className="glass rounded-2xl p-6 border border-slate-700/30"
+      >
         <h3 className="text-sm font-bold text-slate-100 mb-4">Roadmap</h3>
         <div className="space-y-3">
           {[
-            { fase: "1", nombre: "Motor de Ventas",              fecha: "Ago 2026", estado: "ACTIVA",    color: "border-green-500/50 text-green-400" },
-            { fase: "2", nombre: "Economía Ommy Coin",           fecha: "Sep 2026", estado: "Pendiente", color: "border-slate-700/40 text-slate-500" },
+            { fase: "1", nombre: "Motor de Ventas",                fecha: "Ago 2026", estado: "ACTIVA",    color: "border-green-500/50 text-green-400" },
+            { fase: "2", nombre: "Economía Ommy Coin",             fecha: "Sep 2026", estado: "Próxima",   color: "border-purple-500/30 text-purple-400" },
             { fase: "3", nombre: "App Proof of Conscious Activity", fecha: "Ene 2027", estado: "Pendiente", color: "border-slate-700/40 text-slate-500" },
-            { fase: "4", nombre: "Comunidad DAO",                fecha: "Jun 2027", estado: "Pendiente", color: "border-slate-700/40 text-slate-500" },
-            { fase: "5", nombre: "Ommy Lab",                     fecha: "2028+",    estado: "Pendiente", color: "border-slate-700/40 text-slate-500" },
+            { fase: "4", nombre: "Comunidad DAO",                   fecha: "Jun 2027", estado: "Pendiente", color: "border-slate-700/40 text-slate-500" },
+            { fase: "5", nombre: "Ommy Lab",                        fecha: "2028+",    estado: "Pendiente", color: "border-slate-700/40 text-slate-500" },
           ].map((f) => (
             <div key={f.fase} className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${f.color} ${f.estado === "ACTIVA" ? "bg-green-900/10" : ""}`}>
               <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black text-slate-400">{f.fase}</div>
@@ -304,31 +456,38 @@ function SobreNosotrosPanel() {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      {/* Redes */}
-      <div className="glass rounded-2xl p-4 border border-slate-700/30">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Comunidad</h3>
+      {/* ── Comunidad ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+        className="glass rounded-2xl p-4 border border-slate-700/30"
+      >
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Únete a la comunidad</h3>
         <div className="flex flex-wrap gap-2">
           {[
-            { label: "Discord",    href: "https://discord.gg/xXezFXnpaX", icon: "💬" },
-            { label: "Instagram",  href: "https://www.instagram.com/om.domo/", icon: "📸" },
-            { label: "TikTok",    href: "https://www.tiktok.com/@omdomo.com", icon: "🎵" },
-            { label: "X/Twitter", href: "https://twitter.com/omdomocom", icon: "𝕏" },
-            { label: "YouTube",   href: "https://www.youtube.com/@omdomocom", icon: "▶️" },
+            { label: "Discord",    href: "https://discord.gg/xXezFXnpaX",          icon: "💬" },
+            { label: "Instagram",  href: "https://www.instagram.com/om.domo/",      icon: "📸" },
+            { label: "TikTok",    href: "https://www.tiktok.com/@omdomo.com",       icon: "🎵" },
+            { label: "X/Twitter", href: "https://twitter.com/omdomocom",            icon: "𝕏" },
+            { label: "YouTube",   href: "https://www.youtube.com/@omdomocom",       icon: "▶️" },
           ].map((s) => (
-            <a
+            <motion.a
               key={s.label}
               href={s.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-700/40 text-xs text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-all"
+              whileHover={{ scale: 1.05, y: -2 }}
+              transition={{ duration: 0.15 }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-700/40 text-xs text-slate-400 hover:text-slate-200 hover:border-purple-500/40 hover:bg-purple-500/05 transition-colors"
             >
               {s.icon} {s.label}
-            </a>
+            </motion.a>
           ))}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -588,7 +747,13 @@ export function Dashboard() {
 
             {/* Logo */}
             <a href="/" className="flex items-center gap-2 flex-shrink-0">
-              <NextImage src="/logo-blanco.png" alt="Om Domo" width={28} height={28} className="object-contain" />
+              <NextImage
+                src={lightMode ? "/logo-negro.png" : "/logo-blanco.png"}
+                alt="Om Domo"
+                width={28}
+                height={28}
+                className="object-contain"
+              />
               <span className="font-black text-sm gradient-text hidden sm:block">Om Domo</span>
             </a>
 

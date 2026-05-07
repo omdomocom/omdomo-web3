@@ -67,6 +67,7 @@ const EMOJI_AVATARS = ["🧘", "🦁", "🌟", "🔮", "🌊", "🦋", "⚡", "�
 
 export interface UserProfile {
   username: string;
+  usernameColor: string;
   bio: string;
   avatar: string;
   avatarType: "emoji" | "image";
@@ -79,8 +80,21 @@ export interface UserProfile {
   zodiacClaimed: boolean;
 }
 
+export const USERNAME_COLORS: { label: string; value: string; preview: string }[] = [
+  { label: "Blanco",    value: "#f1f5f9",  preview: "bg-slate-100" },
+  { label: "Púrpura",  value: "#a78bfa",  preview: "bg-violet-400" },
+  { label: "Cyan",     value: "#22d3ee",  preview: "bg-cyan-400" },
+  { label: "Dorado",   value: "#fbbf24",  preview: "bg-amber-400" },
+  { label: "Rosa",     value: "#f472b6",  preview: "bg-pink-400" },
+  { label: "Verde",    value: "#4ade80",  preview: "bg-green-400" },
+  { label: "Coral",    value: "#fb7185",  preview: "bg-rose-400" },
+  { label: "Naranja",  value: "#fb923c",  preview: "bg-orange-400" },
+  { label: "Negro",    value: "#1e293b",  preview: "bg-slate-800" },
+];
+
 export const DEFAULT_PROFILE: UserProfile = {
   username: "",
+  usernameColor: "#f1f5f9",
   bio: "",
   avatar: "🧘",
   avatarType: "emoji",
@@ -247,7 +261,12 @@ export function ProfilePanel({
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
 
         <div>
-          <p className="text-base font-bold text-slate-100">{displayName}</p>
+          <p
+            className="text-base font-bold"
+            style={{ color: profile.usernameColor || "#f1f5f9" }}
+          >
+            {displayName}
+          </p>
           {profile.bio && <p className="text-xs text-slate-500 mt-1 leading-relaxed">{profile.bio}</p>}
           <div className="flex flex-wrap justify-center gap-2 mt-2">
             {walletAddress && (
@@ -332,8 +351,32 @@ export function ProfilePanel({
                   onChange={(e) => setDraft((d) => ({ ...d, username: e.target.value }))}
                   placeholder="Tu nombre en la comunidad"
                   maxLength={30}
-                  className="w-full bg-slate-800/60 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 border border-slate-700/40 focus:border-purple-500/50 focus:outline-none"
+                  className="w-full bg-slate-800/60 rounded-lg px-3 py-2 text-sm placeholder-slate-600 border border-slate-700/40 focus:border-purple-500/50 focus:outline-none"
+                  style={{ color: draft.usernameColor || "#f1f5f9" }}
                 />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-2 block">Color del nombre</label>
+                <div className="flex flex-wrap gap-2">
+                  {USERNAME_COLORS.map((c) => (
+                    <button
+                      key={c.value}
+                      title={c.label}
+                      onClick={() => setDraft((d) => ({ ...d, usernameColor: c.value }))}
+                      className={`w-7 h-7 rounded-full border-2 transition-all ${c.preview} ${
+                        draft.usernameColor === c.value
+                          ? "border-white scale-110 shadow-md"
+                          : "border-transparent hover:scale-105"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-slate-700 mt-1">
+                  Vista previa:{" "}
+                  <span className="font-semibold" style={{ color: draft.usernameColor || "#f1f5f9" }}>
+                    {draft.username || "Tu nombre"}
+                  </span>
+                </p>
               </div>
               <div>
                 <label className="text-xs text-slate-500 mb-1 block">Bio <span className="text-slate-700">({draft.bio.length}/100)</span></label>

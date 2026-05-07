@@ -76,7 +76,7 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
 // ─── Avatar adaptador ──────────────────────────────────────────────────
 function CommunityAvatar({ user, size = "sm" }: { user: typeof COMMUNITY_USERS[0]; size?: "sm" | "md" }) {
   const fakeProfile: UserProfile = {
-    username: user.name, bio: "", avatar: user.avatar,
+    username: user.name, usernameColor: "#f1f5f9", bio: "", avatar: user.avatar,
     avatarType: user.avatarType, bgTheme: "space", joinDate: "",
     email: "", birthday: "", gender: "", profileRewardClaimed: false, zodiacClaimed: false,
   };
@@ -469,7 +469,7 @@ export function CommunityPanel() {
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
   const [openConvId, setOpenConvId] = useState<string | null>(null);
   const [myProfile, setMyProfile] = useState<UserProfile>({
-    username: "", bio: "", avatar: "🧘", avatarType: "emoji", bgTheme: "space", joinDate: "",
+    username: "", usernameColor: "#f1f5f9", bio: "", avatar: "🧘", avatarType: "emoji", bgTheme: "space", joinDate: "",
     email: "", birthday: "", gender: "", profileRewardClaimed: false, zodiacClaimed: false,
   });
 
