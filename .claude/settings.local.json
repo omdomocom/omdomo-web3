@@ -63,7 +63,8 @@
       "Bash(sed -i '' 's/Junio 2026/Agosto 2026/g' /Users/carleone/Desktop/web3/CLAUDE.md)",
       "Bash(sed -i '' 's/Jul 2026/Sep 2026/g' /Users/carleone/Desktop/web3/CLAUDE.md)",
       "Bash(sed -i '' 's/lock→21 Dic 2026/lock→21 Feb 2027/g' /Users/carleone/Desktop/web3/CLAUDE.md)",
-      "Bash(sed -i '' 's/Pre-compra \\(lock→21Dic\\)/Pre-compra \\(lock→21Feb\\)/g' /Users/carleone/Desktop/web3/CLAUDE.md)"
+      "Bash(sed -i '' 's/Pre-compra \\(lock→21Dic\\)/Pre-compra \\(lock→21Feb\\)/g' /Users/carleone/Desktop/web3/CLAUDE.md)",
+      "Read(//Users/carleone/Desktop/Omdomo/marketing/**)"
     ]
   }
 }
