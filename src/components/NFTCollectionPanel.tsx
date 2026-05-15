@@ -19,8 +19,8 @@ import type { NFT } from "thirdweb";
 import { loadProfile } from "./ProfilePanel";
 
 // ─── Tipos ──────────────────────────────────────────────────────────────────
-type Rarity = "Genesis" | "Founder" | "Community" | "Standard";
-type NFTCategory = "drop" | "zodiac";
+type Rarity = "Genesis" | "Founder" | "Community" | "Standard" | "Rare" | "Legendary";
+type NFTCategory = "drop" | "zodiac" | "dias" | "chakra";
 
 interface CatalogNFT {
   id: string;
@@ -75,6 +75,44 @@ const RARITY_STYLES: Record<Rarity, {
     gradientText: "from-slate-300 to-slate-400",
     fullBg: "from-slate-800/60 to-slate-700/60",
   },
+  Rare: {
+    border: "border-orange-400/60",
+    bg: "from-orange-900/30 to-amber-900/30",
+    badge: "bg-orange-400/20 text-orange-300 border border-orange-400/30",
+    glow: "shadow-orange-500/30",
+    gradientText: "from-orange-300 to-amber-300",
+    fullBg: "from-orange-900/60 to-amber-900/60",
+  },
+  Legendary: {
+    border: "border-yellow-300/70",
+    bg: "from-yellow-900/40 to-cyan-900/30",
+    badge: "bg-yellow-300/20 text-yellow-200 border border-yellow-300/40",
+    glow: "shadow-yellow-400/40",
+    gradientText: "from-yellow-200 to-cyan-300",
+    fullBg: "from-yellow-900/70 to-cyan-900/50",
+  },
+};
+
+// ─── Colores por Rayo (Días de la Semana) ───────────────────────────────────
+const RAYO_COLORS: Record<string, { from: string; to: string; glow: string }> = {
+  "Rayo Amarillo-Dorado": { from: "from-yellow-900/60", to: "to-amber-900/60",   glow: "shadow-yellow-500/40" },
+  "Rayo Rosa":            { from: "from-pink-900/60",   to: "to-rose-900/60",    glow: "shadow-pink-500/40"   },
+  "Rayo Blanco":          { from: "from-slate-700/50",  to: "to-slate-600/50",   glow: "shadow-slate-300/20"  },
+  "Rayo Verde":           { from: "from-green-900/60",  to: "to-emerald-900/60", glow: "shadow-green-500/40"  },
+  "Rayo Oro-Rubí-Naranja":{ from: "from-orange-900/60", to: "to-red-900/60",     glow: "shadow-orange-500/40" },
+  "Rayo Violeta":         { from: "from-violet-900/60", to: "to-purple-900/60",  glow: "shadow-violet-500/40" },
+  "Rayo Azul":            { from: "from-blue-900/70",   to: "to-cyan-900/60",    glow: "shadow-blue-500/50"   },
+};
+
+// ─── Colores por Chakra ──────────────────────────────────────────────────────
+const CHAKRA_COLORS: Record<string, { from: string; to: string; glow: string }> = {
+  "Rojo":            { from: "from-red-900/60",    to: "to-rose-900/60",    glow: "shadow-red-500/40"    },
+  "Naranja":         { from: "from-orange-900/60", to: "to-amber-900/60",   glow: "shadow-orange-500/40" },
+  "Amarillo":        { from: "from-yellow-900/60", to: "to-amber-900/60",   glow: "shadow-yellow-500/40" },
+  "Verde":           { from: "from-green-900/60",  to: "to-emerald-900/60", glow: "shadow-green-500/40"  },
+  "Azul":            { from: "from-blue-900/60",   to: "to-cyan-900/60",    glow: "shadow-blue-500/40"   },
+  "Índigo":          { from: "from-indigo-900/60", to: "to-violet-900/60",  glow: "shadow-indigo-500/40" },
+  "Violeta / Blanco":{ from: "from-purple-900/70", to: "to-violet-900/60",  glow: "shadow-purple-500/50" },
 };
 
 // ─── Colores por elemento zodiacal ──────────────────────────────────────────
@@ -104,10 +142,28 @@ const NFT_CATALOG: CatalogNFT[] = [
   { id: "zodiac-capricornio", name: "Capricornio", rarity: "Genesis", tokenId: "10", category: "zodiac", emoji: "♑", image: "/nft-assets/10.gif", element: "Tierra", ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Capricornio", ommyReward: 1000 },
   { id: "zodiac-acuario",     name: "Acuario",     rarity: "Genesis", tokenId: "11", category: "zodiac", emoji: "♒", image: "/nft-assets/11.gif", element: "Aire",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Acuario",     ommyReward: 1000 },
   { id: "zodiac-piscis",      name: "Piscis",      rarity: "Genesis", tokenId: "12", category: "zodiac", emoji: "♓", image: "/nft-assets/12.gif", element: "Agua",   ommyPrice: 500, claimUrl: "/claim-zodiac?zodiac=Piscis",      ommyReward: 1000 },
+  // ── Días de la Semana ──
+  { id: "dias-lunes",     name: "Lunes · Jofiel",    rarity: "Standard",  tokenId: "13", category: "dias", emoji: "☀️", image: "ipfs://QmYoa6YrehBKzJPep4T1D5i9mbCYfPp3RvtNA3cqtkAEeh",  ommyPrice: null, ommyReward: 500,  element: "Rayo Amarillo-Dorado",   lockDate: "Oct 2026" },
+  { id: "dias-martes",    name: "Martes · Chamuel",  rarity: "Standard",  tokenId: "14", category: "dias", emoji: "🌸", image: "ipfs://QmfUx8ccabiQabWhSzKAA1CjWgkCtWVWy8tv6UTuEoanPb",  ommyPrice: null, ommyReward: 500,  element: "Rayo Rosa",              lockDate: "Oct 2026" },
+  { id: "dias-miercoles", name: "Miércoles · Gabriel",rarity: "Standard", tokenId: "15", category: "dias", emoji: "🤍", image: "ipfs://QmdyTNrmNu3xe9CWZT3wKjk17dDecbax2Pefa97bDrGCLY",  ommyPrice: null, ommyReward: 500,  element: "Rayo Blanco",            lockDate: "Oct 2026" },
+  { id: "dias-jueves",    name: "Jueves · Rafael",   rarity: "Rare",      tokenId: "16", category: "dias", emoji: "🍃", image: "ipfs://Qmbozb86Mkspg7xdfaTQit8mNHPxo129wYd8VV71WyNAKK",  ommyPrice: null, ommyReward: 1500, element: "Rayo Verde",             lockDate: "Oct 2026" },
+  { id: "dias-viernes",   name: "Viernes · Uriel",   rarity: "Rare",      tokenId: "17", category: "dias", emoji: "💛", image: "ipfs://QmSxoBghRUuiamv6TggsujpsRAcZeFwiAurE91Uwk5F3ve",  ommyPrice: null, ommyReward: 1500, element: "Rayo Oro-Rubí-Naranja",  lockDate: "Oct 2026" },
+  { id: "dias-sabado",    name: "Sábado · Zadkiel",  rarity: "Rare",      tokenId: "18", category: "dias", emoji: "🔮", image: "ipfs://QmZDzRu2PApFpcEfoCGgN6BzNnEMbgZ5iaaQvVVDoeYvt2",  ommyPrice: null, ommyReward: 1500, element: "Rayo Violeta",           lockDate: "Oct 2026" },
+  { id: "dias-domingo",   name: "Domingo · Miguel",  rarity: "Legendary", tokenId: "19", category: "dias", emoji: "⚡", image: "ipfs://QmYEUkVHbjK1owZmGYenWF89o69xGxjvfKpTuqwmegZ4BF",  ommyPrice: null, ommyReward: 5000, element: "Rayo Azul",              lockDate: "Oct 2026" },
+  // ── Chakras ──
+  { id: "chakra-muladhara",    name: "Muladhara",    rarity: "Standard",  tokenId: "20", category: "chakra", emoji: "🔴", image: "ipfs://QmQhurqhQ6YrGxtinGvDnvYYRHwedfy5oNnJmxf3P2qrZf", ommyPrice: null, ommyReward: 500,  element: "Rojo",             lockDate: "Sep 2026" },
+  { id: "chakra-svadhisthana", name: "Svadhisthana", rarity: "Standard",  tokenId: "21", category: "chakra", emoji: "🟠", image: "ipfs://QmSxWUBmAqUrTh2VpMUg47yHXoUVyaLqFoeebJgJUgoqWi", ommyPrice: null, ommyReward: 500,  element: "Naranja",          lockDate: "Sep 2026" },
+  { id: "chakra-manipura",     name: "Manipura",     rarity: "Standard",  tokenId: "22", category: "chakra", emoji: "🟡", image: "ipfs://QmP6KDkHU1FqPWmsX6wn3FKc1yujEuLiJKkHd72uGzHrv6", ommyPrice: null, ommyReward: 500,  element: "Amarillo",         lockDate: "Sep 2026" },
+  { id: "chakra-anahata",      name: "Anahata",      rarity: "Rare",      tokenId: "23", category: "chakra", emoji: "💚", image: "ipfs://QmThfSyF1NocDT8vSLdXgybDzshxQH7mu3osxWfzkeqPJe", ommyPrice: null, ommyReward: 1500, element: "Verde",            lockDate: "Sep 2026" },
+  { id: "chakra-vishuddha",    name: "Vishuddha",    rarity: "Standard",  tokenId: "24", category: "chakra", emoji: "💙", image: "ipfs://QmcsuCZPsp1tHSnpkA73b4CndBc4tXDMUnzWYe3KL4v7md", ommyPrice: null, ommyReward: 500,  element: "Azul",             lockDate: "Sep 2026" },
+  { id: "chakra-ajna",         name: "Ajna",         rarity: "Rare",      tokenId: "25", category: "chakra", emoji: "👁", image: "ipfs://QmSgzzW5VqpV7DxkAg9crxw3LC5TTxrB8MLBizPV6a37Hg",  ommyPrice: null, ommyReward: 1500, element: "Índigo",           lockDate: "Sep 2026" },
+  { id: "chakra-sahasrara",    name: "Sahasrara",    rarity: "Legendary", tokenId: "26", category: "chakra", emoji: "👑", image: "ipfs://QmV4EWPQJTyS7D2TDkN9xZMYenbC3jYbK27vBt2bTvk5Ng",  ommyPrice: null, ommyReward: 5000, element: "Violeta / Blanco", lockDate: "Sep 2026" },
 ];
 
 const ZODIAC_NFTS = NFT_CATALOG.filter((n) => n.category === "zodiac");
 const DROP_NFTS   = NFT_CATALOG.filter((n) => n.category === "drop");
+const DIAS_NFTS   = NFT_CATALOG.filter((n) => n.category === "dias");
+const CHAKRA_NFTS = NFT_CATALOG.filter((n) => n.category === "chakra");
 
 // ─── Helper: calcular signo desde birthday ───────────────────────────────────
 function getZodiacIdFromBirthday(birthday: string): string | null {
@@ -328,6 +384,72 @@ function DropCard({ nft, isOwned }: { nft: CatalogNFT; isOwned: boolean }) {
   );
 }
 
+// ─── Card genérica para Días y Chakras ──────────────────────────────────────
+function CollectionNFTCard({
+  nft,
+  colorMap,
+  isOwned,
+}: {
+  nft: CatalogNFT;
+  colorMap: Record<string, { from: string; to: string; glow: string }>;
+  isOwned: boolean;
+}) {
+  const style = RARITY_STYLES[nft.rarity];
+  const color = nft.element ? colorMap[nft.element] : null;
+  const imgSrc = nft.image.startsWith("ipfs://")
+    ? nft.image.replace("ipfs://", "https://ipfs.io/ipfs/")
+    : nft.image;
+
+  return (
+    <motion.div
+      whileHover={{ y: -3, scale: 1.03 }}
+      transition={{ duration: 0.18 }}
+      className={`group relative rounded-xl border overflow-hidden shadow-md transition-all duration-300
+        ${isOwned ? style.border : "border-slate-700/30"}
+        ${color ? color.glow : style.glow}
+      `}
+    >
+      {/* Imagen */}
+      <div className="aspect-square relative overflow-hidden bg-slate-900/60">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imgSrc}
+          alt={nft.name}
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-300
+            ${isOwned ? "" : "opacity-50 group-hover:opacity-100 grayscale group-hover:grayscale-0"}`}
+        />
+        {/* overlay de color en hover */}
+        {!isOwned && color && (
+          <div className={`absolute inset-0 bg-gradient-to-br ${color.from} ${color.to} opacity-0 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none`} />
+        )}
+        {/* badges */}
+        <div className="absolute top-1 left-1 right-1 flex items-center justify-between z-20">
+          <span className={`px-1 py-0.5 rounded-full text-[9px] font-bold ${style.badge}`}>
+            {nft.rarity}
+          </span>
+          {isOwned && (
+            <span className="px-1 py-0.5 rounded-full text-[9px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-0.5">
+              <Check size={7} /> Tuyo
+            </span>
+          )}
+        </div>
+      </div>
+      {/* Footer */}
+      <div className={`p-2 transition-opacity duration-300 ${isOwned ? "" : "opacity-60 group-hover:opacity-100"}`}>
+        <p className="text-[11px] font-bold text-slate-200 truncate">{nft.name}</p>
+        <div className="flex items-center justify-between mt-0.5">
+          <p className="text-[9px] text-slate-500">#{nft.tokenId}</p>
+          {nft.lockDate && (
+            <span className="text-[9px] text-slate-500 flex items-center gap-0.5">
+              <Lock size={7} /> {nft.lockDate}
+            </span>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // ─── Helper: IPFS → HTTP gateway ─────────────────────────────────────────────
 function ipfsToHttp(url?: string): string | undefined {
   if (!url) return undefined;
@@ -481,6 +603,24 @@ export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
       gradient: "from-yellow-600 to-orange-600",
       badgeText: null,
       nftCount: 1,
+    },
+    {
+      id: "dias",
+      name: "Días de la Semana",
+      description: "7 NFTs · Arcángeles · Rayos Divinos",
+      active: true,
+      gradient: "from-blue-600 to-violet-600",
+      badgeText: null,
+      nftCount: 7,
+    },
+    {
+      id: "chakras",
+      name: "Chakras",
+      description: "7 NFTs animados · 396–963 Hz",
+      active: true,
+      gradient: "from-red-600 to-purple-600",
+      badgeText: null,
+      nftCount: 7,
     },
     {
       id: "solsticio",
@@ -691,6 +831,66 @@ export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
                           nft={nft}
                           isOwned={ownedIds.has(nft.id)}
                           isMyZodiac={nft.id === myZodiacId && !ownedIds.has(nft.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Colección expandida — Días de la Semana */}
+            <AnimatePresence>
+              {expandedCollection === "dias" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="glass rounded-2xl border border-blue-500/20 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-blue-300">Días de la Semana — 7 Arcángeles</p>
+                      <span className="text-[10px] text-slate-500">Oct 2026</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {DIAS_NFTS.map((nft) => (
+                        <CollectionNFTCard
+                          key={nft.id}
+                          nft={nft}
+                          colorMap={RAYO_COLORS}
+                          isOwned={ownedIds.has(nft.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Colección expandida — Chakras */}
+            <AnimatePresence>
+              {expandedCollection === "chakras" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="glass rounded-2xl border border-purple-500/20 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-purple-300">Chakras — 7 Fractales Animados</p>
+                      <span className="text-[10px] text-slate-500">Sep 2026</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {CHAKRA_NFTS.map((nft) => (
+                        <CollectionNFTCard
+                          key={nft.id}
+                          nft={nft}
+                          colorMap={CHAKRA_COLORS}
+                          isOwned={ownedIds.has(nft.id)}
                         />
                       ))}
                     </div>
