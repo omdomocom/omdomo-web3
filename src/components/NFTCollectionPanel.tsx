@@ -19,7 +19,7 @@ import type { NFT } from "thirdweb";
 import { loadProfile } from "./ProfilePanel";
 
 // ─── Tipos ──────────────────────────────────────────────────────────────────
-type Rarity = "Genesis" | "Founder" | "Community" | "Standard" | "Rare" | "Legendary";
+type Rarity = "Genesis" | "Founder" | "Community" | "Standard" | "Rare" | "Legendary" | "Special";
 type NFTCategory = "drop" | "zodiac" | "dias" | "chakra";
 
 interface CatalogNFT {
@@ -91,6 +91,14 @@ const RARITY_STYLES: Record<Rarity, {
     gradientText: "from-yellow-200 to-cyan-300",
     fullBg: "from-yellow-900/70 to-cyan-900/50",
   },
+  Special: {
+    border: "border-violet-300/70",
+    bg: "from-violet-900/40 to-white/5",
+    badge: "bg-violet-300/20 text-violet-100 border border-violet-300/40",
+    glow: "shadow-violet-400/50",
+    gradientText: "from-violet-200 to-white",
+    fullBg: "from-violet-900/70 to-slate-700/50",
+  },
 };
 
 // ─── Colores por Rayo (Días de la Semana) ───────────────────────────────────
@@ -157,7 +165,7 @@ const NFT_CATALOG: CatalogNFT[] = [
   { id: "chakra-anahata",      name: "Anahata",      rarity: "Rare",      tokenId: "23", category: "chakra", emoji: "💚", image: "ipfs://QmThfSyF1NocDT8vSLdXgybDzshxQH7mu3osxWfzkeqPJe", ommyPrice: null, ommyReward: 1500, element: "Verde",            lockDate: "Sep 2026" },
   { id: "chakra-vishuddha",    name: "Vishuddha",    rarity: "Standard",  tokenId: "24", category: "chakra", emoji: "💙", image: "ipfs://QmcsuCZPsp1tHSnpkA73b4CndBc4tXDMUnzWYe3KL4v7md", ommyPrice: null, ommyReward: 500,  element: "Azul",             lockDate: "Sep 2026" },
   { id: "chakra-ajna",         name: "Ajna",         rarity: "Rare",      tokenId: "25", category: "chakra", emoji: "👁", image: "ipfs://QmSgzzW5VqpV7DxkAg9crxw3LC5TTxrB8MLBizPV6a37Hg",  ommyPrice: null, ommyReward: 1500, element: "Índigo",           lockDate: "Sep 2026" },
-  { id: "chakra-sahasrara",    name: "Sahasrara",    rarity: "Legendary", tokenId: "26", category: "chakra", emoji: "👑", image: "ipfs://QmV4EWPQJTyS7D2TDkN9xZMYenbC3jYbK27vBt2bTvk5Ng",  ommyPrice: null, ommyReward: 5000, element: "Violeta / Blanco", lockDate: "Sep 2026" },
+  { id: "chakra-sahasrara",    name: "Sahasrara",    rarity: "Special",   tokenId: "26", category: "chakra", emoji: "👑", image: "ipfs://QmV4EWPQJTyS7D2TDkN9xZMYenbC3jYbK27vBt2bTvk5Ng",  ommyPrice: null, ommyReward: 5000, element: "Violeta / Blanco", lockDate: "Sep 2026" },
 ];
 
 const ZODIAC_NFTS = NFT_CATALOG.filter((n) => n.category === "zodiac");
