@@ -20,7 +20,7 @@ import { loadProfile } from "./ProfilePanel";
 
 // ─── Tipos ──────────────────────────────────────────────────────────────────
 type Rarity = "Genesis" | "Founder" | "Community" | "Standard" | "Rare" | "Legendary" | "Special";
-type NFTCategory = "drop" | "zodiac" | "dias" | "chakra";
+type NFTCategory = "drop" | "zodiac" | "dias" | "chakra" | "sol-y-luna";
 
 interface CatalogNFT {
   id: string;
@@ -123,6 +123,13 @@ const CHAKRA_COLORS: Record<string, { from: string; to: string; glow: string }> 
   "Violeta / Blanco":{ from: "from-purple-900/70", to: "to-violet-900/60",  glow: "shadow-purple-500/50" },
 };
 
+// ─── Colores Sol y Luna ──────────────────────────────────────────────────────
+const SOL_LUNA_COLORS: Record<string, { from: string; to: string; glow: string }> = {
+  "Sol":     { from: "from-amber-900/60",  to: "to-orange-900/60", glow: "shadow-amber-500/40"  },
+  "Luna":    { from: "from-slate-800/60",  to: "to-blue-900/60",   glow: "shadow-blue-400/30"   },
+  "Eclipse": { from: "from-violet-900/60", to: "to-red-900/60",    glow: "shadow-violet-500/40" },
+};
+
 // ─── Colores por elemento zodiacal ──────────────────────────────────────────
 const ELEMENT_COLORS: Record<string, { glow: string; from: string; to: string }> = {
   Fuego:  { glow: "shadow-orange-500/40", from: "from-orange-900/60", to: "to-red-900/60" },
@@ -158,6 +165,23 @@ const NFT_CATALOG: CatalogNFT[] = [
   { id: "dias-viernes",   name: "Viernes · Uriel",   rarity: "Rare",      tokenId: "17", category: "dias", emoji: "💛", image: "ipfs://QmSxoBghRUuiamv6TggsujpsRAcZeFwiAurE91Uwk5F3ve",  ommyPrice: null, ommyReward: 1500, element: "Rayo Oro-Rubí-Naranja",  lockDate: "Oct 2026" },
   { id: "dias-sabado",    name: "Sábado · Zadkiel",  rarity: "Rare",      tokenId: "18", category: "dias", emoji: "🔮", image: "ipfs://QmZDzRu2PApFpcEfoCGgN6BzNnEMbgZ5iaaQvVVDoeYvt2",  ommyPrice: null, ommyReward: 1500, element: "Rayo Violeta",           lockDate: "Oct 2026" },
   { id: "dias-domingo",   name: "Domingo · Miguel",  rarity: "Legendary", tokenId: "19", category: "dias", emoji: "⚡", image: "ipfs://QmYEUkVHbjK1owZmGYenWF89o69xGxjvfKpTuqwmegZ4BF",  ommyPrice: null, ommyReward: 5000, element: "Rayo Azul",              lockDate: "Oct 2026" },
+  // ── Sol y Luna ──
+  { id: "sol-dawn",       name: "Dawn · Amanecer",                  rarity: "Standard", tokenId: "27", category: "sol-y-luna", emoji: "🌅", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004004_c424b1d6-8579-44c1-aa2a-98b7fffd61e9.png", ommyPrice: null, ommyReward: 500,  element: "Sol",     lockDate: "Jun 2026" },
+  { id: "sol-zenith",     name: "Solar Zenith · Sol Cenital",       rarity: "Standard", tokenId: "28", category: "sol-y-luna", emoji: "☀️", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004008_5b3cbef4-9f82-47d6-b70f-828097ba4188.png", ommyPrice: null, ommyReward: 500,  element: "Sol",     lockDate: "Jun 2026" },
+  { id: "sol-sunset",     name: "Sunset · Atardecer",               rarity: "Standard", tokenId: "29", category: "sol-y-luna", emoji: "🌇", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_010308_bd837f1f-e24a-4e31-b251-17c0123e62ad.png", ommyPrice: null, ommyReward: 500,  element: "Sol",     lockDate: "Jun 2026" },
+  { id: "sol-negro",      name: "Black Sun · Sol Negro",            rarity: "Rare",     tokenId: "30", category: "sol-y-luna", emoji: "🌑", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004014_7a86dddb-42b0-4f02-a336-79f2831786fb.png", ommyPrice: null, ommyReward: 1500, element: "Sol",     lockDate: "Jun 2026" },
+  { id: "sol-solsticio",  name: "Solstice · Solsticio",             rarity: "Rare",     tokenId: "31", category: "sol-y-luna", emoji: "🗿", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004021_ee4a7566-b769-49d9-abf0-952276609e0e.png", ommyPrice: null, ommyReward: 1500, element: "Sol",     lockDate: "Jun 2026" },
+  { id: "luna-nueva",     name: "New Moon · Luna Nueva",            rarity: "Standard", tokenId: "32", category: "sol-y-luna", emoji: "🌑", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004025_6dd9b02a-0f60-4216-8241-d8a9f2e6fe2b.png", ommyPrice: null, ommyReward: 500,  element: "Luna",    lockDate: "Jun 2026" },
+  { id: "luna-creciente", name: "Waxing Crescent · Luna Creciente", rarity: "Standard", tokenId: "33", category: "sol-y-luna", emoji: "🌒", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004028_8ef7f9f7-b308-4980-be94-d5a33221d24d.png", ommyPrice: null, ommyReward: 500,  element: "Luna",    lockDate: "Jun 2026" },
+  { id: "luna-cuarto1",   name: "First Quarter · Cuarto Creciente", rarity: "Standard", tokenId: "34", category: "sol-y-luna", emoji: "🌓", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004031_03901464-746e-4626-bb51-fb1b42ccea1b.png", ommyPrice: null, ommyReward: 500,  element: "Luna",    lockDate: "Jun 2026" },
+  { id: "luna-gibosa1",   name: "Waxing Gibbous · Gibosa Creciente",rarity: "Standard", tokenId: "35", category: "sol-y-luna", emoji: "🌔", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004040_b1be9101-63c1-46d4-aaaa-4d00f10fa16d.png", ommyPrice: null, ommyReward: 500,  element: "Luna",    lockDate: "Jun 2026" },
+  { id: "luna-llena",     name: "Full Moon · Luna Llena",           rarity: "Rare",     tokenId: "36", category: "sol-y-luna", emoji: "🌕", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004043_fc8fd298-1da3-4845-a00f-c6eb3e3a5249.png", ommyPrice: null, ommyReward: 1500, element: "Luna",    lockDate: "Jun 2026" },
+  { id: "luna-gibosa2",   name: "Waning Gibbous · Gibosa Menguante",rarity: "Standard", tokenId: "37", category: "sol-y-luna", emoji: "🌖", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004046_3801bc97-d647-4949-afac-bf87f81af754.png", ommyPrice: null, ommyReward: 500,  element: "Luna",    lockDate: "Jun 2026" },
+  { id: "luna-cuarto2",   name: "Last Quarter · Cuarto Menguante",  rarity: "Standard", tokenId: "38", category: "sol-y-luna", emoji: "🌗", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004523_a1944e28-6979-4dbf-a06b-ab2f1c65d296.png", ommyPrice: null, ommyReward: 500,  element: "Luna",    lockDate: "Jun 2026" },
+  { id: "luna-menguante", name: "Waning Crescent · Luna Menguante", rarity: "Standard", tokenId: "39", category: "sol-y-luna", emoji: "🌘", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004056_c589a284-1a1e-4e83-980e-86463cd0ac1f.png", ommyPrice: null, ommyReward: 500,  element: "Luna",    lockDate: "Jun 2026" },
+  { id: "eclipse-total",  name: "Total Solar Eclipse · Eclipse Total",rarity: "Special", tokenId: "40", category: "sol-y-luna", emoji: "🌑", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004059_5c560483-8920-4439-b1b0-dfabcfdef0f5.png", ommyPrice: null, ommyReward: 5000, element: "Eclipse", lockDate: "Jun 2026" },
+  { id: "eclipse-anular", name: "Annular Eclipse · Eclipse Anular", rarity: "Special",  tokenId: "41", category: "sol-y-luna", emoji: "💫", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004103_ab78d644-4b06-4ea3-8e64-9b08d7cb993c.png", ommyPrice: null, ommyReward: 5000, element: "Eclipse", lockDate: "Jun 2026" },
+  { id: "eclipse-sangre", name: "Blood Moon · Luna de Sangre",      rarity: "Special",  tokenId: "42", category: "sol-y-luna", emoji: "🔴", image: "https://d8j0ntlcm91z4.cloudfront.net/user_3DOfG8D2Coz7F3FRUeXDMJCeYOi/hf_20260516_004106_450318e9-66b8-4825-8655-c039c5984b3b.png", ommyPrice: null, ommyReward: 5000, element: "Eclipse", lockDate: "Jun 2026" },
   // ── Chakras ──
   { id: "chakra-muladhara",    name: "Muladhara",    rarity: "Standard",  tokenId: "20", category: "chakra", emoji: "🔴", image: "ipfs://QmQhurqhQ6YrGxtinGvDnvYYRHwedfy5oNnJmxf3P2qrZf", ommyPrice: null, ommyReward: 500,  element: "Rojo",             lockDate: "Sep 2026" },
   { id: "chakra-svadhisthana", name: "Svadhisthana", rarity: "Standard",  tokenId: "21", category: "chakra", emoji: "🟠", image: "ipfs://QmSxWUBmAqUrTh2VpMUg47yHXoUVyaLqFoeebJgJUgoqWi", ommyPrice: null, ommyReward: 500,  element: "Naranja",          lockDate: "Sep 2026" },
@@ -168,10 +192,11 @@ const NFT_CATALOG: CatalogNFT[] = [
   { id: "chakra-sahasrara",    name: "Sahasrara",    rarity: "Special",   tokenId: "26", category: "chakra", emoji: "👑", image: "ipfs://QmV4EWPQJTyS7D2TDkN9xZMYenbC3jYbK27vBt2bTvk5Ng",  ommyPrice: null, ommyReward: 5000, element: "Violeta / Blanco", lockDate: "Sep 2026" },
 ];
 
-const ZODIAC_NFTS = NFT_CATALOG.filter((n) => n.category === "zodiac");
-const DROP_NFTS   = NFT_CATALOG.filter((n) => n.category === "drop");
-const DIAS_NFTS   = NFT_CATALOG.filter((n) => n.category === "dias");
-const CHAKRA_NFTS = NFT_CATALOG.filter((n) => n.category === "chakra");
+const ZODIAC_NFTS    = NFT_CATALOG.filter((n) => n.category === "zodiac");
+const DROP_NFTS      = NFT_CATALOG.filter((n) => n.category === "drop");
+const DIAS_NFTS      = NFT_CATALOG.filter((n) => n.category === "dias");
+const CHAKRA_NFTS    = NFT_CATALOG.filter((n) => n.category === "chakra");
+const SOL_LUNA_NFTS  = NFT_CATALOG.filter((n) => n.category === "sol-y-luna");
 
 // ─── Helper: calcular signo desde birthday ───────────────────────────────────
 function getZodiacIdFromBirthday(birthday: string): string | null {
@@ -631,6 +656,15 @@ export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
       nftCount: 7,
     },
     {
+      id: "sol-y-luna",
+      name: "Sol y Luna - Sun and Moon",
+      description: "16 NFTs · Fases solares, lunares y eclipses",
+      active: true,
+      gradient: "from-amber-500 to-blue-700",
+      badgeText: null,
+      nftCount: 16,
+    },
+    {
       id: "solsticio",
       name: "Drop #2 Solsticio",
       description: "50 unidades exclusivas",
@@ -868,6 +902,36 @@ export function NFTCollectionPanel({ walletAddress }: NFTCollectionPanelProps) {
                           key={nft.id}
                           nft={nft}
                           colorMap={RAYO_COLORS}
+                          isOwned={ownedIds.has(nft.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Colección expandida — Sol y Luna */}
+            <AnimatePresence>
+              {expandedCollection === "sol-y-luna" && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="glass rounded-2xl border border-amber-500/20 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-amber-300">Sol y Luna — 5 Sol · 8 Luna · 3 Eclipses</p>
+                      <span className="text-[10px] text-slate-500">Jun 2026</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {SOL_LUNA_NFTS.map((nft) => (
+                        <CollectionNFTCard
+                          key={nft.id}
+                          nft={nft}
+                          colorMap={SOL_LUNA_COLORS}
                           isOwned={ownedIds.has(nft.id)}
                         />
                       ))}
